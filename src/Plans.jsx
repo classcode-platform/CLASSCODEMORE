@@ -32,22 +32,19 @@ export default function Plans() {
         'ALL ACCESS ACADEMY', 
         'Soporte'
       ],
-      // 
-      action:<iframe>'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=6c842f08d2e74f1abfe843bf2eb935f7' 
-      </iframe>     
-      }
+      // Link corregido (sin etiquetas iframe)
+      action: 'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=6c842f08d2e74f1abfe843bf2eb935f7' 
+    }
   ];
 
   const handlePlanClick = (link) => {
     if (link) {
-      // Esto lleva al usuario a Mercado Pago
       window.location.href = link;
     }
   };
 
   return (
     <div className="min-h-screen bg-[#282929] text-white font-['Open_Sans'] antialiased p-8 md:p-12">
-      {/* ... (El resto del diseño sigue igual) ... */}
       
       <header className="flex justify-between items-center mb-16">
         <div>
