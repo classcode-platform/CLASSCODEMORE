@@ -46,7 +46,6 @@ export default function Dashboard() {
     'Catering / Barra', 'Animación / Show', 'Ambientación', 'Técnica / Ilum.'
   ];
 
-  // --- DATA DE ACADEMY COURSES (12 CATEGORÍAS INTEGRADAS) ---
   const academyCourses = [
     {
       id: 'nivelacion',
@@ -60,7 +59,6 @@ export default function Dashboard() {
         { q: '¿Para qué sirve el ISO alto?', options: ['Ambientes oscuros', 'Mayor nitidez', 'Desenfoque de fondo'], correct: 0 }
       ]
     }
-    // Aquí puedes mapear dinámicamente según el rubro del perfil si lo deseas
   ];
 
   const calculateTotalScore = () => {
@@ -90,7 +88,7 @@ export default function Dashboard() {
             const data = docSnap.data();
             const photosData = {};
             data.photos?.forEach((url, i) => { if(i < 10) photosData[`photo${i+1}`] = url; });
-            setProfile({ ...data, ...photosData, academyPoints: data.academyPoints || 0 });
+            setProfile(prev => ({ ...prev, ...data, ...photosData, academyPoints: data.academyPoints || 0 }));
           }
           const chatsRef = collection(db, "chats");
           const q = query(chatsRef, where("participants", "array-contains", user.uid));
@@ -124,7 +122,6 @@ export default function Dashboard() {
     if (user) {
       try {
         const proRef = doc(db, "professionals", user.uid);
-        // SUMA 500 PUNTOS Y MARCA COMO NIVELADO (PERO NO PRO)
         await updateDoc(proRef, {
           academyPoints: increment(500),
           verified: true
@@ -337,6 +334,16 @@ export default function Dashboard() {
                   <label className="text-[6px] font-black tracking-[0.3em] text-gray-600 uppercase ml-1">Ubicación</label>
                   <input className="w-full bg-transparent py-2 text-[11px] outline-none focus:text-purple-400 transition-all uppercase tracking-widest" value={profile.location} onChange={e => setProfile({...profile, location: e.target.value})} />
                </div>
+               {/* CAMPO DE BIOGRAFÍA: INTEGRADO AQUÍ */}
+               <div className="space-y-1 border-b border-white/10">
+                  <label className="text-[6px] font-black tracking-[0.3em] text-gray-600 uppercase ml-1">Biografía Profesional</label>
+                  <textarea 
+                    className="w-full bg-transparent py-2 text-[11px] outline-none focus:text-purple-400 transition-all uppercase tracking-widest h-24 resize-none font-['Open_Sans']" 
+                    placeholder="CUENTA TU EXPERIENCIA Y ESTILO..."
+                    value={profile.bio} 
+                    onChange={e => setProfile({...profile, bio: e.target.value})} 
+                  />
+               </div>
             </div>
           </div>
         </div>
@@ -390,3 +397,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom'; // <--- IMPORTANTE: useParams
+import { useNavigate, useParams } from 'react-router-dom';
 import { db, auth } from './firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, increment } from 'firebase/firestore'; // IMPORTANTE: increment
 import { ArrowLeft, CheckCircle, XCircle, Zap, AlertCircle } from 'lucide-react';
 import { ACADEMY_DB } from './AcademyData'; 
 
-export default function AcademyTest() { // <--- Quitamos la prop category
-  const { category } = useParams(); // <--- Capturamos la categoría de la URL directamente
+export default function AcademyTest() {
+  const { category } = useParams();
   const [currentStep, setCurrentStep] = useState(0);
   const [score, setScore] = useState(0);
   const [testFinished, setTestFinished] = useState(false);
   const navigate = useNavigate();
 
-  // Limpieza de categoría para evitar errores de tildes o símbolos en la URL
   const decodedCategory = category ? decodeURIComponent(category) : "Generico";
   const questions = ACADEMY_DB[decodedCategory] || ACADEMY_DB["Generico"];
 
@@ -33,12 +32,16 @@ export default function AcademyTest() { // <--- Quitamos la prop category
     const approved = finalPercent >= 80;
     
     const user = auth.currentUser;
-    if (user) {
+    if (user && approved) {
       try {
+        // LÓGICA DE PUNTOS DINÁMICA
+        const puntosAOtorgar = decodedCategory === "Generico" ? 150 : 250;
+
         await updateDoc(doc(db, "professionals", user.uid), {
-          verified: approved,
+          verified: true,
           testScore: finalPercent,
-          lastTestDate: new Date()
+          lastTestDate: new Date(),
+          score: increment(puntosAOtorgar) // <--- Suma los puntos correspondientes
         });
       } catch (error) { console.error("Error guardando progreso:", error); }
     }
@@ -47,7 +50,6 @@ export default function AcademyTest() { // <--- Quitamos la prop category
 
   const logoStyle = { fontFamily: 'Poppins', fontWeight: 400, letterSpacing: '0.35em' };
 
-  // Pantalla de error por si no hay preguntas cargadas
   if (!questions || questions.length === 0) {
     return (
       <div className="min-h-screen bg-[#282929] flex items-center justify-center p-6 text-white text-center">
@@ -64,18 +66,18 @@ export default function AcademyTest() { // <--- Quitamos la prop category
     const approved = (score / questions.length) * 100 >= 80;
     return (
       <div className="min-h-screen bg-[#282929] flex items-center justify-center p-6 text-white text-center">
-        <div className="max-w-md w-full bg-[#1e1e1e] p-12 rounded-[3rem] border border-white/5 shadow-2xl space-y-8">
+        <div className="max-w-md w-full bg-[#1e1e1e] p-12 rounded-[3rem] border border-white/5 shadow-2xl space-y-8 animate-in zoom-in duration-500">
           {approved ? (
             <>
               <CheckCircle size={60} className="text-green-500 mx-auto" />
               <h2 className="text-2xl font-bold uppercase font-['Poppins'] tracking-widest">¡Nivelado!</h2>
-              <p className="text-gray-400 text-sm italic font-light">Tu perfil ahora cuenta con el sello de confianza CLASSCODE®.</p>
+              <p className="text-gray-400 text-sm italic font-light">Has ganado {decodedCategory === "Generico" ? 150 : 250} puntos y el sello CLASSCODE®.</p>
             </>
           ) : (
             <>
               <XCircle size={60} className="text-red-500 mx-auto" />
               <h2 className="text-2xl font-bold uppercase font-['Poppins'] tracking-widest">No aprobado</h2>
-              <p className="text-gray-400 text-sm italic font-light">Te invitamos a tomar el curso gratuito de nivelación para mejorar tu técnica.</p>
+              <p className="text-gray-400 text-sm italic font-light">Repasá el material e intentalo de nuevo para subir de nivel.</p>
             </>
           )}
           <button onClick={() => navigate('/dashboard')} className="w-full py-4 bg-white/5 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] border border-white/10 mt-4 hover:bg-white/10 transition-all shadow-xl">Volver al Dashboard</button>
@@ -118,3 +120,4 @@ export default function AcademyTest() { // <--- Quitamos la prop category
     </div>
   );
 }
+

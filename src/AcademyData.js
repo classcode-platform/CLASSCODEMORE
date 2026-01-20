@@ -60,3 +60,4 @@ export const ACADEMY_DB = {
     { q: "¿Cuál es el tiempo de respuesta ideal para una consulta de presupuesto?", a: ["7 días", "Menos de 24 horas", "Cuando tenga tiempo", "Una quincena"], correct: 1 }
   ]
 };
+
