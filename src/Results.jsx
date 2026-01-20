@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { db, auth } from './firebase'; 
 import { collection, getDocs } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth'; 
-import { MapPin, ArrowRight, User, Search, Trophy } from 'lucide-react'; // Importamos Trophy
+import { MapPin, ArrowRight, User, Search, Trophy, ShieldCheck } from 'lucide-react'; // Agregamos ShieldCheck
 
 export default function Results() {
   const navigate = useNavigate();
@@ -48,6 +48,7 @@ export default function Results() {
         filtered = filtered.filter(p => p.location?.toLowerCase().includes(loc.toLowerCase()));
       }
 
+      // Prioriza por score (los PRO tienen un bonus de 1000 que definimos antes)
       filtered.sort((a, b) => (b.score || 0) - (a.score || 0));
       setProfessionals(filtered);
     } catch (error) {
@@ -64,7 +65,6 @@ export default function Results() {
   return (
     <div className="min-h-screen bg-[#282929] text-white font-['Open_Sans'] font-light antialiased flex flex-col">
       
-      {/* HEADER CON MARCA REGISTRADA */}
       <nav className="p-6 border-b border-white/5 flex justify-between items-center bg-[#171717]">
         <div 
           onClick={() => navigate('/home')} 
@@ -101,7 +101,6 @@ export default function Results() {
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-900/20 to-black text-gray-700 text-[8px] uppercase tracking-[0.3em] font-bold">Sin portfolio visual</div>
                   )}
                   
-                  {/* --- BADGE DE XP EN LA FOTO --- */}
                   <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
                     <Trophy size={10} className="text-yellow-500" />
                     <span className="text-[8px] tracking-[0.2em] font-bold text-white uppercase">{pro.score || 0} XP</span>
@@ -114,20 +113,28 @@ export default function Results() {
 
                 <div className="p-8 space-y-4 flex flex-col flex-grow">
                   <div>
-                    {/* Badge Dinámico de Nivelación - Indica si aprobó el examen de Academy */}
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-3">
                       {pro.verified ? (
-                        <span className="bg-green-500/10 text-green-400 text-[7px] font-bold px-2 py-0.5 rounded-full border border-green-500/20 tracking-widest uppercase">
-                          Talento Nivelado
-                        </span>
+                        <div className="flex items-center gap-1.5 bg-purple-500/10 text-purple-400 text-[7px] font-bold px-2 py-1 rounded-full border border-purple-500/20 tracking-[0.15em] uppercase shadow-[0_0_10px_rgba(138,43,226,0.2)]">
+                          <ShieldCheck size={10} strokeWidth={2.5}/> Talento Verificado
+                        </div>
                       ) : (
-                        <span className="bg-amber-500/10 text-amber-400 text-[7px] font-bold px-2 py-0.5 rounded-full border border-amber-500/20 tracking-widest uppercase">
+                        <span className="bg-amber-500/10 text-amber-400 text-[7px] font-bold px-2 py-1 rounded-full border border-amber-500/20 tracking-widest uppercase italic opacity-60">
                           Pendiente Nivelación
                         </span>
                       )}
                     </div>
 
-                    <h3 className="text-[17px] font-normal uppercase tracking-wider text-white font-['Poppins']">{pro.name || "Talento Anónimo"}</h3>
+                    {/* NOMBRE + BADGE PRO */}
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-[17px] font-normal uppercase tracking-wider text-white font-['Poppins']">{pro.name || "Talento Anónimo"}</h3>
+                      {pro.verified && (
+                        <div className="p-1 rounded-full bg-purple-500/10 border border-purple-500/20">
+                           <ShieldCheck size={12} className="text-purple-400" />
+                        </div>
+                      )}
+                    </div>
+                    
                     <p className="text-purple-400 text-[10px] uppercase tracking-[0.3em] font-bold mt-1">{pro.job || "Profesional"}</p>
                   </div>
                   

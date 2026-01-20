@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from './firebase'; 
-import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, query, where, getDocs, updateDoc, increment } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, LogOut, Trophy, GraduationCap, PlayCircle, User, ChevronDown, Upload, X, AlertCircle, Eye, Menu } from 'lucide-react'; // Agregué Menu
+import { ArrowRight, LogOut, Trophy, GraduationCap, PlayCircle, User, ChevronDown, Upload, X, AlertCircle, Eye, Menu, ShieldCheck } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
+import QuizModal from './components/QuizModal'; // Asegúrate de tener este componente creado
 
 export default function Dashboard() {
   const [profile, setProfile] = useState({
@@ -15,9 +16,18 @@ export default function Dashboard() {
   });
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [menuOpen, setMenuOpen] = useState(false); // Estado para el menú hamburguesa
+  const [menuOpen, setMenuOpen] = useState(false);
   
-  // Estado de carga para 10 fotos + video
+  // --- ESTADOS PARA ACADEMY QUIZ ---
+  const [quizState, setQuizState] = useState({
+    isOpen: false,
+    quizMode: false,
+    currentQuestion: 0,
+    showResult: false,
+    score: 0,
+    activeCourse: null
+  });
+
   const [uploadingStatus, setUploadingStatus] = useState({
     video: false,
     ...Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`photo${i + 1}`, false]))
@@ -35,6 +45,22 @@ export default function Dashboard() {
     'Fotografía', 'Video / Filmmaker', 'DJ / Sonido', 'Modelo / Presencia', 
     'Locaciones', 'Makeup / Pelo', 'Estilismo / Moda', 'Diseño Gráfico',
     'Catering / Barra', 'Animación / Show', 'Ambientación', 'Técnica / Ilum.'
+  ];
+
+  // --- DATA DE ACADEMY COURSES ---
+  const academyCourses = [
+    {
+      id: 'nivelacion',
+      title: 'NIVELACIÓN PROFESIONAL',
+      description: 'Valida tus conocimientos técnicos y ética profesional.',
+      videoSrc: 'https://player.vimeo.com/video/1041133346', // El video preliminar
+      hasQuiz: true,
+      questions: [
+        { q: '¿Qué ajuste reduce la profundidad de campo?', options: ['Bajar el ISO', 'Cerrar diafragma (f alto)', 'Abrir diafragma (f bajo)'], correct: 2 },
+        { q: '¿Qué controla la velocidad de obturación?', options: ['Color de luz', 'Ruido digital', 'Congelamiento de movimiento'], correct: 2 },
+        { q: '¿Para qué sirve el ISO alto?', options: ['Ambientes oscuros', 'Mayor nitidez', 'Desenfoque de fondo'], correct: 0 }
+      ]
+    }
   ];
 
   const calculateTotalScore = () => {
@@ -77,6 +103,40 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, [navigate]);
 
+  // --- LÓGICA DEL QUIZ ---
+  const handleAnswer = (selectedIndex) => {
+    const currentCourse = academyCourses[0];
+    const isCorrect = selectedIndex === currentCourse.questions[quizState.currentQuestion].correct;
+    
+    if (isCorrect) {
+      const nextQuestion = quizState.currentQuestion + 1;
+      if (nextQuestion < currentCourse.questions.length) {
+        setQuizState(prev => ({ ...prev, currentQuestion: nextQuestion, score: prev.score + 1 }));
+      } else {
+        setQuizState(prev => ({ ...prev, score: prev.score + 1, showResult: true }));
+      }
+    } else {
+      setQuizState(prev => ({ ...prev, showResult: true }));
+    }
+  };
+
+  const handleSaveProgress = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        const proRef = doc(db, "professionals", user.uid);
+        await updateDoc(proRef, {
+          academyPoints: increment(500),
+          verified: true,
+          isPro: true
+        });
+        setProfile(prev => ({ ...prev, verified: true, academyPoints: (prev.academyPoints || 0) + 500 }));
+        setQuizState({ isOpen: false, quizMode: false, currentQuestion: 0, showResult: false, score: 0, activeCourse: null });
+        setModal({ isOpen: true, type: 'success', title: "¡VERIFICADO!", message: "TU PERFIL YA TIENE EL BADGE PRO Y +500 XP.", isConfirm: false, onConfirm: () => {} });
+      } catch (error) { console.error(error); }
+    }
+  };
+
   const handleImageUpload = async (e, photoField) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -115,7 +175,6 @@ export default function Dashboard() {
       try {
         const photoList = Array.from({ length: 10 }, (_, i) => profile[`photo${i + 1}`]).filter(p => p && p !== '');
         const finalData = { ...profile, score: calculateTotalScore(), photos: photoList };
-        // BLINDAJE DE PUNTOS
         await setDoc(doc(db, "professionals", user.uid), finalData, { merge: true });
         setModal({ isOpen: true, type: 'success', title: "GUARDADO", message: "PERFIL ACTUALIZADO.", isConfirm: false, onConfirm: () => {} });
       } catch (e) { console.error(e); }
@@ -128,16 +187,12 @@ export default function Dashboard() {
     <div className="min-h-screen bg-[#282929] text-white font-['Open_Sans'] p-4 md:p-10 relative antialiased">
       <div className="max-w-6xl mx-auto space-y-8 pb-10">
         
-        {/* --- HEADER RESPONSIVE --- */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/5 pb-8 relative">
-          
-          {/* Fila Superior en Móvil: Logo + Ojo + Hamburguesa */}
           <div className="w-full flex justify-between items-center md:w-auto">
             <div className="flex flex-col items-start space-y-3">
               <h1 onClick={() => navigate('/home')} className="text-[22px] font-normal tracking-[0.35em] text-white uppercase font-['Poppins'] cursor-pointer hover:opacity-80 transition-opacity">
                 CLASSCODE
               </h1>
-              {/* MODOS: Visibles siempre, tal como pediste */}
               <div className="flex items-center gap-4">
                 <button onClick={() => navigate('/client-profile')} className="text-[7px] font-black tracking-[0.3em] text-gray-600 hover:text-blue-400 transition-all uppercase">MODO CLIENTE</button>
                 <div className="w-[1px] h-3 bg-white/10" />
@@ -145,9 +200,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Controles visibles en móvil (Ojo + Menu) */}
             <div className="flex items-center gap-4 md:hidden">
-                <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-2 text-gray-500 hover:text-white transition-colors" title="Ver Perfil Público">
+                <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-2 text-gray-500 hover:text-white transition-colors">
                   <Eye size={20} />
                 </button>
                 <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 text-white hover:text-purple-400 transition-colors">
@@ -156,9 +210,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* BOTONES DESKTOP (Ocultos en móvil) */}
           <div className="hidden md:flex items-center gap-4">
-            <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-2 text-gray-500 hover:text-white transition-colors" title="Ver Perfil Público">
+            <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-2 text-gray-500 hover:text-white transition-colors">
               <Eye size={18} />
             </button>
             <button onClick={() => navigate('/plans')} className="px-6 py-1.5 rounded-full bg-[#f1ad02] text-black text-[8px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(241,173,2,0.4)] hover:scale-105 transition-all flex items-center gap-2">
@@ -169,7 +222,6 @@ export default function Dashboard() {
             </button>
           </div>
 
-          {/* --- MENÚ HAMBURGUESA DESPLEGABLE (Solo Móvil) --- */}
           {menuOpen && (
             <div className="absolute top-full left-0 right-0 z-50 bg-[#1e1e1e] border border-white/10 rounded-2xl p-6 mt-4 shadow-2xl flex flex-col gap-4 md:hidden animate-in slide-in-from-top duration-300">
                <button onClick={() => navigate('/plans')} className="w-full py-4 rounded-xl bg-[#f1ad02] text-black text-[10px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(241,173,2,0.4)] flex items-center justify-center gap-2">
@@ -186,11 +238,10 @@ export default function Dashboard() {
           )}
         </header>
 
-        {/* RESTO DEL DASHBOARD (Igual que siempre) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           <div className="space-y-6">
-            {!profile.verified && (
-              <div onClick={() => navigate(`/academy-test/${encodeURIComponent(profile.job || 'Fotografía')}`)} className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-center justify-between animate-pulse cursor-pointer hover:bg-amber-500/20 transition-all">
+            {!profile.verified ? (
+              <div onClick={() => setQuizState({ ...quizState, isOpen: true, activeCourse: academyCourses[0] })} className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-center justify-between animate-pulse cursor-pointer hover:bg-amber-500/20 transition-all">
                 <div className="flex items-center gap-3">
                   <AlertCircle size={16} className="text-amber-500" />
                   <div>
@@ -200,6 +251,11 @@ export default function Dashboard() {
                 </div>
                 <ArrowRight size={12} className="text-amber-500" />
               </div>
+            ) : (
+                <div className="bg-purple-500/5 border border-purple-500/20 rounded-xl p-4 flex items-center gap-3">
+                    <ShieldCheck size={16} className="text-purple-400" />
+                    <p className="text-[8px] font-black uppercase tracking-widest text-purple-400">Perfil Verificado CLASSCODE PRO</p>
+                </div>
             )}
 
             <div className="space-y-3">
@@ -265,7 +321,7 @@ export default function Dashboard() {
                </div>
                <div className="space-y-1 border-b border-white/10 relative">
                   <label className="text-[6px] font-black tracking-[0.3em] text-gray-600 uppercase ml-1">Rubro</label>
-                  <select className="w-full bg-transparent py-2 text-[11px] outline-none appearance-none cursor-pointer uppercase tracking-widest font-['Open_Sans']" value={profile.job} onChange={e => setProfile({...profile, job: e.target.value})}>
+                  <select className="w-full bg-transparent py-2 text-[11px] outline-none appearance-none cursor-pointer uppercase tracking-widest" value={profile.job} onChange={e => setProfile({...profile, job: e.target.value})}>
                     <option value="" className="bg-[#282929]">Seleccionar</option>
                     {categories.map(cat => <option key={cat} value={cat} className="bg-[#282929]">{cat.toUpperCase()}</option>)}
                   </select>
@@ -273,13 +329,12 @@ export default function Dashboard() {
                </div>
                <div className="space-y-1 border-b border-white/10">
                   <label className="text-[6px] font-black tracking-[0.3em] text-gray-600 uppercase ml-1">Ubicación</label>
-                  <input className="w-full bg-transparent py-2 text-[11px] outline-none focus:text-purple-400 transition-all uppercase tracking-widest font-['Open_Sans']" value={profile.location} onChange={e => setProfile({...profile, location: e.target.value})} />
+                  <input className="w-full bg-transparent py-2 text-[11px] outline-none focus:text-purple-400 transition-all uppercase tracking-widest" value={profile.location} onChange={e => setProfile({...profile, location: e.target.value})} />
                </div>
             </div>
           </div>
         </div>
 
-        {/* PORTFOLIO GRID: 10 FOTOS */}
         <div className="space-y-4">
           <span className="text-[8px] font-black tracking-[0.3em] text-gray-500 uppercase border-b border-white/5 pb-1 block w-full">Portfolio Visual (Hasta 10 fotos)</span>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -303,16 +358,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* BOTONES FINALES: Ocultos en móvil porque ya están en el menú, visibles en desktop */}
-        <div className="pt-6 border-t border-white/5 space-y-6 text-center hidden md:block">
-          <button onClick={handleSave} className="w-full max-w-sm mx-auto py-4 text-[9px] tracking-[0.4em] font-black uppercase rounded-xl bg-gradient-to-r from-purple-600 to-indigo-800 text-white shadow-lg hover:opacity-90 active:scale-95 transition-all block">
-            GUARDAR PERFIL
-          </button>
-          <button onClick={() => { signOut(auth); navigate('/'); }} className="text-[7px] font-black tracking-[0.4em] uppercase text-gray-700 hover:text-red-500 transition-colors flex items-center justify-center gap-2 mx-auto"><LogOut size={10}/> Salir del Panel</button>
-        </div>
-        
-        {/* BOTÓN GUARDAR (Versión móvil visible fuera del menú) */}
-        <div className="pt-6 border-t border-white/5 space-y-6 text-center md:hidden">
+        <div className="pt-6 border-t border-white/5 space-y-6 text-center">
           <button onClick={handleSave} className="w-full max-w-sm mx-auto py-4 text-[9px] tracking-[0.4em] font-black uppercase rounded-xl bg-gradient-to-r from-purple-600 to-indigo-800 text-white shadow-lg hover:opacity-90 active:scale-95 transition-all block">
             GUARDAR PERFIL
           </button>
@@ -321,6 +367,21 @@ export default function Dashboard() {
       </div>
 
       <CustomModal isOpen={modal.isOpen} onClose={() => setModal({ ...modal, isOpen: false })} title={modal.title} message={modal.message} type={modal.type} onConfirm={modal.onConfirm} isConfirm={modal.isConfirm} />
+      
+      {/* MODAL DE QUIZ */}
+      {quizState.isOpen && (
+        <QuizModal 
+          course={quizState.activeCourse} 
+          onClose={() => setQuizState({ ...quizState, isOpen: false })}
+          quizMode={quizState.quizMode}
+          setQuizMode={(val) => setQuizState({ ...quizState, quizMode: val })}
+          currentQuestion={quizState.currentQuestion}
+          handleAnswer={handleAnswer}
+          showResult={quizState.showResult}
+          score={quizState.score}
+          handleSaveProgress={handleSaveProgress}
+        />
+      )}
     </div>
   );
 }
