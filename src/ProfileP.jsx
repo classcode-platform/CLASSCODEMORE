@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db, auth } from './firebase';
 import { doc, getDoc, collection, serverTimestamp, setDoc, addDoc, deleteDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
-// IMPORTAMOS LOS ICONOS ACTUALIZADOS (Incluyendo Star y ShieldCheck)
 import { ArrowLeft, MapPin, Search, X, Heart, Send, Share2, Star, Copy, Check, Instagram, Linkedin, MessageSquare, ShieldCheck } from 'lucide-react';
 
 // --- COMPONENTE SHARE MODAL ---
@@ -20,7 +19,7 @@ const ShareModal = ({ isOpen, onClose, userProfile }) => {
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 font-['Open_Sans']">
-      <div className="relative w-full max-w-sm bg-[#252526] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in duration-300">
+      <div className="relative w-full max-w-sm bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in duration-300">
         <button onClick={onClose} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white transition-colors rounded-full hover:bg-white/10">
           <X size={20} />
         </button>
@@ -34,14 +33,14 @@ const ShareModal = ({ isOpen, onClose, userProfile }) => {
           </div>
           <div className="bg-white p-2 rounded-xl mb-8">
              <div className="w-32 h-32 bg-gray-100 flex items-center justify-center border border-black/5">
-                <span className="text-black text-[10px] font-black font-['Poppins'] text-center">QR CLASSCODE</span>
+                <span className="text-black text-[10px] font-black font-['Poppins'] text-center uppercase leading-tight tracking-tighter">QR<br/>CLASSCODE</span>
              </div>
           </div>
           <div className="w-full relative mb-6">
-            <div className="flex items-center bg-[#1e1e1f] border border-white/10 rounded-xl p-1 pl-4">
+            <div className="flex items-center bg-[#111] border border-white/10 rounded-xl p-1 pl-4">
               <span className="text-gray-400 text-[10px] truncate flex-1 text-left font-mono">{profileUrl}</span>
               <button onClick={handleCopy} className={`p-2 px-4 rounded-lg text-[10px] font-bold tracking-widest transition-all duration-200 uppercase ${copied ? 'bg-green-500/20 text-green-400' : 'bg-[#333333] text-white hover:bg-[#3e3e3e]'}`}>
-                {copied ? <div className="flex gap-2 items-center"><Check size={12}/> COPIADO</div> : <div className="flex gap-2 items-center"><Copy size={12}/> COPIAR</div>}
+                {copied ? <div className="flex gap-2 items-center"><Check size={12}/> OK</div> : <div className="flex gap-2 items-center"><Copy size={12}/> LINK</div>}
               </button>
             </div>
           </div>
@@ -176,15 +175,14 @@ export default function ProfileP() {
       </nav>
 
       <main className="max-w-6xl mx-auto px-10 py-10 grid md:grid-cols-12 gap-20 pb-40">
-        {/* COLUMNA IZQUIERDA: PERFIL */}
         <div className="md:col-span-4 space-y-12">
-          <div className="aspect-[4/5] w-full bg-[#1e1e1e] rounded-[2.5rem] overflow-hidden border border-white/5 relative shadow-2xl group">
+          {/* FOTO CUADRADA PERFECTA */}
+          <div className="aspect-square w-full bg-[#1e1e1e] rounded-[2.5rem] overflow-hidden border border-white/5 relative shadow-2xl group">
             <img src={user.photos?.[0]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="" />
             <button onClick={handleToggleFavorite} className="absolute top-4 right-4 bg-black/50 backdrop-blur-md p-3 rounded-full border border-white/10 transition-all hover:scale-110 z-10">
               <Heart size={20} className={isFavorite ? 'fill-red-500 text-red-500' : 'text-white'}/>
             </button>
             
-            {/* BADGE DE PUNTOS CON ESTRELLA */}
             <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2">
               <Star size={12} className="text-[#f1ad02] fill-[#f1ad02]" />
               <span className="text-[9px] font-bold tracking-widest text-white uppercase">{user.score || 0} PUNTOS</span>
@@ -193,11 +191,10 @@ export default function ProfileP() {
 
           <div className="space-y-6">
             <div className="space-y-2">
-                {/* LÓGICA DE BADGES NIVELADO / PRO */}
                 <div className="flex flex-wrap gap-2 mb-4">
                     {user.isPro ? (
                         <div className="flex items-center gap-1.5 bg-purple-500/10 text-purple-400 text-[8px] font-black px-3 py-1 rounded-full border border-purple-500/20 tracking-[0.2em] uppercase">
-                           <ShieldCheck size={10} strokeWidth={2.5}/> Miembro PRO
+                           <ShieldCheck size={10} strokeWidth={2.5}/> PRO
                         </div>
                     ) : user.verified ? (
                         <div className="flex items-center gap-1.5 bg-blue-500/10 text-blue-400 text-[8px] font-black px-3 py-1 rounded-full border border-blue-500/20 tracking-[0.2em] uppercase">
@@ -213,15 +210,20 @@ export default function ProfileP() {
                 <MapPin size={12} className="text-purple-500"/> {user.location}
             </div>
             
-            <button onClick={() => setShowModal(true)} className="w-full py-5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-900 text-white font-bold text-[10px] tracking-[0.4em] uppercase mt-4 shadow-xl shadow-purple-900/20 hover:opacity-90 transition-all active:scale-95">CONTACTAR AHORA</button>
+            {/* BOTÓN CONTACTAR: COMPACTO Y SIN "AHORA" */}
+            <button 
+              onClick={() => setShowModal(true)} 
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-900 text-white font-bold text-[9px] tracking-[0.3em] uppercase mt-2 shadow-xl shadow-purple-900/20 hover:opacity-90 transition-all active:scale-95"
+            >
+              CONTACTAR
+            </button>
           </div>
         </div>
 
-        {/* COLUMNA DERECHA: SHOWREEL / PORTFOLIO / BIO */}
         <div className="md:col-span-8 space-y-24">
           {user.videoLink && (
             <section className="space-y-6">
-              <h3 className="text-[9px] text-gray-500 uppercase tracking-widest font-black border-b border-white/5 pb-2">Material Showreel</h3>
+              <h3 className="text-[9px] text-gray-500 uppercase tracking-widest font-black border-b border-white/5 pb-2">Showreel</h3>
               <div className="aspect-video bg-black rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl relative">
                 <video src={user.videoLink} controls className="w-full h-full object-cover" />
               </div>
@@ -242,7 +244,11 @@ export default function ProfileP() {
           <section className="space-y-10">
             <div className="space-y-6">
               <h3 className="text-[9px] text-gray-500 uppercase tracking-widest font-black border-b border-white/5 pb-2">Biografía Profesional</h3>
-              <p className="text-gray-300 leading-relaxed font-light text-base uppercase tracking-[0.15em] italic">
+              {/* BIO: TIPOGRAFÍA DE ALTA GAMA (Sin Comic Sans) */}
+              <p 
+                className="text-gray-200 leading-relaxed font-normal text-2xl md:text-3xl tracking-tight opacity-90 italic" 
+                style={{ fontFamily: "'Garamond', 'Palatino', 'Georgia', serif" }}
+              >
                 {user.bio ? `"${user.bio}"` : "BIOGRAFÍA EN PROCESO DE CARGA."}
               </p>
             </div>
@@ -262,7 +268,7 @@ export default function ProfileP() {
         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-black/20 backdrop-blur-md">
           <div className="flex items-center gap-3">
              <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></div>
-             <span className="text-[9px] font-black tracking-[0.3em] uppercase text-purple-400">Terminal de Mensajería</span>
+             <span className="text-[9px] font-black tracking-[0.3em] uppercase text-purple-400">En contacto</span>
           </div>
           <button onClick={() => setShowChat(false)} className="text-gray-500 hover:text-white transition-colors"><X size={18}/></button>
         </div>
@@ -296,14 +302,13 @@ export default function ProfileP() {
               <input placeholder="DIRECCIÓN EXACTA" className="col-span-2 bg-black/40 border border-white/5 rounded-xl p-4 text-[10px] text-white uppercase outline-none focus:border-purple-500 font-bold tracking-widest" onChange={e => setFormData({...formData, direccion: e.target.value})} />
               <textarea placeholder="DETALLES ADICIONALES..." className="col-span-2 bg-black/40 border border-white/5 rounded-xl p-4 text-[10px] text-white uppercase h-28 resize-none outline-none focus:border-purple-500 font-bold tracking-widest" onChange={e => setFormData({...formData, detalles: e.target.value})} />
             </div>
-            <button onClick={handleSendMessage} disabled={sending} className="w-full py-5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-900 text-white font-black text-[10px] tracking-[0.4em] uppercase mt-10 transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-purple-900/30">
+            <button onClick={handleSendMessage} disabled={sending} className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-900 text-white font-black text-[9px] tracking-[0.4em] uppercase mt-10 transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-purple-900/30">
               {sending ? 'PROCESANDO ENVÍO...' : 'ENVIAR SOLICITUD'}
             </button>
           </div>
         </div>
       )}
 
-      {/* MODAL DE COMPARTIR */}
       <ShareModal 
         isOpen={showShareModal} 
         onClose={() => setShowShareModal(false)} 
@@ -313,3 +318,4 @@ export default function ProfileP() {
     </div>
   );
 }
+
