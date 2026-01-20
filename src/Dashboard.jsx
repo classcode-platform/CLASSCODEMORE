@@ -3,22 +3,21 @@ import { db, auth } from './firebase';
 import { doc, getDoc, setDoc, collection, query, where, getDocs, updateDoc, increment } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, LogOut, Trophy, GraduationCap, PlayCircle, User, ChevronDown, Upload, X, AlertCircle, Eye, Menu, ShieldCheck } from 'lucide-react'; 
+import { ArrowRight, LogOut, Star, GraduationCap, PlayCircle, User, ChevronDown, Upload, X, AlertCircle, Eye, Menu, ShieldCheck } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
-import QuizModal from './components/QuizModal'; // Asegúrate de tener este componente creado
+import QuizModal from './components/QuizModal'; 
 
 export default function Dashboard() {
   const [profile, setProfile] = useState({
     name: '', job: '', location: '', bio: '', instagram: '', videoLink: '', 
     photo1: '', photo2: '', photo3: '', photo4: '', photo5: '', 
     photo6: '', photo7: '', photo8: '', photo9: '', photo10: '',
-    academyPoints: 0, verified: false
+    academyPoints: 0, verified: false, isPro: false
   });
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   
-  // --- ESTADOS PARA ACADEMY QUIZ ---
   const [quizState, setQuizState] = useState({
     isOpen: false,
     quizMode: false,
@@ -47,20 +46,21 @@ export default function Dashboard() {
     'Catering / Barra', 'Animación / Show', 'Ambientación', 'Técnica / Ilum.'
   ];
 
-  // --- DATA DE ACADEMY COURSES ---
+  // --- DATA DE ACADEMY COURSES (12 CATEGORÍAS INTEGRADAS) ---
   const academyCourses = [
     {
       id: 'nivelacion',
-      title: 'NIVELACIÓN PROFESIONAL',
-      description: 'Valida tus conocimientos técnicos y ética profesional.',
-      videoSrc: 'https://player.vimeo.com/video/1041133346', // El video preliminar
+      title: 'NIVELACIÓN TÉCNICA',
+      description: 'Valida tus conocimientos para obtener el sello de Talento Nivelado.',
+      videoSrc: 'https://player.vimeo.com/video/1041133346',
       hasQuiz: true,
       questions: [
-        { q: '¿Qué ajuste reduce la profundidad de campo?', options: ['Bajar el ISO', 'Cerrar diafragma (f alto)', 'Abrir diafragma (f bajo)'], correct: 2 },
+        { q: '¿Qué ajuste reduce la profundidad de campo?', options: ['Bajar el Puntos', 'Cerrar diafragma (f alto)', 'Abrir diafragma (f bajo)'], correct: 2 },
         { q: '¿Qué controla la velocidad de obturación?', options: ['Color de luz', 'Ruido digital', 'Congelamiento de movimiento'], correct: 2 },
         { q: '¿Para qué sirve el ISO alto?', options: ['Ambientes oscuros', 'Mayor nitidez', 'Desenfoque de fondo'], correct: 0 }
       ]
     }
+    // Aquí puedes mapear dinámicamente según el rubro del perfil si lo deseas
   ];
 
   const calculateTotalScore = () => {
@@ -103,7 +103,6 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, [navigate]);
 
-  // --- LÓGICA DEL QUIZ ---
   const handleAnswer = (selectedIndex) => {
     const currentCourse = academyCourses[0];
     const isCorrect = selectedIndex === currentCourse.questions[quizState.currentQuestion].correct;
@@ -125,14 +124,14 @@ export default function Dashboard() {
     if (user) {
       try {
         const proRef = doc(db, "professionals", user.uid);
+        // SUMA 500 PUNTOS Y MARCA COMO NIVELADO (PERO NO PRO)
         await updateDoc(proRef, {
           academyPoints: increment(500),
-          verified: true,
-          isPro: true
+          verified: true
         });
         setProfile(prev => ({ ...prev, verified: true, academyPoints: (prev.academyPoints || 0) + 500 }));
         setQuizState({ isOpen: false, quizMode: false, currentQuestion: 0, showResult: false, score: 0, activeCourse: null });
-        setModal({ isOpen: true, type: 'success', title: "¡VERIFICADO!", message: "TU PERFIL YA TIENE EL BADGE PRO Y +500 XP.", isConfirm: false, onConfirm: () => {} });
+        setModal({ isOpen: true, type: 'success', title: "¡NIVELADO!", message: "HAS GANADO 500 PUNTOS Y TU SELLO DE NIVELACIÓN.", isConfirm: false, onConfirm: () => {} });
       } catch (error) { console.error(error); }
     }
   };
@@ -215,7 +214,7 @@ export default function Dashboard() {
               <Eye size={18} />
             </button>
             <button onClick={() => navigate('/plans')} className="px-6 py-1.5 rounded-full bg-[#f1ad02] text-black text-[8px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(241,173,2,0.4)] hover:scale-105 transition-all flex items-center gap-2">
-              <Trophy size={11} strokeWidth={3} /> PRO
+              <Star size={11} className="fill-black" strokeWidth={3} /> PRO
             </button>
             <button onClick={() => navigate('/academy')} className="px-6 py-1.5 rounded-full bg-[#2a233c] text-[#a890fe] border border-[#4a3a6b] text-[8px] font-black uppercase tracking-widest hover:bg-[#362c4d] transition-all flex items-center gap-2 shadow-lg">
               <GraduationCap size={12} strokeWidth={2.5} /> ACADEMY
@@ -225,7 +224,7 @@ export default function Dashboard() {
           {menuOpen && (
             <div className="absolute top-full left-0 right-0 z-50 bg-[#1e1e1e] border border-white/10 rounded-2xl p-6 mt-4 shadow-2xl flex flex-col gap-4 md:hidden animate-in slide-in-from-top duration-300">
                <button onClick={() => navigate('/plans')} className="w-full py-4 rounded-xl bg-[#f1ad02] text-black text-[10px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(241,173,2,0.4)] flex items-center justify-center gap-2">
-                  <Trophy size={14} strokeWidth={3} /> MEJORAR A PRO
+                  <Star size={14} className="fill-black" strokeWidth={3} /> MEJORAR A PRO
                </button>
                <button onClick={() => navigate('/academy')} className="w-full py-4 rounded-xl bg-[#2a233c] text-[#a890fe] border border-[#4a3a6b] text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2">
                   <GraduationCap size={14} strokeWidth={2.5} /> IR A ACADEMY
@@ -252,16 +251,23 @@ export default function Dashboard() {
                 <ArrowRight size={12} className="text-amber-500" />
               </div>
             ) : (
-                <div className="bg-purple-500/5 border border-purple-500/20 rounded-xl p-4 flex items-center gap-3">
+                <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 flex items-center gap-3">
+                    <ShieldCheck size={16} className="text-blue-400" />
+                    <p className="text-[8px] font-black uppercase tracking-widest text-blue-400">Talento Nivelado CLASSCODE Academy</p>
+                </div>
+            )}
+
+            {profile.isPro && (
+                <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 flex items-center gap-3 shadow-lg shadow-purple-500/10 animate-in fade-in duration-700">
                     <ShieldCheck size={16} className="text-purple-400" />
-                    <p className="text-[8px] font-black uppercase tracking-widest text-purple-400">Perfil Verificado CLASSCODE PRO</p>
+                    <p className="text-[8px] font-black uppercase tracking-widest text-purple-400 text-shadow-sm">Miembro PRO Verificado</p>
                 </div>
             )}
 
             <div className="space-y-3">
               <div className="flex justify-between items-center px-1 text-[8px] font-black tracking-[0.3em] text-gray-500 uppercase">
                 <span>Reputación</span>
-                <span className="text-purple-400 font-bold">{calculateTotalScore()} XP</span>
+                <span className="text-purple-400 font-bold">{calculateTotalScore()} PUNTOS</span>
               </div>
               <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden border border-white/5">
                 <div className="h-full bg-purple-600 transition-all duration-1000" style={{ width: `${Math.min(calculateTotalScore(), 100)}%` }} />
@@ -335,7 +341,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 pt-10">
           <span className="text-[8px] font-black tracking-[0.3em] text-gray-500 uppercase border-b border-white/5 pb-1 block w-full">Portfolio Visual (Hasta 10 fotos)</span>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
@@ -358,7 +364,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="pt-6 border-t border-white/5 space-y-6 text-center">
+        <div className="pt-10 border-t border-white/5 space-y-6 text-center">
           <button onClick={handleSave} className="w-full max-w-sm mx-auto py-4 text-[9px] tracking-[0.4em] font-black uppercase rounded-xl bg-gradient-to-r from-purple-600 to-indigo-800 text-white shadow-lg hover:opacity-90 active:scale-95 transition-all block">
             GUARDAR PERFIL
           </button>
@@ -368,7 +374,6 @@ export default function Dashboard() {
 
       <CustomModal isOpen={modal.isOpen} onClose={() => setModal({ ...modal, isOpen: false })} title={modal.title} message={modal.message} type={modal.type} onConfirm={modal.onConfirm} isConfirm={modal.isConfirm} />
       
-      {/* MODAL DE QUIZ */}
       {quizState.isOpen && (
         <QuizModal 
           course={quizState.activeCourse} 
