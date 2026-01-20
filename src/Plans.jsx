@@ -32,20 +32,21 @@ export default function Plans() {
         'ALL ACCESS ACADEMY', 
         'Soporte'
       ],
-      // LINK ACTUALIZADO DE MERCADO PAGO (Suscripción)
+      // 
       action: 'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=6c842f08d2e74f1abfe843bf2eb935f7' 
     }
   ];
 
   const handlePlanClick = (link) => {
     if (link) {
-      // Usamos href para que la redirección de vuelta a /success funcione en la misma app
+      // Esto lleva al usuario a Mercado Pago
       window.location.href = link;
     }
   };
 
   return (
     <div className="min-h-screen bg-[#282929] text-white font-['Open_Sans'] antialiased p-8 md:p-12">
+      {/* ... (El resto del diseño sigue igual) ... */}
       
       <header className="flex justify-between items-center mb-16">
         <div>
@@ -106,15 +107,14 @@ export default function Plans() {
           </div>
         ))}
       </div>
-      
-      <div className="mt-20 max-w-4xl mx-auto text-center border-t border-white/5 pt-10">
+
+       <div className="mt-20 max-w-4xl mx-auto text-center border-t border-white/5 pt-10">
         <p className="text-[10px] text-gray-600 uppercase tracking-widest mb-4">Potenciá tu marca</p>
         <div className="w-full bg-[#171717] border border-dashed border-white/10 rounded-xl p-8 flex flex-col items-center justify-center text-gray-500 gap-2">
             <span className="text-sm font-light">ESPACIO DISPONIBLE PARA PUBLICIDAD</span>
             <span className="text-[10px] uppercase tracking-widest text-purple-400">Contactar a contacto.classcode@gmail.com</span>
         </div>
       </div>
-
     </div>
   );
 }
