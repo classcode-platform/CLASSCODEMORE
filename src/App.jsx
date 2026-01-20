@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
-// --- IMPORTACIONES ---
+// --- IMPORTACIONES (Ahora sí van a funcionar sin error) ---
 import Auth from './Auth';             
 import Onboarding from './Onboarding'; 
 import Home from './Home';             
