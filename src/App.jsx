@@ -1,8 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import GuestUpload from './components/GuestUpload';
 
-// --- IMPORTACIONES ---
+// --- IMPORTACIONES DE COMPONENTES ---
 import Auth from './Auth';             
 import Onboarding from './Onboarding'; 
 import Home from './Home';             
@@ -16,6 +15,10 @@ import Plans from './Plans';
 import AcademyTest from './AcademyTest'; 
 import BusinessChat from './components/BusinessChat';
 import PaymentSuccess from './PaymentSuccess'; 
+
+// --- IMPORTACIONES LIVE EXPERIENCE (AQUÍ ESTABA EL ERROR) ---
+import GuestUpload from './components/GuestUpload';
+import LiveGallery from './components/LiveGallery'; // <--- IMPORTACIÓN AGREGADA
 
 function AppContent() {
   const location = useLocation();
@@ -32,7 +35,7 @@ function AppContent() {
         {/* RUTA PROFESIONAL */}
         <Route path="/dashboard" element={<Dashboard />} />
         
-        {/* RUTA CLIENTE - ASEGURATE QUE EL DASHBOARD APUNTE A ESTE PATH */}
+        {/* RUTA CLIENTE */}
         <Route path="/client-profile" element={<ClientProfile />} /> 
         
         {/* RUTA ACADEMY */}
@@ -51,9 +54,14 @@ function AppContent() {
         <Route path="/profile/:id" element={<ProfileP />} /> 
         <Route path="/plans" element={<Plans />} />
         <Route path="/success" element={<PaymentSuccess />} />
+
+        {/* RUTAS LIVE EXPERIENCE */}
         <Route path="/live/:eventCode" element={<GuestUpload />} />
+        <Route path="/live-gallery/:eventCode" element={<LiveGallery />} />
+        
       </Routes>
 
+      {/* Overlay para el chat */}
       {isChatRoute && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[150] pointer-events-none" />
       )}

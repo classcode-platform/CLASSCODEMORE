@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-// Corregido: Subimos un nivel (../) para encontrar firebase desde la carpeta components
 import { db } from '../firebase'; 
-import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
-import { Camera, CheckCircle2, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { collection, query, where, getDocs, doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { Camera, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 
 export default function GuestUpload() {
   const { eventCode } = useParams();
   const [uploading, setUploading] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState(null);
 
   const CLOUD_NAME = "dsyfitywd";
   const UPLOAD_PRESET = "CLASSCODE";
@@ -19,11 +18,13 @@ export default function GuestUpload() {
     if (!file) return;
 
     setUploading(true);
+    setError(null);
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', UPLOAD_PRESET);
 
     try {
+      // 1. Subida a Cloudinary
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
         method: 'POST',
         body: formData
@@ -31,52 +32,70 @@ export default function GuestUpload() {
       const data = await res.json();
 
       if (data.secure_url) {
-        // IMPORTANTE: Asegurate que el ID del documento en Firestore sea el UID del cliente
-        // Para pruebas manuales, podés reemplazar esto con el ID que creaste en la captura anterior
-        const eventRef = doc(db, "events", "ID_DE_TU_DOCUMENTO"); 
-        await updateDoc(eventRef, {
-          liveGallery: arrayUnion(data.secure_url)
-        });
-        setDone(true);
+        // 2. BUSQUEDA DINÁMICA: Buscamos el evento por su código
+        const eventsRef = collection(db, "events");
+        const q = query(eventsRef, where("eventCode", "==", eventCode));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          // El ID del documento es el ID del usuario que creó el evento
+          const eventDoc = querySnapshot.docs[0];
+          const eventRef = doc(db, "events", eventDoc.id); 
+          
+          // 3. Actualizamos el array en Firebase
+          await updateDoc(eventRef, {
+            liveGallery: arrayUnion(data.secure_url)
+          });
+          setDone(true);
+        } else {
+          setError("EVENTO NO ENCONTRADO.");
+        }
       }
-    } catch (error) {
-      console.error("Error en la subida:", error);
+    } catch (err) {
+      console.error("Error:", err);
+      setError("ERROR EN LA CONEXIÓN.");
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#282929] text-white flex flex-col items-center justify-center p-6 font-['Open_Sans'] uppercase antialiased">
+    <div className="min-h-screen bg-[#282929] text-white flex flex-col items-center justify-center p-6 font-['Open_Sans'] uppercase antialiased text-left">
       <div className="max-w-md w-full space-y-12 text-center">
         <header className="space-y-2">
           <div className="text-[20px] font-['Poppins'] tracking-[0.4em] text-white uppercase">CLASSCODE</div>
-          <p className="text-purple-400 text-[9px] font-black tracking-[0.3em] uppercase">LIVE EVENT EXPERIENCE</p>
+          <p className="text-purple-400 text-[9px] font-black tracking-[0.3em] uppercase italic">LIVE EVENT EXPERIENCE</p>
         </header>
 
         <div className="bg-[#171717] rounded-[3rem] p-10 border border-white/5 shadow-2xl space-y-10 relative overflow-hidden">
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl text-red-400 text-[8px] font-bold tracking-widest flex items-center gap-3">
+              <AlertCircle size={16} /> {error}
+            </div>
+          )}
+
           {done ? (
             <div className="space-y-6 py-10">
               <CheckCircle2 size={60} className="text-green-500 mx-auto" />
-              <p className="text-[12px] font-black tracking-widest uppercase">¡CONTENIDO COMPARTIDO!</p>
+              <p className="text-[12px] font-black tracking-widest uppercase italic">¡CONTENIDO COMPARTIDO!</p>
               <button onClick={() => setDone(false)} className="text-[8px] text-purple-400 font-bold tracking-widest uppercase underline">Subir otra más</button>
             </div>
           ) : (
             <>
-              <div className="space-y-4">
-                <h2 className="text-[18px] font-bold tracking-tighter uppercase">EVENTO: {eventCode?.replace(/-/g, ' ')}</h2>
-                <p className="text-[9px] text-gray-500 font-bold tracking-widest leading-relaxed uppercase">
+              <div className="space-y-4 text-left">
+                <h2 className="text-[18px] font-bold tracking-tighter uppercase leading-none">EVENTO: {eventCode}</h2>
+                <p className="text-[9px] text-gray-500 font-bold tracking-widest leading-relaxed uppercase italic">
                   TU CONTENIDO SE MOSTRARÁ EN LA GALERÍA DEL ORGANIZADOR AL INSTANTE.
                 </p>
               </div>
 
-              <label className="relative flex flex-col items-center justify-center bg-white/[0.03] border-2 border-dashed border-white/10 rounded-[2rem] py-16 cursor-pointer hover:bg-white/[0.05] transition-all group">
+              <label className="relative flex flex-col items-center justify-center bg-white/[0.03] border-2 border-dashed border-white/10 rounded-[2.5rem] py-16 cursor-pointer hover:bg-white/[0.05] transition-all group">
                 {uploading ? (
                   <Loader2 size={40} className="text-purple-500 animate-spin" />
                 ) : (
                   <>
                     <Camera size={40} className="text-gray-700 group-hover:text-purple-500 transition-colors" />
-                    <span className="text-[10px] font-black tracking-[0.3em] mt-4 uppercase">SUBIR ARCHIVO</span>
+                    <span className="text-[10px] font-black tracking-[0.3em] mt-4 uppercase italic">CAPTURAR MOMENTO</span>
                   </>
                 )}
                 <input type="file" className="hidden" onChange={handleUpload} accept="image/*,video/*" disabled={uploading} />
