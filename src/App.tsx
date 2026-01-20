@@ -14,7 +14,7 @@ import Terms from './Terms';
 import Plans from './Plans';  
 import AcademyTest from './AcademyTest'; 
 import BusinessChat from './components/BusinessChat';
-import PaymentSuccess from './PaymentSuccess'; // <--- Nueva Importación
+import PaymentSuccess from './PaymentSuccess'; 
 
 function AppContent() {
   const location = useLocation();
@@ -48,8 +48,8 @@ function AppContent() {
         <Route path="/academy-test/:category" element={<AcademyTest />} /> 
         <Route path="/plans" element={<Plans />} />
 
-        {/* RUTA DE RETORNO DE PAGO */}
-        <Route path="/payment-success" element={<PaymentSuccess />} /> {/* <--- Nueva Ruta */}
+        {/* ✅ RUTA CORREGIDA: Usamos /success para coincidir con MP */}
+        <Route path="/success" element={<PaymentSuccess />} />
       </Routes>
 
       {isChatRoute && (
