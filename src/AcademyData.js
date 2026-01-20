@@ -1,63 +1,76 @@
-// AcademyData.js
+// AcademyData.js - BASE DE DATOS PROFESIONAL DE CLASSCODE ACADEMY
+
 export const ACADEMY_DB = {
+  "Generico": [
+    { q: "PUNTUALIDAD: ¿CUÁNDO DEBES ESTAR EN EL LUGAR?", a: ["A LA HORA DE INICIO", "15-30 MIN ANTES", "10 MIN DESPUÉS"], correct: 1 },
+    { q: "BACKUP: ¿CUÁL ES EL PROTOCOLO DE SEGURIDAD?", a: ["AL LLEGAR A CASA", "DOBLE BACKUP AL MOMENTO", "MAÑANA POR LA NUBE"], correct: 1 },
+    { q: "VESTIMENTA: ¿QUÉ USAR EN EVENTO 'BLACK TIE'?", a: ["ROPA INFORMAL", "TOTAL BLACK DISCRETO", "REMERAS CON LOGO"], correct: 1 },
+    { q: "COMPORTAMIENTO: PEDIDO DE ÚLTIMO MOMENTO:", a: ["NEGARSE", "RESOLVER Y COBRAR LUEGO", "HACERLO DE MALA GANA"], correct: 1 }
+  ],
   "Fotografía": [
-    { q: "¿Cuál es el formato de archivo que conserva toda la información del sensor para edición profesional?", a: ["JPEG", "RAW (Crudo)", "PNG", "TIFF"], correct: 1 },
-    { q: "En un evento con luz cambiante, ¿qué modo de cámara permite mayor control creativo?", a: ["Automático", "Manual (M)", "Modo Escena", "Prioridad de Rostros"], correct: 1 },
-    { q: "Protocolo CLASSCODE®: ¿Cómo garantizas que no se pierda material por falla técnica?", a: ["Borrando fotos viejas", "Backup en tiempo real (Doble ranura)", "Usando una sola tarjeta grande", "Confiando en la nube"], correct: 1 }
+    { q: "¿QUÉ AJUSTE MODIFICA LA PROFUNDIDAD DE CAMPO Y EL BOKEH?", a: ["VELOCIDAD DE OBTURACIÓN", "APERTURA DEL DIAFRAGMA", "SENSIBILIDAD ISO"], correct: 1 },
+    { q: "¿QUÉ FORMATO DE ARCHIVO ES OBLIGATORIO PARA EDICIÓN PRO?", a: ["JPG EN ALTA", "RAW (CRUDO)", "PNG"], correct: 1 },
+    { q: "¿QUÉ LENTE ES IDEAL PARA RETRATOS SIN DISTORSIÓN?", a: ["GRAN ANGULAR 16MM", "TELEOBJETIVO 85MM", "OJO DE PEZ"], correct: 1 },
+    { q: "¿CÓMO EVITAS EL MOVIMIENTO MOVIDO SIN USAR FLASH?", a: ["BAJANDO EL ISO", "AUMENTANDO LA VELOCIDAD", "CERRANDO EL DIAFRAGMA"], correct: 1 }
   ],
   "Video / Filmmaker": [
-    { q: "¿Qué tasa de cuadros (FPS) es el estándar para lograr un look cinematográfico?", a: ["60 fps", "120 fps", "24 fps", "30 fps"], correct: 2 },
-    { q: "Al grabar audio de una entrevista o discurso, la prioridad es:", a: ["El eco del lugar", "La ganancia externa", "Monitoreo con auriculares y backup externo", "Usar el micro de cámara"], correct: 2 },
-    { q: "¿Qué es el 'Balance de Blancos'?", a: ["La exposición de la luz", "Ajustar la temperatura color según la fuente de luz", "El brillo de la lente", "La velocidad de obturación"], correct: 1 }
+    { q: "¿FPS PARA UN LOOK CINEMATOGRÁFICO ESTÁNDAR?", a: ["60 FPS", "24 FPS", "120 FPS"], correct: 1 },
+    { q: "¿PARA QUÉ SE UTILIZA UN PERFIL DE COLOR LOG?", a: ["YA VIENE EDITADO", "MAYOR RANGO DINÁMICO", "AHORRAR MEMORIA"], correct: 1 },
+    { q: "¿QUÉ ACCESORIO ES VITAL PARA MOVIMIENTOS FLUIDOS?", a: ["FILTRO ND", "GIMBAL / ESTABILIZADOR", "TRÍPODE FIJO"], correct: 1 },
+    { q: "¿REGLA DE OBTURACIÓN PARA VIDEO (180 DEGREES)?", a: ["IGUAL A LOS FPS", "DOBLE DE LOS FPS", "MITAD DE LOS FPS"], correct: 1 }
   ],
   "DJ / Sonido": [
-    { q: "¿Cuál es el protocolo antes de que lleguen los invitados al evento?", a: ["Llegar sobre la hora", "Prueba de sonido (Soundcheck) y chequeo de fases", "Conectar Spotify", "Probar el volumen con gente"], correct: 1 },
-    { q: "¿Qué cable se utiliza comúnmente para una conexión balanceada profesional sin ruidos?", a: ["RCA", "Mini Jack", "XLR (Canon)", "Plug mono"], correct: 2 },
-    { q: "Si el limitador de sonido está en rojo constante, debes:", a: ["Subir más el volumen", "Bajar la ganancia para evitar distorsión y rotura", "Ignorarlo", "Desconectarlo"], correct: 1 }
-  ],
-  "Makeup": [
-    { q: "¿Cómo se debe extraer un producto cremoso (labial/corrector) para uso profesional?", a: ["Directo con el dedo", "Con espátula y paleta de mezcla limpia", "Con el mismo aplicador", "Soplando el producto"], correct: 1 },
-    { q: "Para fotografía HD y video 4K, ¿qué tipo de acabado de piel es más seguro?", a: ["Exceso de glitter", "Piel bien sellada y difuminada (sin parches)", "Base muy pesada y oleosa", "Sin sellar"], correct: 1 },
-    { q: "Esencial de higiene: Los pinceles deben estar:", a: ["Limpios visualmente", "Desinfectados profundamente entre cada cliente", "Solo sacudidos", "Limpios una vez al mes"], correct: 1 }
-  ],
-  "Pelo": [
-    { q: "¿Qué producto es obligatorio antes de usar planchas o bucleadoras?", a: ["Laca", "Protector térmico", "Agua", "Brillantina"], correct: 1 },
-    { q: "Para un peinado duradero en eventos de larga exposición, el secreto es:", a: ["Mucha agua", "Preparación correcta de la fibra y fijación técnica", "Usar solo hebillas", "No tocar el pelo"], correct: 1 }
+    { q: "¿QUÉ ES EL BEATMATCHING?", a: ["SINCRONIZAR RITMOS", "SUBIR EL VOLUMEN", "CAMBIAR DE CANCIÓN"], correct: 0 },
+    { q: "¿QUÉ INDICA EL ROJO CONSTANTE EN EL VÚMETRO?", a: ["POTENCIA ÓPTIMA", "DISTORSIÓN Y DAÑO (CLIPPING)", "FALTA DE SEÑAL"], correct: 1 },
+    { q: "¿PARA QUÉ SIRVE EL FILTRO PASA-ALTOS (HPF)?", a: ["SUBIR GRAVES", "LIMPIAR FRECUENCIAS BAJAS", "MUDAR EL AUDIO"], correct: 1 },
+    { q: "¿QUÉ ES UN ARCHIVO DE AUDIO LOSSLESS?", a: ["MP3 COMPRIMIDO", "WAV / AIFF SIN PÉRDIDA", "SPOTIFY LINK"], correct: 1 }
   ],
   "Modelo / Presencia": [
-    { q: "En un set profesional, el 'Comp card' o 'Book' sirve para:", a: ["Saber el nombre", "Ver el registro fotográfico y versatilidad", "Pedir autógrafos", "Ver la altura solamente"], correct: 1 },
-    { q: "La puntualidad en una jornada de producción se considera:", a: ["Llegar 10 min después", "Estar listo 15 min antes del horario de citación", "Llegar justo a tiempo", "Depende del tráfico"], correct: 1 }
+    { q: "¿QUÉ ES UN CASTING REEL?", a: ["VIDEO DE PRESENTACIÓN", "BOOK DE FOTOS", "CONTRATO"], correct: 0 },
+    { q: "¿CÓMO POSAR PARA UNA EDITORIAL DE VANGUARDIA?", a: ["SONRISA A CÁMARA", "LÍNEAS CORPORALES Y ACTITUD", "POSES ESTÁTICAS"], correct: 1 },
+    { q: "¿QUÉ ES EL LOOKBOOK EN UN RODAJE?", a: ["GUÍA DE POSES Y VESTUARIO", "LISTA DE PRECIOS", "MENÚ DE CATERING"], correct: 0 },
+    { q: "¿MÁS IMPORTANTE ANTES DE IR A SET?", a: ["LLEVAR JOYAS", "ESTUDIAR EL MOODBOARD", "IR SIN DORMIR"], correct: 1 }
   ],
   "Locaciones": [
-    { q: "Requisito legal mínimo para habilitar un evento en un espacio:", a: ["Tener luces lindas", "Seguro de Responsabilidad Civil y Habilitación vigente", "Tener Wi-Fi", "Un contrato de palabra"], correct: 1 },
-    { q: "¿Qué es el 'Rider Técnico' de una locación?", a: ["La lista de precios", "Las especificaciones de energía, accesos y equipamiento", "Las reglas del barrio", "La decoración"], correct: 1 }
+    { q: "¿QUÉ ES EL SCOUTING TÉCNICO?", a: ["BUSCAR ACTORES", "VISITAR Y EVALUAR EL LUGAR", "PEDIR COMIDA"], correct: 1 },
+    { q: "¿POR QUÉ ES CRUCIAL EL ORIENTACIÓN DEL SOL?", a: ["POR EL CALOR", "POR EL PLANO DE LUCES", "POR EL WI-FI"], correct: 1 },
+    { q: "¿REQUISITO ELÉCTRICO PARA EQUIPOS PESADOS?", a: ["ENCHUFES COMUNES", "POTENCIA Y FASES DISPONIBLES", "ALARGUES LARGOS"], correct: 1 }
+  ],
+  "Makeup / Pelo": [
+    { q: "¿CÓMO EVITAR EL BRILLO POR FLASH EN PIEL?", a: ["POLVOS TRASLÚCIDOS", "ILUMINADOR LÍQUIDO", "GLOSS"], correct: 0 },
+    { q: "¿FUNCIÓN DEL CORRECTOR COMPLEMENTARIO (NARANJA)?", a: ["TAPAR GRANITOS", "NEUTRALIZAR OJERAS AZULES", "DAR LUZ"], correct: 1 },
+    { q: "¿USO OBLIGATORIO ANTES DE PLANCHA O BUCLERA?", a: ["LACA FUERTE", "PROTECTOR TÉRMICO", "AGUA"], correct: 1 },
+    { q: "¿QUÉ ES LA HIGIENE PROFESIONAL EN MAQUILLAJE?", a: ["LIMPIAR AL FINAL", "USO DE ESPÁTULAS Y MEZCLADORES", "DEDOS LIMPIOS"], correct: 1 }
   ],
   "Estilismo / Moda": [
-    { q: "El 'Shooting Board' o 'Moodboard' sirve para:", a: ["Comprar ropa", "Alinear la estética visual entre fotógrafo, makeup y modelo", "Elegir la comida", "Ver el presupuesto"], correct: 1 },
-    { q: "¿Qué herramienta es indispensable para un retoque de último momento en set?", a: ["Un peine", "Kit de costura, alfileres y vaporizador", "Un perfume", "Cámara de fotos"], correct: 1 }
+    { q: "¿QUÉ SE HACE EN EL FITTING?", a: ["PRUEBA Y AJUSTE DE PRENDAS", "COMPRAR ROPA", "CAMINAR"], correct: 0 },
+    { q: "¿PARA QUÉ SIRVE EL MOODBOARD DE VESTUARIO?", a: ["PAGAR FACTURAS", "DEFINIR CONCEPTO VISUAL", "LISTA DE TALLES"], correct: 1 },
+    { q: "¿QUÉ ES UN OUTFIT STATEMENT?", a: ["ROPA BÁSICA", "PIEZA CENTRAL LLAMATIVA", "ROPA DEPORTIVA"], correct: 1 }
   ],
   "Diseño Gráfico": [
-    { q: "¿Qué sistema de color se utiliza para archivos que van a imprenta profesional?", a: ["RGB", "CMYK", "Pantone solamente", "HEX"], correct: 1 },
-    { q: "Un logo profesional debe entregarse principalmente en formato:", a: ["JPG", "Vectorial (AI / EPS / PDF)", "Captura de pantalla", "Word"], correct: 1 }
+    { q: "¿SISTEMA DE COLOR PARA IMPRENTA?", a: ["RGB", "CMYK", "HEX"], correct: 1 },
+    { q: "¿POR QUÉ USAR VECTORES PARA LOGOS?", a: ["SON MÁS LINDOS", "ESCALAN SIN PERDER CALIDAD", "PESAN MENOS"], correct: 1 },
+    { q: "¿QUÉ ES EL KERNING?", a: ["TIPO DE COLOR", "ESPACIO ENTRE LETRAS", "TAMAÑO PAPEL"], correct: 1 }
   ],
   "Catering / Barra": [
-    { q: "¿Qué carnet es obligatorio para manipular alimentos en un evento?", a: ["Documento nacional", "Curso de Manipulación de Alimentos vigente", "Licencia de conducir", "Ninguno"], correct: 1 },
-    { q: "En caso de invitados con alergias alimentarias (Celíacos/Veganos), el protocolo es:", a: ["Darles lo mismo", "Evitar contaminación cruzada y tener menú diferenciado", "Decirles que no hay nada", "Mezclar los platos"], correct: 1 }
+    { q: "¿CARNET INDISPENSABLE PARA TRABAJAR?", a: ["CURSO DE MANIPULACIÓN", "DNI", "SEGURO"], correct: 0 },
+    { q: "¿QUÉ ES EL SERVICIO FINGER FOOD?", a: ["COMIDA AL PLATO", "BOCADOS PARA LA MANO", "POSTRES"], correct: 1 },
+    { q: "¿PARA QUÉ SIRVE EL JIGGER EN BARRA?", a: ["LIMPIAR", "MEDICIÓN EXACTA", "BATIR"], correct: 1 }
   ],
   "Animación / Show": [
-    { q: "El factor más importante en un show en vivo según CLASSCODE® es:", a: ["El vestuario caro", "El manejo de energía y la conexión con el público", "Terminar antes", "Hacer siempre lo mismo"], correct: 1 },
-    { q: "¿Qué debe chequear un artista antes de salir a escena?", a: ["Su celular", "Espacio de trabajo, sonido y seguridad de elementos", "La barra de tragos", "El reloj"], correct: 1 }
+    { q: "¿CUALIDAD VITAL DEL ANIMADOR?", a: ["VESTUARIO", "MANEJO DE ENERGÍA Y PÚBLICO", "VOZ BAJA"], correct: 1 },
+    { q: "¿CÓMO REACCIONAR ANTE UN IMPREVISTO?", a: ["PARAR EL SHOW", "IMPROVISAR CON SEGURIDAD", "ENOJARSE"], correct: 1 },
+    { q: "¿ELEMENTO DE SEGURIDAD EN SHOW DE FX?", a: ["CINTA", "EXTINTOR Y PROTOCOLO", "AGUA"], correct: 1 }
   ],
   "Ambientación": [
-    { q: "¿Qué es el 'Layout' de un evento?", a: ["La lista de flores", "El plano de distribución de mobiliario y flujos de gente", "El presupuesto", "La paleta de colores"], correct: 1 },
-    { q: "Al elegir iluminación decorativa, lo más importante es:", a: ["Que sea muy potente", "La temperatura color y que no moleste a la vista/fotos", "Que sea barata", "Que parpadee"], correct: 1 }
+    { q: "¿QUÉ ES EL LAYOUT DE UN EVENTO?", a: ["LAS FLORES", "MAPA DE DISTRIBUCIÓN", "LOS COLORES"], correct: 1 },
+    { q: "¿PARA QUÉ SE USAN LOS PARLEDS?", a: ["PARA LEER", "ILUMINACIÓN ARQUITECTÓNICA", "BUFFET"], correct: 1 },
+    { q: "¿CARACTERÍSTICA DE TELA IGNÍFUGA?", a: ["ES BRILLANTE", "NO PROPAGA EL FUEGO", "ES ELÁSTICA"], correct: 1 }
   ],
   "Técnica / Ilum.": [
-    { q: "¿Qué significa 'DMX' en iluminación profesional?", a: ["Marca de luces", "Protocolo de control digital para luminarias", "Tipo de enchufe", "Velocidad de la luz"], correct: 1 },
-    { q: "Prioridad número uno en montaje técnico de estructuras:", a: ["La estética", "La seguridad y anclaje de cargas (Rigging)", "El tiempo", "El peso de los cables"], correct: 1 }
-  ],
-  "Generico": [
-    { q: "¿Cuál es el tiempo de respuesta ideal para una consulta de presupuesto?", a: ["7 días", "Menos de 24 horas", "Cuando tenga tiempo", "Una quincena"], correct: 1 }
+    { q: "¿TEMPERATURA DE LUZ DÍA ESTÁNDAR?", a: ["3200K", "5600K", "10000K"], correct: 1 },
+    { q: "¿QUÉ SE CONECTA POR XLR?", a: ["CORRIENTE", "AUDIO Y SEÑAL DMX", "WI-FI"], correct: 1 },
+    { q: "¿FUNCIÓN DE LAS BANDERAS (BARNDOORS)?", a: ["CAMBIAR COLOR", "RECORTAR Y DIRECCIONAR LUZ", "ENFRIAR"], correct: 1 }
   ]
 };
 
