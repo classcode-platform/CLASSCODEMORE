@@ -33,8 +33,9 @@ export default function Plans() {
         'Soporte'
       ],
       // 
-      action: 'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=6c842f08d2e74f1abfe843bf2eb935f7' 
-    }
+      action:<iframe>'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=6c842f08d2e74f1abfe843bf2eb935f7' 
+      </iframe>     
+      }
   ];
 
   const handlePlanClick = (link) => {
