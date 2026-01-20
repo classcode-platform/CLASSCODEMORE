@@ -1,7 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import GuestUpload from './components/GuestUpload';
 
-// --- IMPORTACIONES (Ahora sí van a funcionar sin error) ---
+// --- IMPORTACIONES ---
 import Auth from './Auth';             
 import Onboarding from './Onboarding'; 
 import Home from './Home';             
@@ -24,32 +25,33 @@ function AppContent() {
     <div className="relative min-h-screen">
       <Routes>
         <Route path="/" element={<Auth />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/terms" element={<Terms />} />
         
-        {/* DASHBOARD - MODO PROFESIONAL */}
+        {/* RUTA PROFESIONAL */}
         <Route path="/dashboard" element={<Dashboard />} />
         
-        {/* CHAT CON DASHBOARD DE FONDO */}
+        {/* RUTA CLIENTE - ASEGURATE QUE EL DASHBOARD APUNTE A ESTE PATH */}
+        <Route path="/client-profile" element={<ClientProfile />} /> 
+        
+        {/* RUTA ACADEMY */}
+        <Route path="/academy" element={<Academy />} />      
+        <Route path="/academy-test/:category" element={<AcademyTest />} /> 
+
+        {/* CHAT OVERLAY */}
         <Route path="/chat/:chatId" element={
           <>
-            <Dashboard />
+            <ClientProfile /> 
             <BusinessChat />
           </>
         } />
 
-        {/* CLIENT PROFILE - MODO CLIENTE */}
-        <Route path="/client-profile" element={<ClientProfile />} /> 
-        
-        <Route path="/home" element={<Home />} />
         <Route path="/results" element={<Results />} />
         <Route path="/profile/:id" element={<ProfileP />} /> 
-        <Route path="/academy" element={<Academy />} />      
-        <Route path="/academy-test/:category" element={<AcademyTest />} /> 
         <Route path="/plans" element={<Plans />} />
-
-        {/* RUTA DE PAGO */}
         <Route path="/success" element={<PaymentSuccess />} />
+        <Route path="/live/:eventCode" element={<GuestUpload />} />
       </Routes>
 
       {isChatRoute && (
