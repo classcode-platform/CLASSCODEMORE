@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, Star, Zap, Crown, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Check, Star, Zap, ExternalLink } from 'lucide-react';
 
 export default function Plans() {
   const navigate = useNavigate();
@@ -32,16 +32,15 @@ export default function Plans() {
         'ALL ACCESS ACADEMY', 
         'Soporte'
       ],
-      // LINK DE PAGO DE MERCADO PAGO
-      // IMPORTANTE: Asegúrate de configurar en Mercado Pago que la "URL de retorno" (Back URL) sea:
-      // https://tudominio.com/payment-success
-      action: 'https://mpago.la/2HnzA11' 
+      // LINK ACTUALIZADO DE MERCADO PAGO (Suscripción)
+      action: 'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=6c842f08d2e74f1abfe843bf2eb935f7' 
     }
   ];
 
   const handlePlanClick = (link) => {
     if (link) {
-      window.open(link, '_blank');
+      // Usamos href para que la redirección de vuelta a /success funcione en la misma app
+      window.location.href = link;
     }
   };
 
