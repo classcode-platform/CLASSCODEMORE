@@ -48,7 +48,7 @@ function AppContent() {
         <Route path="/academy-test/:category" element={<AcademyTest />} /> 
         <Route path="/plans" element={<Plans />} />
 
-        {/* ✅ RUTA CORREGIDA: Usamos /success para coincidir con MP */}
+        {/* RUTA DE PAGO */}
         <Route path="/success" element={<PaymentSuccess />} />
       </Routes>
 
