@@ -1,137 +1,175 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from './firebase';
+import { auth, db } from './firebase';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
-  sendPasswordResetEmail 
+  GoogleAuthProvider,
+  signInWithPopup 
 } from 'firebase/auth';
+import { Eye, EyeOff } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Auth() {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleResetPassword = async () => {
-    if (!email) {
-      alert("Por favor, ingresá tu email primero.");
-      return;
+  const processUserRedirection = async (user) => {
+    const pendingRole = localStorage.getItem('pendingRole');
+    if (pendingRole) {
+      await setDoc(doc(db, "users", user.uid), {
+        role: pendingRole,
+        email: user.email
+      }, { merge: true });
+      localStorage.removeItem('pendingRole');
+      navigate(pendingRole === 'professional' ? '/dashboard' : '/home');
+    } else {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        navigate(userDoc.data().role === 'professional' ? '/dashboard' : '/home');
+      } else {
+        navigate('/home');
+      }
     }
+  };
+
+  const handleGoogleLogin = async () => {
+    const provider = new GoogleAuthProvider();
     try {
-      await sendPasswordResetEmail(auth, email);
-      alert("¡Email enviado! Revisá tu casilla.");
+      const result = await signInWithPopup(auth, provider);
+      await processUserRedirection(result.user);
     } catch (error) {
-      alert("Error: Email no encontrado.");
+      console.error(error);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isLogin && !acceptedTerms) return;
     try {
-      if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-        // IMPORTANTE: Siempre mandamos a Onboarding para que allí se verifique el rol
-        navigate('/onboarding'); 
-      } else {
-        await createUserWithEmailAndPassword(auth, email, password);
-        navigate('/onboarding');
-      }
+      const userCredential = isLogin 
+        ? await signInWithEmailAndPassword(auth, email, password)
+        : await createUserWithEmailAndPassword(auth, email, password);
+      await processUserRedirection(userCredential.user);
     } catch (error) {
-      alert("Error en los datos.");
+      alert("Error en la autenticación");
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#282929] flex items-center justify-center p-4 font-['Open_Sans'] text-white">
-      <div className="max-w-md w-full space-y-10 bg-[#171717] p-10 rounded-[2.5rem] border border-white/5 shadow-2xl text-center">
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6 font-['Open_Sans'] text-white relative overflow-hidden">
+      
+      {/* LUCES ORBITALES DINÁMICAS */}
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.5, 1],
+          x: [-200, 200, -200],
+          y: [-100, 100, -100],
+          rotate: [0, 360]
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+        className="absolute w-[600px] h-[600px] bg-purple-600/30 rounded-full blur-[140px] pointer-events-none"
+      />
+      <motion.div 
+        animate={{ 
+          scale: [1.2, 1, 1.2],
+          x: [200, -200, 200],
+          y: [100, -100, 100],
+          rotate: [360, 0]
+        }}
+        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+        className="absolute w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none"
+      />
+
+      {/* TARJETA GLASSMORPHISM */}
+      <div className="max-w-md w-full space-y-8 bg-white/5 backdrop-blur-2xl p-10 md:p-12 rounded-[2.5rem] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative z-10">
         
-        {/* LOGO */}
-        <div>
-          <h1 className="font-['Poppins'] font-normal text-2xl tracking-[0.35em] uppercase">
-                 CLASSCODE
+        {/* LOGO CLASSCODE ÚNICO */}
+        <header className="text-center pb-2 cursor-default">
+          <h1 className="text-3xl md:text-4xl font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white leading-none">
+            CLASSCODE
           </h1>
-          <p className="text-gray-500 text-[10px] uppercase tracking-widest mt-2 font-light">
-            Tu talento, nuestra plataforma
-          </p>
+        </header>
+        
+        <div className="space-y-6">
+          <button 
+            onClick={handleGoogleLogin}
+            className="w-full py-3.5 px-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-3 hover:bg-white/10 transition-all group"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24">
+               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            <span className="text-[10px] tracking-[0.2em] uppercase font-semibold text-gray-300 group-hover:text-white transition-colors">
+              Continuar con Google
+            </span>
+          </button>
+
+          <div className="flex items-center gap-4 opacity-20">
+            <div className="h-[1px] flex-1 bg-white"></div>
+            <span className="text-[10px] uppercase tracking-widest">o</span>
+            <div className="h-[1px] flex-1 bg-white"></div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div className="text-left">
+                <label className="text-[9px] text-gray-500 tracking-widest uppercase ml-1">Email</label>
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-transparent border-b border-white/10 py-2 text-sm outline-none focus:border-purple-500 transition-all font-light" 
+                  required
+                />
+              </div>
+              
+              <div className="text-left relative">
+                <label className="text-[9px] text-gray-500 tracking-widest uppercase ml-1">Contraseña</label>
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-transparent border-b border-white/10 py-2 text-sm outline-none focus:border-purple-500 transition-all font-light" 
+                  required
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-0 bottom-2 text-gray-600 hover:text-white"
+                >
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
+            </div>
+
+            <button 
+              type="submit"
+              className="w-full py-4 rounded-xl bg-white text-black hover:bg-gray-200 transition-all shadow-xl active:scale-[0.98]"
+            >
+              <span className="text-[11px] tracking-[0.25em] font-black uppercase">
+                {isLogin ? 'Entrar' : 'Registrarme'}
+              </span>
+            </button>
+          </form>
         </div>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <input 
-            type="email" 
-            placeholder="EMAIL" 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-transparent border-b border-white/10 py-3 text-[12px] text-left placeholder:text-gray-600 outline-none focus:border-white transition-all tracking-widest font-light" 
-            required
-          />
-          
-          <input 
-            type="password" 
-            placeholder="CONTRASEÑA" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-transparent border-b border-white/10 py-3 text-[12px] text-left placeholder:text-gray-600 outline-none focus:border-white transition-all tracking-widest font-light" 
-            required
-          />
-
-          {!isLogin && (
-            <div className="flex items-center justify-center gap-3 pt-2">
-              <input 
-                type="checkbox" 
-                checked={acceptedTerms}
-                onChange={(e) => setAcceptedTerms(e.target.checked)}
-                className="h-4 w-4 border-white/10 bg-white/5 text-purple-600 rounded"
-              />
-              <label className="text-[10px] text-gray-500 uppercase tracking-widest font-light">
-                Acepto las <span 
-                  onClick={() => navigate('/terms')} 
-                  className="text-purple-400 hover:underline font-bold cursor-pointer"
-                >
-                  Bases y Condiciones
-                </span>
-              </label>
-            </div>
-          )}
-          
-          <button 
-            type="submit"
-            disabled={!isLogin && !acceptedTerms}
-            className={`w-full py-4 rounded-xl font-bold text-[10px] tracking-[0.35em] uppercase transition-all mt-4 ${
-              !isLogin && !acceptedTerms 
-              ? 'bg-gray-800 text-gray-600' 
-              : 'bg-gradient-to-r from-[#8A2BE2] to-[#4B0082] text-white hover:opacity-90 shadow-lg shadow-purple-500/10'
-            }`}
-          >
-            {isLogin ? 'ENTRAR' : 'REGISTRARME'}
+        <footer className="pt-4 flex flex-col items-center gap-3">
+          <button className="text-[9px] text-gray-600 tracking-[0.15em] uppercase hover:text-purple-400 transition-colors">
+            ¿Olvidaste tu contraseña?
           </button>
-        </form>
-        
-        {/* SECCIÓN INFERIOR */}
-        <div className="pt-2 flex flex-col items-center space-y-4">
-          
-          {isLogin && (
-            <button 
-              type="button"
-              onClick={handleResetPassword}
-              className="text-[9px] text-gray-600 uppercase tracking-[0.2em] hover:text-purple-400 transition-colors"
-            >
-              ¿Olvidaste tu contraseña?
-            </button>
-          )}
-
-          <div className="w-12 h-[1px] bg-white/5"></div>
-
           <button 
-            onClick={() => { setIsLogin(!isLogin); setAcceptedTerms(false); }} 
-            className="text-gray-500 text-[9px] uppercase tracking-widest hover:text-white transition-colors font-light"
+            onClick={() => setIsLogin(!isLogin)} 
+            className="text-white text-[10px] tracking-[0.15em] uppercase font-bold border-b border-white/20 pb-1"
           >
             {isLogin ? 'Crear cuenta nueva' : 'Ya tengo cuenta'}
           </button>
-        </div>
-
+        </footer>
       </div>
     </div>
   );

@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 // --- IMPORTACIONES DE COMPONENTES ---
+import SplashScreen from './components/SplashScreen'; // Importamos tu nueva animación
+import Landing from './Landing';       
 import Auth from './Auth';             
-import Onboarding from './Onboarding'; 
 import Home from './Home';             
 import Results from './Results';       
 import Dashboard from './Dashboard';   
@@ -15,10 +16,8 @@ import Plans from './Plans';
 import AcademyTest from './AcademyTest'; 
 import BusinessChat from './components/BusinessChat';
 import PaymentSuccess from './PaymentSuccess'; 
-
-// --- IMPORTACIONES LIVE EXPERIENCE (AQUÍ ESTABA EL ERROR) ---
 import GuestUpload from './components/GuestUpload';
-import LiveGallery from './components/LiveGallery'; // <--- IMPORTACIÓN AGREGADA
+import LiveGallery from './components/LiveGallery'; 
 
 function AppContent() {
   const location = useLocation();
@@ -27,22 +26,15 @@ function AppContent() {
   return (
     <div className="relative min-h-screen">
       <Routes>
-        <Route path="/" element={<Auth />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/auth" element={<Auth />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/terms" element={<Terms />} />
-        
-        {/* RUTA PROFESIONAL */}
         <Route path="/dashboard" element={<Dashboard />} />
-        
-        {/* RUTA CLIENTE */}
         <Route path="/client-profile" element={<ClientProfile />} /> 
-        
-        {/* RUTA ACADEMY */}
         <Route path="/academy" element={<Academy />} />      
         <Route path="/academy-test/:category" element={<AcademyTest />} /> 
-
-        {/* CHAT OVERLAY */}
+        <Route path="/academy-test/Generico" element={<AcademyTest />} />
         <Route path="/chat/:chatId" element={
           <>
             <ClientProfile /> 
@@ -54,11 +46,8 @@ function AppContent() {
         <Route path="/profile/:id" element={<ProfileP />} /> 
         <Route path="/plans" element={<Plans />} />
         <Route path="/success" element={<PaymentSuccess />} />
-
-        {/* RUTAS LIVE EXPERIENCE */}
         <Route path="/live/:eventCode" element={<GuestUpload />} />
         <Route path="/live-gallery/:eventCode" element={<LiveGallery />} />
-        
       </Routes>
 
       {/* Overlay para el chat */}
@@ -70,9 +59,20 @@ function AppContent() {
 }
 
 export default function App() {
+  // Estado para controlar la animación de entrada de 1.15 MB
+  const [showSplash, setShowSplash] = useState(true);
+
   return (
     <BrowserRouter>
-      <AppContent />
+      {showSplash ? (
+        // Se muestra la animación. Cuando el video termina, pasa a la App.
+        <SplashScreen onFinished={() => setShowSplash(false)} />
+      ) : (
+        // Contenido principal con una transición suave de entrada
+        <div className="animate-in fade-in duration-1000">
+          <AppContent />
+        </div>
+      )}
     </BrowserRouter>
   );
 }

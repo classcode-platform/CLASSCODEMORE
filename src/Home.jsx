@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, MapPin, ChevronDown, Camera, Music, Sparkles, 
   Lightbulb, Utensils, Video, ArrowRight, User, LogOut, 
@@ -18,7 +18,6 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // 1. SEGURIDAD
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -30,7 +29,6 @@ export default function Home() {
     return () => unsubscribe();
   }, [navigate]);
 
-  // 2. FUNCIÓN INTELIGENTE PARA "MI CUENTA"
   const handleAccount = async () => {
     const user = auth.currentUser;
     if (user) {
@@ -38,16 +36,11 @@ export default function Home() {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           const role = userDoc.data().role;
-          if (role === 'professional') {
-            navigate('/dashboard');
-          } else {
-            navigate('/client-profile');
-          }
+          navigate(role === 'professional' ? '/dashboard' : '/client-profile');
         } else {
           navigate('/onboarding');
         }
       } catch (error) {
-        console.error("Error al verificar cuenta:", error);
         navigate('/dashboard');
       }
     }
@@ -66,7 +59,6 @@ export default function Home() {
     navigate(`/results?category=${categoryName}`);
   };
 
-  // CATEGORÍAS ACTUALIZADAS (12 TOTAL)
   const categories = [
     { name: 'Fotografía', count: '+ profesionales', icon: Camera, gradient: 'from-cyan-400 to-blue-500' },
     { name: 'Video / Filmmaker', count: '+ profesionales', icon: Video, gradient: 'from-blue-400 to-indigo-600' },
@@ -82,169 +74,156 @@ export default function Home() {
     { name: 'Técnica / Ilum.', count: '+ profesionales', icon: Zap, gradient: 'from-sky-400 to-blue-600' },
   ];
 
-  const logoStyle = { 
-    fontFamily: 'Poppins', 
-    fontWeight: 400, 
-    letterSpacing: '0.35em' 
-  };
-
-  if (loading) return <div className="min-h-screen bg-[#282929] flex items-center justify-center text-white font-['Poppins'] tracking-[0.35em] text-[10px]">VERIFICANDO...</div>;
+  if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white font-['Poppins'] tracking-[0.35em] text-[10px]">VERIFICANDO...</div>;
 
   return (
-    <div className="min-h-screen bg-[#282929] font-['Open_Sans'] flex flex-col relative overflow-x-hidden antialiased text-white">
+    <div className="min-h-screen bg-[#0a0a0a] font-['Open_Sans'] flex flex-col relative overflow-hidden antialiased text-white">
       
-      <header className="p-6 flex justify-end items-center max-w-7xl mx-auto w-full relative z-[60]">
+      {/* LUCES DINÁMICAS */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <motion.div 
+          animate={{ x: [-50, 50, -50], y: [-30, 30, -30], scale: [1, 1.2, 1] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute top-0 left-0 w-[250px] md:w-[600px] h-[250px] md:h-[600px] bg-purple-600/10 rounded-full blur-[100px] md:blur-[150px]"
+        />
+        <motion.div 
+          animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-0 right-0 w-[200px] md:w-[500px] h-[200px] md:h-[500px] bg-indigo-600/10 rounded-full blur-[90px] md:blur-[130px]"
+        />
+      </div>
+
+      <header className="p-6 md:p-8 flex justify-end items-center max-w-7xl mx-auto w-full relative z-[60]">
         <div className="flex items-center gap-6">
-          <button onClick={handleAccount} className="text-[10px] tracking-[0.2em] uppercase text-gray-400 hover:text-white transition-all flex items-center gap-2 font-bold">
+          <button onClick={handleAccount} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-white transition-all flex items-center gap-2 font-bold">
             <User size={12}/> MI CUENTA
           </button>
-          <button onClick={handleLogout} className="text-[10px] tracking-[0.2em] uppercase text-gray-400 hover:text-red-400 transition-all flex items-center gap-2 font-bold">
+          <button onClick={handleLogout} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-red-400 transition-all flex items-center gap-2 font-bold">
             <LogOut size={12}/> SALIR
           </button>
         </div>
       </header>
 
-      <main className="flex-grow">
+      <main className="flex-grow relative z-10">
         <div className="pt-12 pb-16 px-4 text-center">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
-            <h1 className="text-4xl md:text-6xl text-white mb-6 uppercase" style={logoStyle}>
+            <h1 className="text-4xl md:text-6xl text-white mb-6 uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">
               CLASSCODE
             </h1>
-            <p className="text-gray-400 text-sm font-light tracking-widest uppercase">
+            <p className="text-gray-400 text-[10px] md:text-xs font-light tracking-[0.3em] uppercase">
               Descubre o comparte tu talento con el mundo
             </p>
           </motion.div>
 
-          {/* BUSCADOR */}
+          {/* BUSCADOR GLASSMORPHISM */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="max-w-4xl mx-auto bg-[#171717] border border-white/10 rounded-xl p-2 flex flex-col md:flex-row items-center gap-2 shadow-2xl"
+            className="max-w-4xl mx-auto bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-3 flex flex-col md:flex-row items-center gap-2 shadow-[0_0_50px_rgba(0,0,0,0.3)]"
           >
-            <div className="flex-1 flex items-center px-4 py-3 w-full border-b md:border-b-0 md:border-r border-white/10">
-              <Search className="text-gray-500 w-5 h-5 mr-3" />
-              <input type="text" placeholder="BUSCAR PROFESIONALES..." className="bg-transparent border-none outline-none text-white w-full font-normal uppercase text-[12px] placeholder:text-gray-600 tracking-wide" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <div className="flex-1 flex items-center px-6 py-4 w-full border-b md:border-b-0 md:border-r border-white/10">
+              <Search className="text-purple-400 w-5 h-5 mr-4" />
+              <input type="text" placeholder="BUSCAR PROFESIONALES..." className="bg-transparent border-none outline-none text-white w-full font-normal uppercase text-[11px] placeholder:text-gray-600 tracking-widest" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
             
-            <div className="flex-1 flex items-center px-4 py-3 w-full border-b md:border-b-0 md:border-r border-white/10 relative">
-              <select className="w-full bg-transparent text-gray-500 outline-none appearance-none cursor-pointer z-10 font-normal uppercase text-[12px] tracking-wide" value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
-                <option value="" className="bg-[#171717]">TODAS LAS CATEGORÍAS</option>
-                {categories.map(c => <option key={c.name} value={c.name} className="bg-[#171717]">{c.name.toUpperCase()}</option>)}
+            <div className="flex-1 flex items-center px-6 py-4 w-full border-b md:border-b-0 md:border-r border-white/10 relative">
+              <select className="w-full bg-transparent text-gray-400 outline-none appearance-none cursor-pointer z-10 font-normal uppercase text-[11px] tracking-widest" value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+                <option value="" className="bg-[#0a0a0a]">CATEGORÍAS</option>
+                {categories.map(c => <option key={c.name} value={c.name} className="bg-[#0a0a0a]">{c.name.toUpperCase()}</option>)}
               </select>
-              <ChevronDown className="text-gray-500 w-4 h-4 ml-auto absolute right-4 pointer-events-none" />
+              <ChevronDown className="text-gray-500 w-4 h-4 ml-auto absolute right-6 pointer-events-none" />
             </div>
 
-            <div className="flex-1 flex items-center px-4 py-3 w-full">
-              <MapPin className="text-gray-500 w-5 h-5 mr-3" />
-              <input type="text" placeholder="UBICACIÓN" className="bg-transparent border-none outline-none text-white w-full font-normal uppercase text-[12px] placeholder:text-gray-600 tracking-wide" value={location} onChange={(e) => setLocation(e.target.value)} />
+            <div className="flex-1 flex items-center px-6 py-4 w-full">
+              <MapPin className="text-purple-400 w-5 h-5 mr-4" />
+              <input type="text" placeholder="UBICACIÓN" className="bg-transparent border-none outline-none text-white w-full font-normal uppercase text-[11px] placeholder:text-gray-600 tracking-widest" value={location} onChange={(e) => setLocation(e.target.value)} />
             </div>
 
-            <button onClick={handleSearch} className="w-full md:w-auto px-8 py-3 rounded-lg bg-gradient-to-r from-[#8A2BE2] to-[#4B0082] text-white font-bold uppercase tracking-widest text-[11px] hover:opacity-90 transition-opacity">
+            <button onClick={handleSearch} className="w-full md:w-auto px-10 py-4 rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] hover:bg-gray-200 transition-all shadow-xl">
               BUSCAR
             </button>
           </motion.div>
         </div>
 
-        {/* CATEGORÍAS */}
-        <div className="max-w-5xl mx-auto px-4 pb-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        {/* CATEGORÍAS GLASS */}
+        <div className="max-w-6xl mx-auto px-6 pb-20">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
             {categories.map((cat, i) => (
               <motion.div
                 key={cat.name} onClick={() => handleCategoryClick(cat.name)}
-                whileHover={{ scale: 1.05 }}
-                className="bg-[#171717] p-4 rounded-2xl flex items-center gap-4 border border-transparent hover:border-white/10 transition-colors cursor-pointer group"
+                whileHover={{ scale: 1.03, backgroundColor: 'rgba(255,255,255,0.08)' }}
+                className="bg-white/5 backdrop-blur-md p-6 rounded-[1.5rem] flex items-center gap-5 border border-white/5 hover:border-white/20 transition-all cursor-pointer group shadow-lg"
               >
-                <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${cat.gradient} flex items-center justify-center shadow-lg`}>
+                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.4)]`}>
                    <cat.icon className="text-white w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-[11px] uppercase tracking-wide leading-tight">{cat.name}</h3>
-                  <p className="text-[8px] text-gray-500 uppercase tracking-widest font-normal">{cat.count}</p>
+                  <h3 className="text-white font-bold text-[10px] uppercase tracking-[0.1em] leading-tight">{cat.name}</h3>
+                  <p className="text-[7px] text-gray-500 uppercase tracking-widest mt-1 font-bold">{cat.count}</p>
                 </div>
               </motion.div>
             ))}
           </div>
         </div>
 
-        {/* SECCIÓN ACADEMY PARA CLIENTES */}
-        <div className="max-w-5xl mx-auto px-4 py-20">
-          <div className="bg-gradient-to-br from-[#1e1e1e] to-[#171717] rounded-[3rem] p-10 md:p-16 border border-white/5 shadow-2xl relative overflow-hidden group">
-            
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl group-hover:bg-purple-600/20 transition-all duration-700"></div>
-
-            <div className="relative z-10 flex flex-col md:flex-row items-center gap-12">
-              <div className="flex-1 space-y-6 text-left">
+        {/* SECCIÓN ACADEMY - GLASS DARK */}
+        <div className="max-w-6xl mx-auto px-6 py-20">
+          <div className="bg-white/[0.02] backdrop-blur-3xl rounded-[3.5rem] p-10 md:p-16 border border-white/5 shadow-2xl relative overflow-hidden group">
+            <div className="relative z-10 flex flex-col lg:flex-row items-center gap-16">
+              <div className="flex-1 space-y-8 text-left">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20">
                   <GraduationCap className="text-purple-400" size={16} />
-                  <span className="text-[10px] text-purple-300 font-bold uppercase tracking-[0.2em]">Classcode Academy</span>
+                  <span className="text-[9px] text-purple-300 font-bold uppercase tracking-[0.2em]">Classcode Academy</span>
                 </div>
                 
-                <h2 className="text-3xl md:text-4xl font-light font-['Poppins'] leading-tight">
-                  ¿Querés convertirte en un <span className="text-purple-400 font-normal">Talento Pro</span>?
+                <h2 className="text-3xl md:text-5xl font-light font-['Poppins'] leading-tight tracking-tight">
+                  Potenciá tu <span className="text-purple-500 font-normal">talento creativo</span>
                 </h2>
                 
-                <p className="text-gray-400 text-sm font-light leading-relaxed">
-                  No solo busques, ¡sé parte! En nuestra academia te brindamos las herramientas, 
-                  certificaciones y el coaching necesario para destacar en la industria.
+                <p className="text-gray-400 text-sm md:text-base font-light leading-relaxed max-w-xl">
+                  Brindamos las herramientas, certificaciones y el coaching técnico necesario para destacar en la industria creativa internacional.
                 </p>
 
-                <button 
-                  onClick={() => navigate('/academy')}
-                  className="group flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.3em] text-white hover:text-purple-400 transition-all"
-                >
-                  EXPLORAR CAPACITACIONES 
-                  <div className="p-2 rounded-full bg-white/5 group-hover:bg-purple-500/20 transition-all">
-                    <ArrowRight size={14} />
+                <button onClick={() => navigate('/academy')} className="group flex items-center gap-5 text-[10px] font-black uppercase tracking-[0.3em] text-white hover:text-purple-400 transition-all">
+                  EXPLORAR ACADEMY
+                  <div className="p-3 rounded-full bg-white/5 group-hover:bg-purple-500/20 transition-all">
+                    <ArrowRight size={16} />
                   </div>
                 </button>
               </div>
 
-              <div className="flex-1 grid grid-cols-2 gap-4">
-                <div className="space-y-4 pt-8">
-                  <div className="bg-black/40 p-6 rounded-2xl border border-white/5 text-center">
-                    <Zap className="text-yellow-400 mx-auto mb-2" size={20} />
-                    <p className="text-[8px] text-gray-500 uppercase tracking-widest">Masterclasses</p>
+              <div className="flex-1 grid grid-cols-2 gap-4 w-full">
+                <div className="space-y-4 pt-10">
+                  <div className="bg-white/5 p-8 rounded-3xl border border-white/5 text-center backdrop-blur-sm">
+                    <Zap className="text-yellow-400 mx-auto mb-3" size={24} />
+                    <p className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">Masterclasses</p>
                   </div>
-                  <div className="bg-black/40 p-6 rounded-2xl border border-white/5 text-center">
-                    <Trophy className="text-purple-400 mx-auto mb-2" size={20} />
-                    <p className="text-[8px] text-gray-500 uppercase tracking-widest">Certificaciones</p>
+                  <div className="bg-white/5 p-8 rounded-3xl border border-white/5 text-center backdrop-blur-sm">
+                    <Trophy className="text-purple-400 mx-auto mb-3" size={24} />
+                    <p className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">Certificados</p>
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <div className="bg-black/40 p-6 rounded-2xl border border-white/5 text-center">
-                    <Users size={20} className="text-blue-400 mx-auto mb-2" />
-                    <p className="text-[8px] text-gray-500 uppercase tracking-widest">Mentoria</p>
+                  <div className="bg-white/5 p-8 rounded-3xl border border-white/5 text-center backdrop-blur-sm">
+                    <Users size={24} className="text-blue-400 mx-auto mb-3" />
+                    <p className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">Mentoria</p>
                   </div>
-                  <div className="bg-black/40 p-6 rounded-2xl border border-white/5 text-center">
-                    <Star size={20} className="text-pink-400 mx-auto mb-2" />
-                    <p className="text-[8px] text-gray-500 uppercase tracking-widest">Networking</p>
+                  <div className="bg-white/5 p-8 rounded-3xl border border-white/5 text-center backdrop-blur-sm">
+                    <Star size={24} className="text-pink-400 mx-auto mb-3" />
+                    <p className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">Networking</p>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* CTA FINAL */}
-        <div className="bg-[#171717] py-6 px-4 text-center border-t border-white/5">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-lg md:text-xl font-normal text-gray-400 mb-8 uppercase tracking-wide">
-              Únete a nuestra comunidad y conecta con clientes
-            </h2>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <button onClick={() => navigate('/dashboard')} className="px-8 py-4 rounded-lg bg-gradient-to-r from-[#8A2BE2] to-[#4B0082] text-white font-bold flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] hover:opacity-90 transition-opacity shadow-lg shadow-purple-500/20">
-                CREAR MI PERFIL PROFESIONAL <ArrowRight className="w-5 h-5" />
-              </button>
             </div>
           </div>
         </div>
       </main>
 
-      <footer className="bg-[#282929] py-12 px-4 border-t border-white/5">
-        <div className="max-w-6xl mx-auto text-center text-gray-500 text-sm">
-          <h2 className="text-white uppercase mb-4" style={logoStyle}>CLASSCODE®</h2>
-          <div className="space-y-2">
-            <p className="text-[10px] uppercase tracking-widest font-bold">© 2025 CLASSCODE® — TODOS LOS DERECHOS RESERVADOS</p>
-            <p className="text-[9px] uppercase tracking-widest font-light text-gray-600 italic">Vigente desde el 29 de diciembre de 2025.</p>
+      <footer className="bg-[#0a0a0a] py-20 px-6 border-t border-white/5">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-white text-3xl font-['Poppins'] font-normal tracking-[0.05em] uppercase mb-8">CLASSCODE</h2>
+          <div className="space-y-4 opacity-30">
+            <p className="text-[9px] uppercase tracking-[0.5em] font-bold">© 2026 CLASSCODE — TODOS LOS DERECHOS RESERVADOS</p>
+            <p className="text-[8px] uppercase tracking-[0.4em] font-light">Vigente desde enero 2026.</p>
           </div>
         </div>
       </footer>

@@ -1,14 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Open+Sans:wght@400;600;700&display=swap');
+/* Agregamos pesos 700 y 900 para títulos de impacto en la Landing */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Open+Sans:wght@400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  background-color: #282929;
+  /* Cambiado a negro puro para que el video de 49.5KB no tenga bordes */
+  background-color: #000000; 
   color: white;
   font-family: 'Open Sans', sans-serif;
   margin: 0;
+  overflow-x: hidden; /* Evita scrolls laterales molestos en mobile */
 }
 
 h1, h2, h3 {
