@@ -81,12 +81,14 @@ export default function ClientProfile() {
   };
 
   const togglePause = async () => {
+    if (!events[0]) return;
     const newStatus = events[0].status === 'paused' ? 'active' : 'paused';
     await updateDoc(doc(db, "events", events[0].id), { status: newStatus });
     setModal({ isOpen: true, title: "STATUS", message: `SISTEMA ${newStatus === 'paused' ? 'PAUSADO' : 'REANUDADO'}.`, type: "success" });
   };
 
   const confirmFinish = () => {
+    if (!events[0]) return;
     setModal({
       isOpen: true,
       title: "APAGAR SISTEMA",
@@ -100,6 +102,7 @@ export default function ClientProfile() {
   };
 
   const confirmDelete = () => {
+    if (!events[0]) return;
     setModal({
       isOpen: true,
       title: "ELIMINAR PROYECTO",
@@ -113,12 +116,14 @@ export default function ClientProfile() {
   };
 
   const copyGuestLink = () => {
-    navigator.clipboard.writeText(`https://classcode.app/guest-upload/${events[0].eventCode}`);
+    if (!events[0]) return;
+    navigator.clipboard.writeText(`https://www.classcode.com.ar/guest-upload/${events[0].eventCode}`);
     setModal({ isOpen: true, title: "ÉXITO", message: "LINK DE SUBIDA COPIADO.", type: "success" });
   };
 
   const handleShareTV = () => {
-    navigator.clipboard.writeText(`https://classcode.app/live-gallery/${events[0].eventCode}`);
+    if (!events[0]) return;
+    navigator.clipboard.writeText(`https://www.classcode.com.ar/live-gallery/${events[0].eventCode}`);
     setModal({ isOpen: true, title: "SHARE TV", message: "LINK DE PROYECCIÓN COPIADO.", type: "success" });
   };
 
@@ -246,12 +251,22 @@ export default function ClientProfile() {
             {events.length > 0 ? (
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 md:gap-12 items-start">
                 <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-10 bg-white/[0.02] p-6 md:p-8 rounded-[2rem] border border-white/5 text-left w-full font-normal">
-                  <div className="bg-white p-4 rounded-[1.5rem] md:rounded-[2rem] shadow-2xl flex-shrink-0">
-                    <img src={`https://chart.googleapis.com/chart?cht=qr&chs=180x180&chl=https://classcode.app/guest-upload/${events[0].eventCode}`} alt="QR Code" className="w-28 h-28 md:w-32 md:h-32"/>
-                    <p className="text-black text-[6px] font-normal mt-2 tracking-[0.2em] uppercase leading-none text-center">Scan to upload</p>
+                  
+                  {/* QR FIX: REEMPLAZADO GOOGLE CHARTS POR API DE RESPALDO QRSERVER Y Z-INDEX 300 */}
+                  <div className="bg-white p-4 rounded-[1.5rem] md:rounded-[2rem] shadow-2xl flex-shrink-0 relative z-[300] border-4 border-white">
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://www.classcode.com.ar/guest-upload/${events[0].eventCode}`} 
+                      alt="QR Code" 
+                      className="w-28 h-28 md:w-32 md:h-32 block"
+                      onError={(e) => {
+                        // Respaldo final por si la API falla
+                        e.target.src = `https://chart.googleapis.com/chart?cht=qr&chs=180x180&chl=https://www.classcode.com.ar/guest-upload/${events[0].eventCode}`;
+                      }}
+                    />
+                    <p className="text-black text-[6px] font-bold mt-2 tracking-[0.2em] uppercase leading-none text-center">Scan to upload</p>
                   </div>
                   
-                  <div className="flex-1 space-y-6 md:space-y-8 text-center lg:text-left w-full leading-none font-normal">
+                  <div className="flex-1 space-y-6 md:space-y-8 text-center lg:text-left w-full leading-none font-normal relative z-10">
                     <div className="group relative">
                       <div className="flex items-center justify-center lg:justify-start gap-4">
                          <h4 className="text-[20px] md:text-[28px] font-normal tracking-[0.02em] text-white uppercase leading-tight">{events[0].eventName}</h4>
@@ -283,7 +298,7 @@ export default function ClientProfile() {
                   </div>
                 </div>
 
-                <div className="space-y-6 text-left border-t border-white/5 pt-10 xl:border-0 xl:pt-0 font-normal">
+                <div className="space-y-6 text-left border-t border-white/5 pt-10 xl:border-0 xl:pt-0 font-normal relative z-10">
                   <div className="flex justify-between items-center border-b border-white/5 pb-4 font-normal">
                     <h4 className="text-[10px] text-gray-500 font-normal tracking-[0.4em] uppercase leading-none font-normal">Galería</h4>
                     <span className="text-[10px] font-normal text-purple-400 uppercase tracking-widest bg-purple-500/10 px-4 py-1.5 rounded-full">{events[0].liveGallery?.length || 0} Fotos</span>
@@ -364,7 +379,10 @@ export default function ClientProfile() {
                           try {
                             const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
                             const data = await res.json();
-                            if (data.secure_url) setProfile(prev => ({ ...prev, photoURL: data.secure_url }));
+                            if (data.secure_url) {
+                               setProfile(prev => ({ ...prev, photoURL: data.secure_url }));
+                               await updateDoc(doc(db, "users", auth.currentUser.uid), { photoURL: data.secure_url });
+                            }
                           } catch (err) { console.error(err); } finally { setUploading(false); }
                       }} className="hidden" /></label>
                     </div>

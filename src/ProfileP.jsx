@@ -6,9 +6,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MapPin, Search, X, Heart, Send, Share2, Star, ShieldCheck } from 'lucide-react';
 
 // --- SHARE MODAL ---
-const ShareModal = ({ isOpen, onClose, userProfile }) => {
+const ShareModal = ({ isOpen, onClose, userProfile, profileId }) => {
   const [copied, setCopied] = useState(false);
-  const profileUrl = window.location.href; 
+  // URL Actualizada al dominio oficial .com.ar
+  const profileUrl = `https://www.classcode.com.ar/profile/${profileId}`; 
+  
   const handleCopy = () => {
     navigator.clipboard.writeText(profileUrl);
     setCopied(true);
@@ -176,7 +178,6 @@ export default function ProfileP() {
           <div className="space-y-6 text-center lg:text-left">
             <div className="space-y-3">
                <div className="flex justify-center lg:justify-start gap-2">
-                 {/* JERARQUÍA DE ESCUDOS: DORADO PARA PRO, VIOLETA PARA NIVELADO */}
                  {user.isPro ? (
                     <span className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
                       <ShieldCheck size={12} className="fill-amber-500/20"/> PRO
@@ -277,7 +278,7 @@ export default function ProfileP() {
         )}
       </AnimatePresence>
 
-      <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} userProfile={user} />
+      <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} userProfile={user} profileId={id} />
       
       <footer className="bg-black py-20 px-6 border-t border-white/5 text-center relative z-10 w-full font-['Poppins']">
         <div className="max-w-[1440px] mx-auto">

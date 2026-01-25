@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 // --- IMPORTACIONES DE COMPONENTES ---
-import SplashScreen from './components/SplashScreen'; // Importamos tu nueva animación
+import SplashScreen from './components/SplashScreen'; 
 import Landing from './Landing';       
 import Auth from './Auth';             
 import Home from './Home';             
@@ -12,6 +12,7 @@ import ProfileP from './ProfileP';
 import ClientProfile from './ClientProfile'; 
 import Academy from './Academy';       
 import Terms from './Terms';           
+import Privacy from './Privacy'; // Nueva importación para Google Cloud
 import Plans from './Plans';  
 import AcademyTest from './AcademyTest'; 
 import BusinessChat from './components/BusinessChat';
@@ -29,7 +30,11 @@ function AppContent() {
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/home" element={<Home />} />
+        
+        {/* RUTAS LEGALES PARA GOOGLE CLOUD */}
         <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} /> 
+
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/client-profile" element={<ClientProfile />} /> 
         <Route path="/academy" element={<Academy />} />      
@@ -59,16 +64,13 @@ function AppContent() {
 }
 
 export default function App() {
-  // Estado para controlar la animación de entrada de 1.15 MB
   const [showSplash, setShowSplash] = useState(true);
 
   return (
     <BrowserRouter>
       {showSplash ? (
-        // Se muestra la animación. Cuando el video termina, pasa a la App.
         <SplashScreen onFinished={() => setShowSplash(false)} />
       ) : (
-        // Contenido principal con una transición suave de entrada
         <div className="animate-in fade-in duration-1000">
           <AppContent />
         </div>
