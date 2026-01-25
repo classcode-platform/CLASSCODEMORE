@@ -12,7 +12,7 @@ import ProfileP from './ProfileP';
 import ClientProfile from './ClientProfile'; 
 import Academy from './Academy';       
 import Terms from './Terms';           
-import Privacy from './Privacy'; // Nueva importación para Google Cloud
+import Privacy from './Privacy'; 
 import Plans from './Plans';  
 import AcademyTest from './AcademyTest'; 
 import BusinessChat from './components/BusinessChat';
