@@ -139,7 +139,7 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* --- SECCIÓN DUAL: LIVE Y ACADEMY (SIMÉTRICOS Y CENTRADOS) --- */}
+        {/* --- SECCIÓN DUAL: LIVE Y ACADEMY --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-32 pt-8">
           
           {/* LIVE GALLERY PAD */}
@@ -162,7 +162,7 @@ export default function Landing() {
             </button>
           </motion.div>
 
-          {/* ACADEMY PAD (LOGO ORIGINAL SIMÉTRICO) */}
+          {/* ACADEMY PAD */}
           <motion.div 
             whileInView={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 20 }}
             className="bg-white/[0.02] backdrop-blur-3xl rounded-[3.5rem] p-10 md:p-12 border border-white/5 shadow-2xl relative overflow-hidden flex flex-col justify-between group h-[280px] w-full"
@@ -195,8 +195,15 @@ export default function Landing() {
         </div>
       </main>
 
-      <footer className="p-12 text-center opacity-20 border-t border-white/5">
-        <p className="text-[10px] tracking-[0.6em] font-['Poppins'] uppercase text-white/50">CLASSCODE © 2026</p>
+      {/* FOOTER ACTUALIZADO PARA VERIFICACIÓN DE GOOGLE CLOUD */}
+      <footer className="p-12 text-center border-t border-white/5 bg-black/20">
+        <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12 mb-8">
+           <a href="/privacy" className="text-[11px] text-white/40 hover:text-purple-400 transition-colors uppercase tracking-[0.3em] font-bold">Privacidad</a>
+           <a href="/terms" className="text-[11px] text-white/40 hover:text-purple-400 transition-colors uppercase tracking-[0.3em] font-bold">Términos</a>
+        </div>
+        <p className="text-[10px] tracking-[0.6em] font-['Poppins'] uppercase text-white/20">
+          CLASSCODE © 2026 — Descubre el talento Argentino
+        </p>
       </footer>
     </div>
   );
