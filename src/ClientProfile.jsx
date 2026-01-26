@@ -211,21 +211,33 @@ export default function ClientProfile() {
       </aside>
 
       <main className="flex-1 md:ml-72 p-4 md:p-12 relative z-10 w-full max-w-[1600px] mx-auto">
+        {/* HEADER FIXED: SEPARACIÓN DE HAMBURGUESA Y PERFIL */}
         <header className="flex justify-between items-center mb-12 md:mb-20">
+          {/* Lado Izquierdo: Solo Hamburguesa en Mobile */}
+          <div className="md:hidden">
+            <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 hover:bg-white/5 rounded-xl">
+              <Menu size={32} />
+            </button>
+          </div>
+
+          {/* Centro/Lado derecho: Perfil e Identidad */}
           <div className="flex items-center gap-4 md:gap-6">
-            <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden text-white p-2 hover:bg-white/5 rounded-xl"><Menu size={32} /></button>
-            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border border-white/10 overflow-hidden bg-white/5 shadow-2xl relative flex-shrink-0">
+            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border border-white/10 overflow-hidden bg-white/5 shadow-2xl relative flex-shrink-0">
               {profile.photoURL ? <img src={profile.photoURL} className="w-full h-full object-cover" alt="Profile" /> : <User size={28} className="m-auto mt-4 text-gray-700"/>}
             </div>
             <div className="text-left leading-none flex flex-col gap-1 md:gap-2 font-normal">
               <div className="flex items-center gap-3">
-                <h2 className="text-[16px] md:text-[20px] font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white/90 truncate max-w-[150px] md:max-w-none">{profile.name || 'ORGANIZADOR'}</h2>
+                <h2 className="text-[14px] md:text-[20px] font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white/90 truncate max-w-[120px] md:max-w-none">{profile.name || 'ORGANIZADOR'}</h2>
                 <button onClick={() => setIsEditingProfile(true)} className="text-gray-600 hover:text-purple-400 transition-colors hidden md:block"><Edit3 size={18} /></button>
               </div>
-              <p className="text-[8px] md:text-[10px] text-purple-400 font-normal tracking-[0.3em] uppercase">{profile.location || 'BUENOS AIRES'}</p>
+              <p className="text-[7px] md:text-[10px] text-purple-400 font-normal tracking-[0.3em] uppercase">{profile.location || 'BUENOS AIRES'}</p>
             </div>
           </div>
-          <Bell size={20} className="text-gray-700 cursor-pointer hover:text-white transition-colors" />
+
+          {/* Lado Derecho: Notificaciones */}
+          <div className="flex items-center">
+            <Bell size={20} className="text-gray-700 cursor-pointer hover:text-white transition-colors" />
+          </div>
         </header>
 
         <div className="space-y-12">
@@ -252,14 +264,12 @@ export default function ClientProfile() {
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 md:gap-12 items-start">
                 <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-10 bg-white/[0.02] p-6 md:p-8 rounded-[2rem] border border-white/5 text-left w-full font-normal">
                   
-                  {/* QR FIX: REEMPLAZADO GOOGLE CHARTS POR API DE RESPALDO QRSERVER Y Z-INDEX 300 */}
                   <div className="bg-white p-4 rounded-[1.5rem] md:rounded-[2rem] shadow-2xl flex-shrink-0 relative z-[300] border-4 border-white">
                     <img 
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://www.classcode.com.ar/guest-upload/${events[0].eventCode}`} 
                       alt="QR Code" 
                       className="w-28 h-28 md:w-32 md:h-32 block"
                       onError={(e) => {
-                        // Respaldo final por si la API falla
                         e.target.src = `https://chart.googleapis.com/chart?cht=qr&chs=180x180&chl=https://www.classcode.com.ar/guest-upload/${events[0].eventCode}`;
                       }}
                     />

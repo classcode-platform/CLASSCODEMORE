@@ -48,29 +48,38 @@ export default function Dashboard() {
 
   const isProfileVisible = profile.name?.trim() && profile.bio?.trim() && profile.photo1;
 
-  const calculateTotalScore = () => {
-    let baseScore = 0;
-    if (profile.name?.trim()) baseScore += 15;
-    if (profile.job?.trim()) baseScore += 15;
-    const photoCount = Array.from({ length: 10 }, (_, i) => profile[`photo${i + 1}`]).filter(Boolean).length;
-    baseScore += photoCount * 5; 
-    if (profile.videoLink) baseScore += 20;
-    return baseScore + (profile.score || 0);
+  // Lógica de cálculo corregida: Usa el score de la Academy (data.score) y suma lo del perfil
+  const calculateTotalScore = (currentProfile) => {
+    let bonus = 0;
+    if (currentProfile.name?.trim()) bonus += 15;
+    if (currentProfile.job?.trim()) bonus += 15;
+    const photoCount = Array.from({ length: 10 }, (_, i) => currentProfile[`photo${i + 1}`]).filter(Boolean).length;
+    bonus += photoCount * 5; 
+    if (currentProfile.videoLink) bonus += 20;
+    
+    // El score base viene de lo que ya está en Firestore (Academy, etc)
+    return bonus + (currentProfile.academyBaseScore || 0);
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let profUnsubscribe = () => {};
+    let chatUnsubscribe = () => {};
+
+    const authUnsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        const profUnsubscribe = onSnapshot(doc(db, "professionals", user.uid), (docSnap) => {
+        profUnsubscribe = onSnapshot(doc(db, "professionals", user.uid), (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
             const photosData = {};
             data.photos?.forEach((url, i) => { if(i < 10) photosData[`photo${i+1}`] = url; });
+            
             setProfile(prev => ({ 
               ...prev, 
               ...data, 
               ...photosData, 
-              completedCourses: data.completedCourses || [] 
+              completedCourses: data.completedCourses || [],
+              // Guardamos el score de la DB por separado para el cálculo
+              academyBaseScore: data.score || 0 
             }));
           } else {
             setProfile(prev => ({
@@ -83,45 +92,45 @@ export default function Dashboard() {
         });
 
         const q = query(collection(db, "chats"), where("participants", "array-contains", user.uid));
-        const chatUnsubscribe = onSnapshot(q, (snap) => {
+        chatUnsubscribe = onSnapshot(q, (snap) => {
             setMessages(snap.docs.map(chatDoc => ({ id: chatDoc.id, ...chatDoc.data() })));
         });
-
-        return () => {
-          profUnsubscribe();
-          chatUnsubscribe();
-        };
-
-      } else { 
-        navigate('/'); 
-      }
+      } else { navigate('/'); }
     });
-    return () => unsubscribe();
+
+    return () => {
+      authUnsubscribe();
+      profUnsubscribe();
+      chatUnsubscribe();
+    };
   }, [navigate]);
 
-  const handleSaveProfileData = async () => {
+  // FUNCIÓN DE GUARDADO ÚNICA (Persiste Score y Datos)
+  const persistProfile = async (updates) => {
     const user = auth.currentUser;
-    if (user) {
-      if (!profile.job) return setModal({ isOpen: true, title: 'ATENCIÓN', message: 'SELECCIONÁ CATEGORÍA.', type: 'warning' });
-      try {
-        const photoList = Array.from({ length: 10 }, (_, i) => profile[`photo${i + 1}`]).filter(p => p && p !== '');
-        
-        const updatedData = {
-          name: profile.name || '',
-          job: profile.job || '',
-          location: profile.location || '',
-          bio: profile.bio || '',
-          instagram: profile.instagram || '',
-          videoLink: profile.videoLink || '',
-          photos: photoList,
-          uid: user.uid
-        };
+    if (!user) return;
 
-        await setDoc(doc(db, "professionals", user.uid), updatedData, { merge: true });
-        setIsEditingProfile(false);
-        setModal({ isOpen: true, type: 'success', title: "ÉXITO", message: "PERFIL ACTUALIZADO." });
-      } catch (e) { console.error(e); }
-    }
+    const newProfile = { ...profile, ...updates };
+    const photoList = Array.from({ length: 10 }, (_, i) => newProfile[`photo${i + 1}`]).filter(Boolean);
+    const finalScore = calculateTotalScore(newProfile);
+
+    const dataToSave = {
+      ...updates,
+      photos: photoList,
+      score: finalScore,
+      uid: user.uid
+    };
+
+    try {
+      await setDoc(doc(db, "professionals", user.uid), dataToSave, { merge: true });
+    } catch (e) { console.error("Error al persistir:", e); }
+  };
+
+  const handleSaveProfileData = async () => {
+    if (!profile.job) return setModal({ isOpen: true, title: 'ATENCIÓN', message: 'SELECCIONÁ CATEGORÍA.', type: 'warning' });
+    await persistProfile(profile);
+    setIsEditingProfile(false);
+    setModal({ isOpen: true, type: 'success', title: "ÉXITO", message: "PERFIL ACTUALIZADO." });
   };
 
   const handleSwitchToClient = async () => {
@@ -142,10 +151,9 @@ export default function Dashboard() {
       const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
       const data = await response.json();
       if (data?.secure_url) {
-        setProfile(prev => ({ ...prev, [photoField]: data.secure_url }));
-        if (photoField === 'photo1') {
-           await setDoc(doc(db, "professionals", auth.currentUser.uid), { photo1: data.secure_url }, { merge: true });
-        }
+        const updates = { [photoField]: data.secure_url };
+        setProfile(prev => ({ ...prev, ...updates }));
+        await persistProfile(updates);
       }
     } finally { setUploadingStatus(prev => ({ ...prev, [photoField]: false })); }
   };
@@ -162,8 +170,9 @@ export default function Dashboard() {
       const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, { method: 'POST', body: formData });
       const data = await response.json();
       if (data?.secure_url) {
-        setProfile(prev => ({ ...prev, videoLink: data.secure_url }));
-        await setDoc(doc(db, "professionals", auth.currentUser.uid), { videoLink: data.secure_url }, { merge: true });
+        const updates = { videoLink: data.secure_url };
+        setProfile(prev => ({ ...prev, ...updates }));
+        await persistProfile(updates);
       }
     } finally { setUploadingStatus(prev => ({ ...prev, video: false })); }
   };
@@ -178,7 +187,6 @@ export default function Dashboard() {
         <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[130px]" />
       </div>
 
-      {/* HEADER MOBILE */}
       <header className="md:hidden fixed top-0 left-0 right-0 bg-black/60 backdrop-blur-xl border-b border-white/5 z-[100] px-8 py-6 flex justify-between items-center">
         <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer">CLASSCODE</div>
         <div className="flex items-center gap-6">
@@ -270,7 +278,7 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-8 leading-none">
              <div className="text-right hidden sm:block leading-none">
-                <p className="text-[14px] font-black text-white tracking-tighter italic leading-none">{calculateTotalScore()} PTS</p>
+                <p className="text-[14px] font-black text-white tracking-tighter italic leading-none">{calculateTotalScore(profile)} PTS</p>
                 <p className="text-[7px] text-purple-400 font-black uppercase tracking-widest mt-1 leading-none">Reputación</p>
              </div>
              <Bell size={20} className="text-gray-600 cursor-pointer hover:text-white transition-colors" />
@@ -292,39 +300,17 @@ export default function Dashboard() {
                        <p className="text-[8px] text-gray-500 uppercase font-bold mt-2 leading-none">{isGenericoDone ? 'VERIFICADO' : 'PENDIENTE'}</p>
                     </div>
                     {!isGenericoDone && (
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          navigate('/academy-test/Generico');
-                        }} 
-                        className="ml-auto bg-amber-500/20 border border-amber-500/40 text-amber-500 p-3 rounded-full hover:bg-amber-500 hover:text-black transition-all cursor-pointer relative z-30"
-                      >
-                        <ArrowRight size={18}/>
-                      </button>
+                      <button onClick={() => navigate('/academy-test/Generico')} className="ml-auto bg-amber-500/20 border border-amber-500/40 text-amber-500 p-3 rounded-full hover:bg-amber-500 hover:text-black transition-all cursor-pointer relative z-30"><ArrowRight size={18}/></button>
                     )}
                   </div>
                   <div className="flex items-center gap-4 leading-none">
-                    <div className={`p-4 rounded-2xl ${isProfessionalTestDone ? 'bg-purple-500/10 text-purple-400' : 'bg-white/5 text-gray-600 border border-white/5'} leading-none`}>
-                       <Award size={24}/>
-                    </div>
+                    <div className={`p-4 rounded-2xl ${isProfessionalTestDone ? 'bg-purple-500/10 text-purple-400' : 'bg-white/5 text-gray-600 border border-white/5'} leading-none`}><Award size={24}/></div>
                     <div className="leading-none">
                        <p className="text-[11px] font-black uppercase tracking-widest italic leading-none">Especialista {profile.job || ''}</p>
-                       <p className="text-[8px] text-gray-500 uppercase font-bold mt-2 leading-none">
-                          {isProfessionalTestDone ? 'CERTIFICADO ELITE' : profile.job ? `INVITACIÓN AL TEST DE ${profile.job.toUpperCase()}` : 'ASIGNA RUBRO'}
-                       </p>
+                       <p className="text-[8px] text-gray-500 uppercase font-bold mt-2 leading-none">{isProfessionalTestDone ? 'CERTIFICADO ELITE' : profile.job ? `INVITACIÓN AL TEST DE ${profile.job.toUpperCase()}` : 'ASIGNA RUBRO'}</p>
                     </div>
                     {(!isProfessionalTestDone && profile.job) && (
-                       <button 
-                         onClick={(e) => {
-                           e.preventDefault();
-                           e.stopPropagation();
-                           navigate(`/academy-test/${encodeURIComponent(profile.job)}`);
-                         }} 
-                         className="ml-auto bg-purple-600/20 border border-purple-500/40 text-purple-400 p-3 rounded-full hover:bg-purple-600 hover:text-white transition-all shadow-lg cursor-pointer relative z-30"
-                       >
-                          <Zap size={18} fill="currentColor"/>
-                       </button>
+                       <button onClick={() => navigate(`/academy-test/${encodeURIComponent(profile.job)}`)} className="ml-auto bg-purple-600/20 border border-purple-500/40 text-purple-400 p-3 rounded-full hover:bg-purple-600 hover:text-white transition-all shadow-lg cursor-pointer relative z-30"><Zap size={18} fill="currentColor"/></button>
                     )}
                   </div>
                </div>
@@ -350,10 +336,7 @@ export default function Dashboard() {
           <div className="space-y-12">
             <div className="aspect-video bg-black rounded-[2.5rem] md:rounded-[3rem] overflow-hidden border border-white/5 relative flex items-center justify-center group shadow-2xl leading-none">
                {profile.videoLink ? <video src={profile.videoLink} controls className="w-full h-full object-cover" /> : (
-                 <div className="text-center opacity-30 group-hover:opacity-60 transition-opacity leading-none">
-                    <PlayCircle size={60} strokeWidth={1} className="text-white mx-auto leading-none"/>
-                    <p className="text-[8px] font-black uppercase tracking-[0.5em] mt-4 italic leading-none">Cargar Showreel</p>
-                 </div>
+                 <div className="text-center opacity-30 group-hover:opacity-60 transition-opacity leading-none"><PlayCircle size={60} strokeWidth={1} className="text-white mx-auto leading-none"/><p className="text-[8px] font-black uppercase tracking-[0.5em] mt-4 italic leading-none">Cargar Showreel</p></div>
                )}
                <input type="file" accept="video/*" onChange={handleVideoUpload} className="absolute inset-0 opacity-0 cursor-pointer z-10 leading-none" />
             </div>
@@ -366,15 +349,14 @@ export default function Dashboard() {
                       <>
                         <img src={profile[`photo${num}`]} className="w-full h-full object-cover" />
                         <button onClick={async () => {
-                          const photoList = Array.from({ length: 10 }, (_, i) => i + 1 === num ? '' : profile[`photo${i+1}`]).filter(Boolean);
-                          await setDoc(doc(db, "professionals", auth.currentUser.uid), { photos: photoList }, { merge: true });
-                          setProfile({...profile, [`photo${num}`]: ''});
+                          const updates = { [`photo${num}`]: '' };
+                          setProfile(prev => ({ ...prev, ...updates }));
+                          await persistProfile(updates);
                         }} className="absolute top-2 right-2 p-2 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 text-red-500 transition-all leading-none"><X size={10} /></button>
                       </>
                     ) : (
                       <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-500/5 transition-all leading-none">
-                        <Upload size={20} className="text-gray-700 mb-2 leading-none"/>
-                        <span className="text-[6px] font-black text-gray-800 uppercase tracking-widest italic">ESPACIO {num}</span>
+                        <Upload size={20} className="text-gray-700 mb-2 leading-none"/><span className="text-[6px] font-black text-gray-800 uppercase tracking-widest italic">ESPACIO {num}</span>
                         <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, `photo${num}`)} className="hidden leading-none" />
                       </label>
                     )}
@@ -414,7 +396,6 @@ export default function Dashboard() {
           </div>
         )}
       </AnimatePresence>
-
       <CustomModal isOpen={modal.isOpen} onClose={() => setModal({ ...modal, isOpen: false })} title={modal.title} message={modal.message} type={modal.type} />
     </div>
   );

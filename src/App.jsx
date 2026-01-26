@@ -31,7 +31,7 @@ function AppContent() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/home" element={<Home />} />
         
-        {/* RUTAS LEGALES PARA GOOGLE CLOUD */}
+        {/* RUTAS LEGALES */}
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} /> 
 
@@ -40,6 +40,7 @@ function AppContent() {
         <Route path="/academy" element={<Academy />} />      
         <Route path="/academy-test/:category" element={<AcademyTest />} /> 
         <Route path="/academy-test/Generico" element={<AcademyTest />} />
+        
         <Route path="/chat/:chatId" element={
           <>
             <ClientProfile /> 
@@ -51,11 +52,19 @@ function AppContent() {
         <Route path="/profile/:id" element={<ProfileP />} /> 
         <Route path="/plans" element={<Plans />} />
         <Route path="/success" element={<PaymentSuccess />} />
+
+        {/* --- CORRECCIÓN CRÍTICA AQUÍ --- */}
+        {/* Cambié /live por /guest-upload para que coincida con el link del perfil */}
+        <Route path="/guest-upload/:eventCode" element={<GuestUpload />} />
+        {/* Mantengo /live por si acaso tenías códigos QR viejos impresos, ambos llevarán al mismo lugar */}
         <Route path="/live/:eventCode" element={<GuestUpload />} />
+        
         <Route path="/live-gallery/:eventCode" element={<LiveGallery />} />
+
+        {/* RUTA DE RESPALDO (404) para evitar pantallas negras */}
+        <Route path="*" element={<Landing />} />
       </Routes>
 
-      {/* Overlay para el chat */}
       {isChatRoute && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[150] pointer-events-none" />
       )}
@@ -71,7 +80,8 @@ export default function App() {
       {showSplash ? (
         <SplashScreen onFinished={() => setShowSplash(false)} />
       ) : (
-        <div className="animate-in fade-in duration-1000">
+        // Añadí h-full y bg-black para evitar destellos blancos entre transiciones
+        <div className="animate-in fade-in duration-1000 min-h-screen bg-[#0a0a0a]">
           <AppContent />
         </div>
       )}

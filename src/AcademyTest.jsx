@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth } from './firebase';
-import { doc, setDoc, increment, arrayUnion } from 'firebase/firestore'; // Importamos setDoc
+import { doc, setDoc, increment, arrayUnion, serverTimestamp } from 'firebase/firestore'; // Importamos setDoc
 import { Zap, ShieldCheck, Trophy, RefreshCw, X, ArrowRight } from 'lucide-react';
 import { ACADEMY_DB } from './AcademyData'; 
 
@@ -32,13 +32,13 @@ export default function AcademyTest() {
       try {
         const courseId = decodedCategory === "Generico" ? "cert_generico" : `cert_${decodedCategory.toLowerCase().replace(/\s/g, '')}`;
         
-        // BLINDAJE: Usamos setDoc con merge: true para crear el doc si no existe
-        // y asegurar que el status Verified impacte en Results y ProfileP.
+        // UNIFICACIÓN: Impactamos directamente en 'professionals' para sincronizar con Dashboard, ProfileP y Results
         await setDoc(doc(db, "professionals", user.uid), {
           score: increment(puntosAOtorgar),
           completedCourses: arrayUnion(courseId),
           verified: true,
-          uid: user.uid
+          uid: user.uid,
+          lastAchievement: serverTimestamp()
         }, { merge: true });
 
       } catch (error) { console.error("Error Firebase Academy:", error); }
@@ -152,4 +152,3 @@ export default function AcademyTest() {
     </div>
   );
 }
-
