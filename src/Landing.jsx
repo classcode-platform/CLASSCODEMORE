@@ -169,10 +169,18 @@ export default function Landing() {
               <GraduationCap size={46} className="text-purple-500 stroke-[1]" />
             </div>
             <div className="relative z-10 text-left pt-2 leading-none font-normal uppercase">
-              <span className="text-[1.8rem] md:text-[2.2rem] font-['Poppins'] font-light tracking-tight text-purple-500 leading-none mb-1 block">Descubre</span>
+              <span className="text-[1.8rem] md:text-[2.2rem] font-['Poppins'] font-light tracking-tight text-purple-500 leading-none mb-1 block uppercase">Descubre</span>
               <div className="flex flex-col items-start leading-none">
-                <h2 className="text-3xl md:text-5xl font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white leading-none">CLASSCODE</h2>
-                <span className="text-[18px] md:text-[28px] font-['Poppins'] font-light tracking-[0.05em] text-white/90 ml-auto leading-none">Academy</span>
+                <div className="flex flex-col items-end w-fit cursor-default leading-none">
+                  <h2 className="text-3xl md:text-5xl font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white leading-none">
+                    CLASSCODE
+                  </h2>
+                  <div className="w-full flex justify-end leading-none">
+                    <span className="text-[18px] md:text-[28px] font-['Poppins'] font-light tracking-[0.05em] text-white/90 -mt-0.5 w-[55%] text-right leading-none lowercase first-letter:uppercase">
+                      Academy
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
             <button onClick={() => handleAction('client', '/academy')} className="flex items-center gap-5 text-[10px] font-black tracking-[0.4em] uppercase text-white hover:text-purple-500 transition-all group/btn mb-2">
@@ -207,17 +215,18 @@ export default function Landing() {
             <div className="lg:col-span-3 grid grid-cols-2 gap-8 leading-none uppercase font-normal">
               <div className="space-y-6">
                 <h4 className="text-white text-[9px] font-black tracking-[0.3em] opacity-40 uppercase leading-none">Soluciones</h4>
-                <nav className="flex flex-col gap-4 text-[10px] font-bold tracking-widest text-gray-500">
-                  <button onClick={() => handleAction('client')} className="hover:text-purple-400 transition-all lg:text-left">MARKETPLACE</button>
-                  <button className="hover:text-purple-400 transition-all lg:text-left">LIVE CONTROL</button>
-                  <button onClick={() => navigate('/academy')} className="hover:text-purple-400 transition-all lg:text-left">ACADEMY</button>
+                <nav className="flex flex-col gap-4 text-[10px] font-bold tracking-widest text-gray-500 items-center lg:items-start">
+                  <button onClick={() => handleAction('client')} className="hover:text-purple-400 transition-all">MARKETPLACE</button>
+                  <button className="hover:text-purple-400 transition-all">LIVE CONTROL</button>
+                  <button onClick={() => navigate('/academy')} className="hover:text-purple-400 transition-all">ACADEMY</button>
                 </nav>
               </div>
               <div className="space-y-6">
                 <h4 className="text-white text-[9px] font-black tracking-[0.3em] opacity-40 uppercase leading-none">Legal</h4>
-                <nav className="flex flex-col gap-4 text-[10px] font-bold tracking-widest text-gray-500">
-                  <button onClick={() => navigate('/terms')} className="hover:text-purple-400 transition-all lg:text-left">TÉRMINOS</button>
-                  <button onClick={() => navigate('/terms')} className="hover:text-purple-400 transition-all lg:text-left">PRIVACIDAD</button>
+                <nav className="flex flex-col gap-4 text-[10px] font-bold tracking-widest text-gray-500 items-center lg:items-start">
+                  <button onClick={() => navigate('/terms')} className="hover:text-purple-400 transition-all">TÉRMINOS</button>
+                  {/* BOTÓN DE PRIVACIDAD CORREGIDO */}
+                  <button onClick={() => navigate('/privacy')} className="hover:text-purple-400 transition-all">PRIVACIDAD</button>
                 </nav>
               </div>
             </div>
