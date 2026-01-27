@@ -24,6 +24,9 @@ export default function ClientProfile() {
   const [messages, setMessages] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [profile, setProfile] = useState({ name: '', location: '', interests: '', photoURL: '' });
+  
+  // NUEVO: Estado para previsualizar imagen en grande
+  const [previewImage, setPreviewImage] = useState(null);
 
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'warning', onConfirm: null });
 
@@ -308,14 +311,22 @@ export default function ClientProfile() {
 
                 <div className="space-y-6 text-left border-t border-white/5 pt-10 xl:border-0 xl:pt-0">
                   <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                    <h4 className="text-[10px] text-gray-500 font-black tracking-[0.4em] uppercase leading-none">Live Stream Gallery</h4>
+                    <h4 className="text-[10px] text-gray-500 font-black tracking-[0.4em] uppercase leading-none">Live Gallery</h4>
                     <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest bg-purple-500/10 px-4 py-1.5 rounded-full">{events[0].liveGallery?.length || 0} Items</span>
                   </div>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 max-h-[350px] overflow-y-auto scrollbar-custom pr-2 leading-none font-normal">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 max-h-[450px] overflow-y-auto scrollbar-custom pr-2 leading-none font-normal">
                     {events[0].liveGallery?.map((url, i) => (
-                      <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} key={i} className="relative aspect-square rounded-xl overflow-hidden group border border-white/10 shadow-lg leading-none">
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.8 }} 
+                        animate={{ opacity: 1, scale: 1 }} 
+                        key={i} 
+                        className="relative aspect-square rounded-xl overflow-hidden group border border-white/10 shadow-lg cursor-pointer"
+                        onClick={() => setPreviewImage(url)}
+                      >
                         <img src={url} className="w-full h-full object-cover" alt="Gallery Content" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
+                        
+                        {/* Overlay: Siempre visible en mobile, hover en desktop */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-2">
                           <button 
                             onClick={async (e) => { 
                               e.stopPropagation(); 
@@ -323,9 +334,9 @@ export default function ClientProfile() {
                                 liveGallery: arrayRemove(url) 
                               }); 
                             }} 
-                            className="p-3 bg-red-600 rounded-full hover:bg-red-500 hover:scale-110 transition-all text-white shadow-xl"
+                            className="p-2.5 bg-red-600 rounded-full text-white shadow-xl active:scale-90 transition-transform"
                           >
-                            <Trash2 size={20} />
+                            <Trash2 size={18} />
                           </button>
                         </div>
                       </motion.div>
@@ -343,15 +354,15 @@ export default function ClientProfile() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
             <section className="bg-[#050505] p-8 md:p-10 rounded-[2.5rem] border border-white/5 space-y-8 shadow-2xl text-left border-t-purple-500/10">
-              <h3 className="text-[10px] text-gray-500 font-black tracking-[0.5em] uppercase flex items-center gap-3 leading-none font-normal"><MessageSquare size={16} className="text-purple-500"/> Mensajería</h3>
+              <h3 className="text-[10px] text-gray-500 font-black tracking-[0.5em] uppercase flex items-center gap-3 leading-none font-normal"><MessageSquare size={16} className="text-purple-500"/> MensajeS</h3>
               <div className="space-y-1">
                 {messages.length === 0 ? <p className="text-[9px] text-gray-700 uppercase py-12 text-center tracking-widest font-black">Sin conversaciones activas</p> : messages.map(chat => (
                   <div key={chat.id} onClick={() => navigate(`/chat/${chat.id}`)} className="flex items-center justify-between p-5 hover:bg-white/[0.04] rounded-[1.5rem] cursor-pointer group transition-all border-b border-white/5 last:border-0 leading-none">
                     <div className="flex items-center gap-5 leading-none">
                       <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-black border border-white/5 uppercase text-gray-400 group-hover:text-white transition-colors">DN</div>
                       <div className="space-y-2">
-                        <p className="text-[11px] font-black tracking-[0.15em] text-gray-300 group-hover:text-purple-400 uppercase leading-none">{chat.clientName || 'TALENTO'}</p>
-                        <p className="text-[8px] text-gray-600 font-black uppercase tracking-widest leading-none">Ver conversación</p>
+                        <p className="text-[11px] font-black tracking-[0.15em] text-gray-300 group-hover:text-purple-400 uppercase leading-none">{chat.professionalName || 'TALENTO'}</p>
+                        <p className="text-[8px] text-gray-600 font-black uppercase tracking-widest leading-none">Consultas enviadas</p>
                       </div>
                     </div>
                     <ArrowRight size={16} className="text-gray-800 group-hover:text-purple-500 transition-all transform group-hover:translate-x-2" />
@@ -359,11 +370,12 @@ export default function ClientProfile() {
                 ))}
               </div>
             </section>
+            
             <section className="bg-[#050505] p-8 md:p-10 rounded-[2.5rem] border border-white/5 space-y-8 shadow-2xl text-left border-t-pink-500/10 leading-none">
-              <h3 className="text-[10px] text-gray-500 font-black tracking-[0.5em] uppercase flex items-center gap-3 leading-none font-normal"><Heart size={16} className="text-pink-500 fill-pink-500"/> Mis Favoritos</h3>
+              <h3 className="text-[10px] text-gray-500 font-black tracking-[0.5em] uppercase flex items-center gap-3 leading-none"><Heart size={16} className="text-pink-500 fill-pink-500"/> Mis Favoritos</h3>
               <div className="grid grid-cols-1 gap-3">
                 {favorites.length === 0 ? <p className="text-[9px] text-gray-700 uppercase py-12 text-center tracking-widest font-black">Sin talentos guardados</p> : favorites.map((fav, i) => (
-                  <motion.div whileHover={{ x: 10 }} key={i} onClick={() => navigate(`/profile/${fav.id}`)} className="p-5 bg-white/[0.02] border border-white/5 rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-purple-500/10 transition-all truncate flex justify-between items-center group leading-none font-normal">
+                  <motion.div whileHover={{ x: 10 }} key={i} onClick={() => navigate(`/profile/${fav.id}`)} className="p-5 bg-white/[0.02] border border-white/5 rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-purple-500/10 transition-all truncate flex justify-between items-center group leading-none">
                      <span className="leading-none text-gray-300 group-hover:text-white">{fav.name || "Talento Pro"}</span>
                      <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-all transform -translate-x-4 group-hover:translate-x-0" />
                   </motion.div>
@@ -376,19 +388,20 @@ export default function ClientProfile() {
 
       <AnimatePresence>
         {(isEditingProfile || isEditingEventName || isCreatingEvent) && (
-          <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[150] flex items-center justify-center p-6 antialiased uppercase font-normal">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-[#050505] border border-white/10 rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-12 max-w-md w-full space-y-12 shadow-2xl text-center relative leading-none border-t-purple-500/20 font-normal">
+          <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[150] flex items-center justify-center p-6 antialiased uppercase">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-[#050505] border border-white/10 rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-12 max-w-md w-full space-y-12 shadow-2xl text-center relative leading-none border-t-purple-500/20">
               <button onClick={() => { setIsEditingProfile(false); setIsEditingEventName(false); setIsCreatingEvent(false); }} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full"><X size={24} /></button>
               {isEditingProfile ? (
                 <>
-                  <h3 className="text-[14px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/5 pb-6 text-left leading-none font-normal">Identidad Organizador</h3>
-                  <div className="flex flex-col items-center gap-6 font-normal">
-                    <div className="relative group w-28 h-28 leading-none font-normal">
-                      <div className="w-full h-full rounded-full border-2 border-purple-500/30 overflow-hidden bg-white/5 shadow-2xl flex items-center justify-center relative leading-none font-normal">
+                  <h3 className="text-[14px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/5 pb-6 text-left leading-none font-bold">Identidad Organizador</h3>
+                  <div className="flex flex-col items-center gap-6">
+                    <div className="relative group w-28 h-28">
+                      <div className="w-full h-full rounded-full border-2 border-purple-500/30 overflow-hidden bg-white/5 shadow-2xl flex items-center justify-center relative leading-none">
                         {profile.photoURL ? <img src={profile.photoURL} className="w-full h-full object-cover" alt="Profile" /> : <User size={40} className="text-gray-700"/>}
-                        {uploading && <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-[10px] font-normal tracking-widest text-purple-400">LOADING</div>}
+                        {uploading && <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-[10px] font-black tracking-widest text-purple-400">LOADING</div>}
                       </div>
-                      <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-all cursor-pointer rounded-full leading-none"><Camera size={28} className="text-white transform group-hover:scale-110 transition-transform"/><input type="file" onChange={async (e) => {
+                      <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-all cursor-pointer rounded-full leading-none">
+                        <Camera size={28} className="text-white"/><input type="file" onChange={async (e) => {
                           const file = e.target.files[0];
                           if (!file) return;
                           setUploading(true);
@@ -403,28 +416,48 @@ export default function ClientProfile() {
                                await updateDoc(doc(db, "users", auth.currentUser.uid), { photoURL: data.secure_url });
                             }
                           } catch (err) { console.error(err); } finally { setUploading(false); }
-                      }} className="hidden" /></label>
+                        }} className="hidden" />
+                      </label>
                     </div>
                   </div>
-                  <div className="space-y-8 text-left leading-none font-normal">
-                    <div className="space-y-3 leading-none font-normal"><label className="text-[8px] text-gray-600 font-normal uppercase tracking-[0.3em] pl-1 leading-none font-normal">Nombre Organizador</label><input className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-[12px] font-normal uppercase outline-none focus:border-purple-500 transition-all text-white leading-none shadow-inner" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} /></div>
-                    <div className="space-y-3 leading-none font-normal"><label className="text-[8px] text-gray-600 font-normal uppercase tracking-[0.3em] pl-1 leading-none font-normal">Sede Central</label><input className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-[12px] font-normal uppercase outline-none focus:border-purple-500 transition-all text-white leading-none shadow-inner" value={profile.location} onChange={e => setProfile({...profile, location: e.target.value})} /></div>
+                  <div className="space-y-8 text-left">
+                    <div className="space-y-3"><label className="text-[8px] text-gray-600 font-black uppercase tracking-[0.3em] pl-1">Nombre Organizador</label><input className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-[12px] font-black uppercase outline-none focus:border-purple-500 transition-all text-white shadow-inner" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} /></div>
+                    <div className="space-y-3"><label className="text-[8px] text-gray-600 font-black uppercase tracking-[0.3em] pl-1">Sede Central</label><input className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-[12px] font-black uppercase outline-none focus:border-purple-500 transition-all text-white shadow-inner" value={profile.location} onChange={e => setProfile({...profile, location: e.target.value})} /></div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 pt-4 leading-none font-normal"><button onClick={() => setIsEditingProfile(false)} className="py-5 bg-white/5 text-gray-500 rounded-2xl font-normal text-[10px] uppercase tracking-widest transition-all hover:bg-white/10 leading-none">DESCARTAR</button><button onClick={handleSaveProfile} className="py-5 bg-purple-600 text-white rounded-2xl font-normal text-[10px] uppercase tracking-widest shadow-xl shadow-purple-900/40 hover:bg-purple-500 active:scale-95 transition-all leading-none">GUARDAR</button></div>
+                  <div className="grid grid-cols-2 gap-4 pt-4"><button onClick={() => setIsEditingProfile(false)} className="py-5 bg-white/5 text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all hover:bg-white/10">DESCARTAR</button><button onClick={handleSaveProfile} className="py-5 bg-purple-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-purple-900/40 hover:bg-purple-500 active:scale-95 transition-all">GUARDAR</button></div>
                 </>
               ) : (
                 <>
-                  <div className="w-16 h-16 bg-purple-500/10 rounded-3xl flex items-center justify-center mx-auto text-purple-400 border border-purple-500/20 leading-none shadow-inner animate-pulse"><Plus size={32}/></div>
+                  <div className="w-16 h-16 bg-purple-500/10 rounded-3xl flex items-center justify-center mx-auto text-purple-400 border border-purple-500/20 leading-none shadow-inner"><Plus size={32}/></div>
                   <div className="space-y-3 text-center leading-none font-normal">
-                    <h3 className="text-[18px] md:text-[20px] font-normal tracking-[0.2em] uppercase leading-none text-white">Nuevo Evento</h3>
-                    <p className="text-[9px] text-gray-500 uppercase tracking-[0.3em] leading-none text-center">Live Gallery</p>
+                    <h3 className="text-[18px] md:text-[20px] font-black tracking-[0.2em] uppercase text-white">Nuevo Evento</h3>
+                    <p className="text-[9px] text-gray-500 uppercase tracking-[0.3em]">Live Gallery Config</p>
                   </div>
-                  <input autoFocus className="w-full bg-white/5 border border-white/10 p-6 rounded-2xl text-[14px] font-normal uppercase text-center outline-none focus:border-purple-500 transition-all text-white shadow-inner leading-none" value={newEventName} onChange={e => setNewEventName(e.target.value)} placeholder="TÍTULO DEL EVENTO" />
-                  <div className="grid grid-cols-2 gap-4 leading-none font-normal"><button onClick={() => { setIsCreatingEvent(false); setIsEditingEventName(false); }} className="py-5 bg-white/5 text-gray-500 rounded-2xl font-normal text-[10px] uppercase tracking-widest transition-all hover:bg-white/10 leading-none">CANCELAR</button><button onClick={isCreatingEvent ? handleCreateEvent : handleUpdateEventName} className="py-5 bg-purple-600 text-white rounded-2xl font-normal text-[10px] uppercase tracking-widest shadow-xl shadow-purple-900/40 hover:bg-purple-500 active:scale-95 transition-all leading-none">ACEPTAR</button></div>
+                  <input autoFocus className="w-full bg-white/5 border border-white/10 p-6 rounded-2xl text-[14px] font-black uppercase text-center outline-none focus:border-purple-500 transition-all text-white shadow-inner" value={newEventName} onChange={e => setNewEventName(e.target.value)} placeholder="TÍTULO DEL EVENTO" />
+                  <div className="grid grid-cols-2 gap-4"><button onClick={() => { setIsCreatingEvent(false); setIsEditingEventName(false); }} className="py-5 bg-white/5 text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all hover:bg-white/10">CANCELAR</button><button onClick={isCreatingEvent ? handleCreateEvent : handleUpdateEventName} className="py-5 bg-purple-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-purple-900/40 hover:bg-purple-500 active:scale-95 transition-all">ACEPTAR</button></div>
                 </>
               )}
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL DE VISTA PREVIA DE IMAGEN */}
+      <AnimatePresence>
+        {previewImage && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setPreviewImage(null)}
+            className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out"
+          >
+            <button className="absolute top-8 right-8 text-white/50 hover:text-white p-2"><X size={32}/></button>
+            <motion.img 
+              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+              src={previewImage} 
+              className="max-w-full max-h-[85vh] rounded-2xl shadow-2xl object-contain border border-white/10"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </motion.div>
         )}
       </AnimatePresence>
 

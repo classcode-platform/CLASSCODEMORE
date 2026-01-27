@@ -193,7 +193,7 @@ export default function Landing() {
             <div className="lg:col-span-4 space-y-8 leading-none">
               <div>
                 <h2 className="text-[26px] font-['Poppins'] tracking-[0.05em] text-white leading-none uppercase font-normal">CLASSCODE<sup className="text-[10px] ml-1 font-bold">®</sup></h2>
-                <p className="text-purple-500 text-[9px] font-black tracking-[0.4em] mt-4 leading-none uppercase">Infraestructura para el Talento Argentino</p>
+                <p className="text-purple-500 text-[9px] font-black tracking-[0.4em] mt-4 leading-none uppercase">Talento Argentino</p>
               </div>
               <p className="text-gray-500 text-[11px] leading-relaxed max-w-xs normal-case font-light mx-auto lg:mx-0">Desarrollamos la arquitectura digital para que la conexión entre talento y mercado sea eficiente, verificada y de alta fidelidad.</p>
               <div className="flex justify-center lg:justify-start gap-4">
