@@ -89,10 +89,10 @@ export default function GuestUpload() {
         className="max-w-md w-full space-y-10 text-center relative z-10"
       >
         <header className="space-y-3">
-          <div className="text-[26px] font-['Poppins'] font-normal tracking-[0.5em] text-white">CLASSCODE</div>
+          <div className="text-[26px] font-['Poppins'] font-normal tracking-[0.05em] text-white">CLASSCODE</div>
           <div className="flex items-center justify-center gap-2">
             <Sparkles size={12} className="text-purple-500 animate-pulse" />
-            <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] italic">LIVE EVENT EXPERIENCE</p>
+            <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em]">LIVE EVENT EXPERIENCE</p>
           </div>
         </header>
 
@@ -128,7 +128,7 @@ export default function GuestUpload() {
                     EVENTO: {eventCode ? eventCode.toUpperCase() : "---"}
                    </h2>
                 </div>
-                <p className="text-[10px] text-gray-400 font-normal tracking-[0.15em] leading-relaxed italic">
+                <p className="text-[10px] text-gray-400 font-normal tracking-[0.15em] leading-relaxed">
                   CAPTURA O SELECCIONA UNA FOTO <br/> PARA TRANSMITIR AL VIVO.
                 </p>
               </div>

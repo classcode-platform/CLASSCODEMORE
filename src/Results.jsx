@@ -75,7 +75,6 @@ export default function Results() {
         
         <header className="mb-8 md:mb-12">
           <p className="text-purple-400 text-[9px] md:text-[10px] tracking-[0.3em] font-bold mb-2">RESULTADOS DE BÚSQUEDA</p>
-          <h2 className="text-3xl md:text-5xl font-['Poppins'] font-light tracking-tight">TALENTOS</h2>
           <div className="mt-4 text-[10px] text-gray-500 tracking-[0.2em] font-bold">{professionals.length} PROFESIONALES DISPONIBLES</div>
         </header>
 

@@ -206,7 +206,7 @@ export default function Dashboard() {
                   <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400"><RefreshCcw size={20} /></div>
                   <div>
                     <p className="text-[7px] font-black text-gray-500 tracking-[0.2em]">SWITCH MOOD</p>
-                    <p className="text-[11px] font-black text-white tracking-widest uppercase mt-1">MODO CLIENTE</p>
+                    <p className="text-[11px] font-black text-white tracking-widest uppercase mt-1">MODO EXPERIENCE</p>
                   </div>
                 </div>
               </button>
