@@ -1,120 +1,154 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom'; // <--- IMPORTANTE: useParams
+import { useNavigate, useParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth } from './firebase';
-import { doc, updateDoc } from 'firebase/firestore';
-import { ArrowLeft, CheckCircle, XCircle, Zap, AlertCircle } from 'lucide-react';
+import { doc, setDoc, increment, arrayUnion, serverTimestamp } from 'firebase/firestore'; // Importamos setDoc
+import { Zap, ShieldCheck, Trophy, RefreshCw, X, ArrowRight } from 'lucide-react';
 import { ACADEMY_DB } from './AcademyData'; 
 
-export default function AcademyTest() { // <--- Quitamos la prop category
-  const { category } = useParams(); // <--- Capturamos la categoría de la URL directamente
+export default function AcademyTest() {
+  const { category } = useParams();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [score, setScore] = useState(0);
   const [testFinished, setTestFinished] = useState(false);
-  const navigate = useNavigate();
 
-  // Limpieza de categoría para evitar errores de tildes o símbolos en la URL
   const decodedCategory = category ? decodeURIComponent(category) : "Generico";
   const questions = ACADEMY_DB[decodedCategory] || ACADEMY_DB["Generico"];
+  const puntosAOtorgar = decodedCategory === "Generico" ? 150 : 250;
 
   const handleAnswer = (isCorrect) => {
     let newScore = score;
     if (isCorrect) newScore = score + 1;
     setScore(newScore);
-    
-    if (currentStep + 1 < questions.length) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      finishTest(newScore);
-    }
+    if (currentStep + 1 < questions.length) setCurrentStep(currentStep + 1);
+    else finishTest(newScore);
   };
 
   const finishTest = async (finalCorrect) => {
-    const finalPercent = (finalCorrect / questions.length) * 100;
-    const approved = finalPercent >= 80;
-    
+    const approved = finalCorrect === questions.length;
     const user = auth.currentUser;
-    if (user) {
+    if (user && approved) {
       try {
-        await updateDoc(doc(db, "professionals", user.uid), {
-          verified: approved,
-          testScore: finalPercent,
-          lastTestDate: new Date()
-        });
-      } catch (error) { console.error("Error guardando progreso:", error); }
+        const courseId = decodedCategory === "Generico" ? "cert_generico" : `cert_${decodedCategory.toLowerCase().replace(/\s/g, '')}`;
+        
+        // UNIFICACIÓN: Impactamos directamente en 'professionals' para sincronizar con Dashboard, ProfileP y Results
+        await setDoc(doc(db, "professionals", user.uid), {
+          score: increment(puntosAOtorgar),
+          completedCourses: arrayUnion(courseId),
+          verified: true,
+          uid: user.uid,
+          lastAchievement: serverTimestamp()
+        }, { merge: true });
+
+      } catch (error) { console.error("Error Firebase Academy:", error); }
     }
     setTestFinished(true);
   };
 
-  const logoStyle = { fontFamily: 'Poppins', fontWeight: 400, letterSpacing: '0.35em' };
-
-  // Pantalla de error por si no hay preguntas cargadas
-  if (!questions || questions.length === 0) {
-    return (
-      <div className="min-h-screen bg-[#282929] flex items-center justify-center p-6 text-white text-center">
-        <div className="space-y-6">
-          <AlertCircle size={48} className="text-amber-500 mx-auto" />
-          <p className="uppercase tracking-widest text-[10px]">No se encontraron preguntas para: {decodedCategory}</p>
-          <button onClick={() => navigate('/dashboard')} className="text-purple-400 font-bold text-[9px] uppercase border border-purple-400/20 px-6 py-2 rounded-full">Volver al Dashboard</button>
-        </div>
-      </div>
-    );
-  }
-
-  if (testFinished) {
-    const approved = (score / questions.length) * 100 >= 80;
-    return (
-      <div className="min-h-screen bg-[#282929] flex items-center justify-center p-6 text-white text-center">
-        <div className="max-w-md w-full bg-[#1e1e1e] p-12 rounded-[3rem] border border-white/5 shadow-2xl space-y-8">
-          {approved ? (
-            <>
-              <CheckCircle size={60} className="text-green-500 mx-auto" />
-              <h2 className="text-2xl font-bold uppercase font-['Poppins'] tracking-widest">¡Nivelado!</h2>
-              <p className="text-gray-400 text-sm italic font-light">Tu perfil ahora cuenta con el sello de confianza CLASSCODE®.</p>
-            </>
-          ) : (
-            <>
-              <XCircle size={60} className="text-red-500 mx-auto" />
-              <h2 className="text-2xl font-bold uppercase font-['Poppins'] tracking-widest">No aprobado</h2>
-              <p className="text-gray-400 text-sm italic font-light">Te invitamos a tomar el curso gratuito de nivelación para mejorar tu técnica.</p>
-            </>
-          )}
-          <button onClick={() => navigate('/dashboard')} className="w-full py-4 bg-white/5 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] border border-white/10 mt-4 hover:bg-white/10 transition-all shadow-xl">Volver al Dashboard</button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-[#282929] text-white font-['Open_Sans'] p-8 md:p-20 flex flex-col items-center">
-      <div className="max-w-2xl w-full space-y-12">
-        <header className="text-center space-y-4">
-          <h1 style={logoStyle} className="text-[14px]">CLASSCODE® ACADEMY</h1>
-          <p className="text-purple-400 text-[9px] uppercase font-bold tracking-[0.35em]">Examen de Nivelación: {decodedCategory}</p>
-        </header>
-
-        <div className="bg-[#1e1e1e] p-10 rounded-[3rem] border border-white/5 shadow-2xl space-y-10">
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] text-gray-600 font-bold uppercase tracking-[0.2em]">Pregunta {currentStep + 1} de {questions.length}</span>
-              <span className="text-[8px] text-purple-500 font-bold uppercase tracking-widest">Mínimo 80% para aprobar</span>
-            </div>
-            <h3 className="text-xl font-light leading-relaxed">{questions[currentStep].q}</h3>
-          </div>
-
-          <div className="grid gap-4">
-            {questions[currentStep].a.map((ans, idx) => (
-              <button 
-                key={idx}
-                onClick={() => handleAnswer(idx === questions[currentStep].correct)}
-                className="w-full py-5 px-8 text-left bg-black/20 border border-white/5 rounded-2xl text-[12px] uppercase tracking-widest hover:bg-purple-600/10 hover:border-purple-500/30 transition-all font-bold group flex justify-between items-center"
-              >
-                <span>{ans}</span>
-                <Zap size={14} className="text-transparent group-hover:text-purple-500 transition-colors" />
-              </button>
-            ))}
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#0a0a0a] fixed inset-0 z-[100] flex items-center justify-center p-4 antialiased font-['Open_Sans'] text-white overflow-hidden uppercase">
+      
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <motion.div 
+          animate={{ x: [-20, 20], y: [-20, 20] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px]"
+        />
       </div>
+
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }} 
+        animate={{ opacity: 1, scale: 1 }}
+        className="max-w-xl w-full bg-white/[0.02] backdrop-blur-3xl rounded-[3rem] border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.8)] relative overflow-hidden z-10"
+      >
+        <button onClick={() => navigate('/academy')} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-all z-20">
+          <X size={20} />
+        </button>
+
+        <div className="p-8 md:p-14">
+          {!testFinished ? (
+            <div className="space-y-10">
+              <header className="text-center space-y-2">
+                <h1 className="text-xl md:text-2xl font-['Poppins'] tracking-[0.05em] leading-none">CLASSCODE</h1>
+                <p className="text-purple-400 text-[8px] font-black tracking-[0.4em]">TEST NIVELACIÓN • {decodedCategory}</p>
+              </header>
+
+              <div className="space-y-6">
+                <div className="flex justify-between items-center px-1">
+                  <span className="text-[9px] text-gray-600 font-black tracking-[0.3em]">PASO {currentStep + 1} / {questions.length}</span>
+                  <div className="flex gap-2">
+                    {questions.map((_, i) => (
+                      <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${i <= currentStep ? 'bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]' : 'bg-white/5'}`} />
+                    ))}
+                  </div>
+                </div>
+                <h3 className="text-[20px] md:text-[24px] font-['Poppins'] font-light leading-snug tracking-tight text-white/90 normal-case">
+                  {questions[currentStep].q}
+                </h3>
+              </div>
+
+              <div className="grid gap-3 pt-4">
+                {questions[currentStep].a.map((ans, idx) => (
+                  <button 
+                    key={idx} 
+                    onClick={() => handleAnswer(idx === questions[currentStep].correct)} 
+                    className="w-full py-5 px-8 text-left bg-white/[0.03] border border-white/5 rounded-2xl text-[10px] md:text-[11px] font-bold tracking-widest hover:bg-purple-600/10 hover:border-purple-500/30 transition-all group flex justify-between items-center"
+                  >
+                    <span className="normal-case opacity-70 group-hover:opacity-100">{ans}</span>
+                    <ArrowRight size={14} className="text-purple-500/0 group-hover:text-purple-500 transition-all translate-x-2 group-hover:translate-x-0" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center space-y-10 py-4">
+              {score === questions.length ? (
+                <div className="space-y-8">
+                  <div className="relative inline-block">
+                    <Trophy size={64} className="text-amber-400 mx-auto" />
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute -top-2 -right-2 bg-green-500 rounded-full p-1 border-2 border-[#111]">
+                      <ShieldCheck size={16} className="text-white" />
+                    </motion.div>
+                  </div>
+                  <div className="space-y-3">
+                    <h2 className="text-2xl font-['Poppins'] tracking-[0.2em]">NIVELADO</h2>
+                    <p className="text-gray-500 text-[10px] tracking-widest font-black max-w-[250px] mx-auto leading-relaxed">
+                      CERTIFICACIÓN CLASSCODE® OBTENIDA. TU STATUS HA SIDO ACTUALIZADO.
+                    </p>
+                  </div>
+                  <button onClick={() => navigate('/dashboard')} className="w-full py-5 bg-white text-black rounded-2xl text-[10px] font-black tracking-[0.4em] shadow-2xl hover:bg-gray-200 transition-all">
+                    IR AL DASHBOARD
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  <div className="space-y-4">
+                    <h2 className="text-[18px] font-['Poppins'] tracking-[0.2em]">CAPACITACIÓN PENDIENTE</h2>
+                    <p className="text-[9px] text-gray-500 font-black tracking-widest leading-relaxed">
+                      REPASÁ EL ESTÁNDAR DE CALIDAD CLASSCODE PARA DESBLOQUEAR EL NIVEL.
+                      </p>
+                  </div>
+
+                  <div className="w-full aspect-video bg-black rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl">
+                    <iframe 
+                      src={decodedCategory === "Fotografía" ? "https://player.vimeo.com/video/1156357123" : "https://player.vimeo.com/video/1151434449"} 
+                      className="w-full h-full" frameBorder="0" allowFullScreen
+                    ></iframe>
+                  </div>
+
+                  <div className="space-y-4 pt-4">
+                    <button onClick={() => window.location.reload()} className="w-full py-5 bg-purple-600 text-white rounded-2xl text-[10px] font-black tracking-[0.4em] shadow-xl shadow-purple-900/20 flex items-center justify-center gap-3 active:scale-95 transition-all">
+                      <RefreshCw size={14}/> REINTENTAR TEST
+                    </button>
+                    <button onClick={() => navigate('/dashboard')} className="w-full py-4 text-gray-600 hover:text-white text-[9px] font-black tracking-widest">SALIR</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </motion.div>
     </div>
   );
 }

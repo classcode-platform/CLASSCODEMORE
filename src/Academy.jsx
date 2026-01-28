@@ -1,184 +1,178 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from './firebase';
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, increment } from 'firebase/firestore';
-import { useNavigate, useLocation } from 'react-router-dom';
-import Hero from './components/Hero';
-import QuizModal from './components/QuizModal';
-import CourseSection from './components/CourseSection'; 
+import { doc, onSnapshot } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  GraduationCap, Zap, Play, CheckCircle2, 
+  BookOpen, Star, ShieldCheck, ArrowRight,
+  User, Search, X 
+} from 'lucide-react';
 
 export default function Academy() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [completed, setCompleted] = useState([]);
-  const [activeCourse, setActiveCourse] = useState(null);
+  const [userJob, setUserJob] = useState('');
+  const [completedCourses, setCompletedCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('Todos');
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [isPro, setIsPro] = useState(false);
 
-  const [quizMode, setQuizMode] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [score, setScore] = useState(0);
-  const [showResult, setShowResult] = useState(false);
-
-  // --- LISTA DE CURSOS ---
-  const courses = [
-    // --- NIVEL 1 ---
-    { 
-      id: 'cert_foto_trilogia', 
-      category: 'Fotografía', 
-      level: 1, 
-      title: 'INTRODUCCIÓN A LA FOTOGRAFÍA', 
-      author: 'CLASSCODE® Board', 
-      duration: '15m', 
-      points: 200, 
-      videoSrc: 'https://player.vimeo.com/video/1156357123', 
-      hasQuiz: true, 
-      isRequiredForPro: true, 
-      questions: [
-        {q: "¿Cuáles son los 3 elementos del Triángulo de Exposición?", options: ["Luz, Cámara y Acción", "ISO, Diafragma y Velocidad", "Enfoque, Encuadre y Zoom"], correct: 1},
-        {q: "En composición, ¿qué regla divide la imagen en 9 secciones?", options: ["Proporción Áurea", "Regla de los Tercios", "Simetría Central"], correct: 1},
-        {q: "¿Qué tipo de luz produce sombras marcadas y bordes definidos?", options: ["Luz Suave (Difusa)", "Luz Dura (Directa)", "Luz de Rebote"], correct: 1}
-      ] 
-    },
-    { 
-      id: 'curso_triangulo', 
-      category: 'Fotografía', 
-      level: 1, 
-      title: 'CLASE MAESTRA: TRIÁNGULO DE EXPOSICIÓN', 
-      author: 'CLASSCODE® Academy', 
-      duration: '20m', 
-      points: 50, 
-      videoSrc: 'https://player.vimeo.com/video/1156296481', 
-      hasQuiz: true, 
-      isRequiredForPro: false,
-      questions: [
-        {q: "Para congelar el movimiento de un sujeto rápido, ¿qué usas?", options: ["Velocidad de Obturación Alta", "ISO Bajo", "Diafragma Cerrado"], correct: 0},
-        {q: "Si hay poca luz en el ambiente, ¿qué ajuste introduce 'ruido' en la foto?", options: ["Abrir Diafragma", "Subir ISO", "Bajar Velocidad"], correct: 1}
-      ] 
-    },
-    // --- NIVEL 2 ---
-    { 
-      id: 'curso_composicion', 
-      category: 'Fotografía', 
-      level: 2, 
-      title: 'CLASE MAESTRA: COMPOSICIÓN VISUAL', 
-      author: 'CLASSCODE® Academy', 
-      duration: 'PRÓXIMAMENTE', 
-      points: 50, 
-      videoSrc: 'https://player.vimeo.com/video/1151434449', 
-      hasQuiz: true, 
-      isRequiredForPro: false,
-      questions: [
-        {q: "¿Qué logran las 'Líneas Guía' en una foto?", options: ["Dividir la imagen", "Dirigir la mirada del espectador", "Enfocar el fondo"], correct: 1}
-      ] 
-    },
-    { 
-      id: 'curso_iluminacion', 
-      category: 'Fotografía', 
-      level: 2, 
-      title: 'CLASE MAESTRA: ILUMINACIÓN', 
-      author: 'CLASSCODE® Academy', 
-      duration: 'PRÓXIMAMENTE', 
-      points: 50, 
-      videoSrc: 'https://player.vimeo.com/video/1151434449', 
-      hasQuiz: true, 
-      isRequiredForPro: false,
-      questions: [
-        {q: "¿Qué esquema de luz crea un triángulo en la mejilla opuesta?", options: ["Mariposa (Paramount)", "Rembrandt", "Split (Lateral)"], correct: 1}
-      ] 
-    },
-    // --- EXTRAS ---
-    { 
-      id: 'cert_video', 
-      category: 'Video', 
-      level: 1, 
-      title: 'CERTIFICACIÓN CAP: FILMMAKING', 
-      author: 'CLASSCODE® Board', 
-      duration: '50m', 
-      points: 100, 
-      videoSrc: 'https://player.vimeo.com/video/1154818731', 
-      hasQuiz: true, 
-      isRequiredForPro: true, 
-      questions: [{q: "¿Qué es un jump-cut?", options: ["Error de edición", "Recurso Narrativo"], correct: 1}] 
-    },
-    { 
-      id: 'cert_mua', 
-      category: 'Maquillaje', 
-      level: 1, 
-      title: 'CERTIFICACIÓN CAP: MAKEUP HD', 
-      duration: '40m', 
-      points: 100, 
-      videoSrc: 'https://player.vimeo.com/video/1154822959', 
-      hasQuiz: true, 
-      isRequiredForPro: true, 
-      questions: [{q: "¿Base ideal para cámara 4K?", options: ["Acabado Mate", "Acabado Satinado/Natural"], correct: 1}] 
-    },
+  const videoLibrary = [
+    { id: 'cert_fotografia_intro', category: 'FOTOGRAFÍA', title: 'FOTOGRAFÍA I: INTRODUCCIÓN', videoUrl: 'https://player.vimeo.com/video/1156357123', description: 'FUNDAMENTOS VISUALES CLASSCODE.' },
+    { id: 'cert_fotografia_triangulo', category: 'FOTOGRAFÍA', title: 'FOTOGRAFÍA II: TRIÁNGULO EXPOSICIÓN', videoUrl: 'https://player.vimeo.com/video/1156296481', description: 'DOMINIO DE LUZ: APERTURA, VELOCIDAD E ISO.' },
+    { id: 'cert_generico', category: 'TODOS', title: 'ESTÁNDAR GLOBAL CLASSCODE®', videoUrl: 'https://player.vimeo.com/video/1151434449', description: 'PROTOCOLO DE ÉTICA Y COMPORTAMIENTO.' }
   ];
 
-  const categories = ['Todos', 'Fotografía', 'Video', 'Diseño', 'Maquillaje', 'Sonido', 'Marketing', 'ARTE DIGITAL'];
-
   useEffect(() => {
-    if (location.state?.filter) setActiveTab(location.state.filter);
-    const fetchUserData = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const proSnap = await getDoc(doc(db, "professionals", user.uid));
-        if (proSnap.exists()) setCompleted(proSnap.data().completedCourses || []);
-      }
-      setLoading(false);
-    };
-    fetchUserData();
-  }, [location]);
-
-  // --- FUNCIÓN CORREGIDA: AHORA SUMA PUNTOS (increment) ---
-  const handleUpgradeToPro = async () => {
     const user = auth.currentUser;
-    try {
-      await updateDoc(doc(db, "users", user.uid), { role: 'professional' });
-      await setDoc(doc(db, "professionals", user.uid), {
-        email: user.email,
-        // AQUÍ ESTÁ EL ARREGLO: USAMOS increment() EN LUGAR DE UN NÚMERO FIJO
-        academyPoints: increment(activeCourse.points), 
-        status: 'active',
-        completedCourses: arrayUnion(activeCourse.id),
-        createdAt: new Date().toISOString()
-      }, { merge: true });
-      navigate('/dashboard');
-    } catch (e) { console.error(e); }
-  };
+    if (user) {
+      const unsubscribe = onSnapshot(doc(db, "professionals", user.uid), (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setUserJob(data.job?.toUpperCase() || '');
+          setCompletedCourses(data.completedCourses || []);
+          setIsPro(data.isPro || false);
+        }
+        setLoading(false);
+      });
+      return () => unsubscribe();
+    }
+  }, []);
 
-  if (loading) return <div className="min-h-screen bg-[#282929] flex items-center justify-center text-white text-[10px] tracking-[0.35em] font-['Poppins']">CARGANDO ACADEMY...</div>;
+  const rubroVideos = videoLibrary.filter(v => v.category === userJob);
+  const generalVideos = videoLibrary.filter(v => v.category === 'TODOS');
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white font-['Poppins'] tracking-[0.35em] text-[10px]">
+      SINCRONIZANDO ACADEMY...
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-[#282929] text-white font-['Open_Sans'] antialiased">
-      <Hero categories={categories} activeTab={activeTab} setActiveTab={setActiveTab} />
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-['Open_Sans'] antialiased flex flex-col relative overflow-hidden uppercase">
       
-      <CourseSection 
-        courses={courses} 
-        completed={completed} 
-        activeTab={activeTab}
-        onOpenCourse={(c) => {
-          setQuizMode(false); setCurrentQuestion(0); setScore(0); setShowResult(false);
-          setActiveCourse(c);
-        }} 
-      />
-
-      {activeCourse && (
-        <QuizModal 
-          course={activeCourse} quizMode={quizMode} setQuizMode={setQuizMode} currentQuestion={currentQuestion}
-          handleAnswer={(i) => {
-            if (i === activeCourse.questions[currentQuestion].correct) setScore(score + 1);
-            if (currentQuestion + 1 < activeCourse.questions.length) setCurrentQuestion(currentQuestion + 1);
-            else setShowResult(true);
-          }}
-          showResult={showResult} score={score}
-          handleSaveProgress={activeCourse.isRequiredForPro ? handleUpgradeToPro : async () => {
-            const user = auth.currentUser;
-            await updateDoc(doc(db, "professionals", user.uid), { completedCourses: arrayUnion(activeCourse.id), academyPoints: increment(activeCourse.points) });
-            setCompleted([...completed, activeCourse.id]); setActiveCourse(null);
-          }}
-          onClose={() => setActiveCourse(null)}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <motion.div 
+          animate={{ x: [-50, 50], y: [-30, 30] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute top-0 left-0 w-[800px] h-[800px] bg-purple-600/10 rounded-full blur-[180px]"
         />
-      )}
+      </div>
+
+      <nav className="p-6 md:p-10 w-full sticky top-0 z-50 bg-black/40 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-[1440px] mx-auto flex justify-between items-center w-full font-['Poppins']">
+          <div onClick={() => navigate('/home')} className="flex flex-col cursor-pointer text-white" style={{ width: 'fit-content' }}>
+            <span className="text-xl md:text-2xl font-normal tracking-[0.05em] leading-none uppercase">CLASSCODE</span>
+            <div className="flex justify-end w-full">
+              <span className="font-light text-[11px] md:text-[14.5px] leading-none -mt-0.5 text-purple-500" style={{ width: '62%', textAlign: 'right', textTransform: 'none', letterSpacing: '0.02em' }}>Academy</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-8 md:gap-12">
+            <button onClick={() => navigate('/dashboard')} className="text-gray-500 hover:text-white transition-all active:scale-90"><User size={22} strokeWidth={1.5} /></button>
+            <button onClick={() => navigate('/home')} className="text-gray-500 hover:text-purple-500 transition-all active:scale-90"><Search size={22} strokeWidth={1.5} /></button>
+          </div>
+        </div>
+      </nav>
+
+      <main className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-16 mt-12 md:mt-16 flex-grow relative z-10 w-full space-y-16 md:space-y-24">
+        {!isPro && (
+          <section className="bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] p-6 md:p-8 border border-white/5 relative overflow-hidden group shadow-2xl">
+            <div className="absolute -top-12 -right-12 w-40 h-40 bg-purple-600/10 rounded-full blur-3xl group-hover:bg-purple-600/20 transition-all duration-1000"></div>
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+                <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shadow-lg"><Star className="text-amber-500 fill-amber-400" size={20} /></div>
+                <div className="space-y-1">
+                  <h2 className="text-xl md:text-2xl font-['Poppins'] font-light tracking-tight text-white">ESTATUS: <span className="text-purple-500 font-normal">TALENTO STANDARD</span></h2>
+                  <p className="text-gray-500 text-[9px] md:text-[10px] font-bold tracking-[0.2em]">ALCANZÁ EL NIVEL <span className="text-white font-black">PRO VERIFIED</span> PARA PRIORIDAD EN BÚSQUEDAS</p>
+                </div>
+              </div>
+              <button onClick={() => navigate('/plans')} className="w-full md:w-auto px-10 py-4 bg-white text-black rounded-xl text-[9px] font-black tracking-[0.3em] hover:bg-gray-200 transition-all shadow-xl uppercase">UPGRADE PRO</button>
+            </div>
+          </section>
+        )}
+        
+        <section className="space-y-10">
+          <div className="flex items-center gap-4 border-l-2 border-purple-500 pl-4">
+            <BookOpen size={16} className="text-purple-400" />
+            <h2 className="text-[11px] md:text-[14px] font-normal tracking-[0.3em]">ESPECIALIZACIÓN: {userJob || 'CREATIVO'}</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+            {rubroVideos.map((video) => (
+              <VideoCard key={video.id} video={video} completed={completedCourses.includes(video.id)} onClick={() => setSelectedVideo(video)} />
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-10 pb-32">
+          <div className="flex items-center gap-4 border-l-2 border-gray-700 pl-4 text-gray-500">
+            <GraduationCap size={16} />
+            <h2 className="text-[11px] md:text-[14px] font-normal tracking-[0.3em]">COMÚN</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+            {generalVideos.map((video) => (
+              <VideoCard key={video.id} video={video} completed={completedCourses.includes(video.id)} onClick={() => setSelectedVideo(video)} />
+            ))}
+          </div>
+        </section>
+      </main>
+
+      <footer className="bg-black py-20 px-6 border-t border-white/5 relative z-10 w-full">
+        <div className="max-w-[1440px] mx-auto text-center font-['Poppins']">
+          <h2 className="text-white text-3xl font-normal tracking-[0.1em] mb-4 opacity-30 uppercase">CLASSCODE</h2>
+          <p className="text-[9px] uppercase tracking-[0.5em] font-bold opacity-30">© 2026 — TODOS LOS DERECHOS RESERVADOS</p>
+        </div>
+      </footer>
+
+      <AnimatePresence>
+        {selectedVideo && (
+          <AcademyPopup video={selectedVideo} completed={completedCourses.includes(selectedVideo.id)} onClose={() => setSelectedVideo(null)} navigate={navigate} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
+const VideoCard = ({ video, completed, onClick }) => (
+  <motion.div whileHover={{ y: -5 }} onClick={onClick} className={`group bg-white/[0.03] backdrop-blur-xl rounded-[2rem] p-3 border transition-all cursor-pointer flex flex-col h-full shadow-2xl ${completed ? 'border-green-500/20' : 'border-white/5 hover:border-purple-500/30'}`}>
+    <div className="aspect-video bg-[#0d0d0d] rounded-[1.5rem] overflow-hidden relative group">
+      {completed && <div className="absolute top-4 right-4 z-10 bg-green-500/80 backdrop-blur-md p-2 rounded-full"><CheckCircle2 size={12} className="text-white" /></div>}
+      <div className="absolute inset-0 flex items-center justify-center bg-purple-900/10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10"><Play size={24} className="text-white" fill="white" /></div>
+      <img src={`https://vumbnail.com/${video.videoUrl.split('/').pop()}.jpg`} className="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-500" alt="" />
+    </div>
+    <div className="p-6 md:p-8 flex-grow flex flex-col justify-between">
+      <div className="space-y-2">
+        <span className={`text-[7px] font-black tracking-widest uppercase ${completed ? 'text-green-400' : 'text-purple-500'}`}>{completed ? 'ESTUDIO COMPLETADO' : video.category}</span>
+        <h4 className="text-[12px] md:text-[14px] font-['Poppins'] font-normal tracking-wide text-white leading-tight uppercase">{video.title}</h4>
+      </div>
+      <div className="mt-6 pt-4 border-t border-white/5 flex justify-between items-center opacity-40 group-hover:opacity-100 transition-opacity">
+        <span className="text-[8px] font-black tracking-[0.2em]">CLASSCODE® ACADEMY</span>
+        <ArrowRight size={14} className="text-purple-400" />
+      </div>
+    </div>
+  </motion.div>
+);
+
+const AcademyPopup = ({ video, completed, onClose, navigate }) => (
+  <div className="fixed inset-0 z-[200] flex items-center justify-center p-0 md:p-4 antialiased">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-black/95 backdrop-blur-xl" />
+    <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }} className="w-full h-full md:h-auto md:max-w-4xl bg-[#0d0d0d] md:rounded-[3.5rem] border-0 md:border md:border-white/10 relative z-[210] p-6 md:p-14 backdrop-blur-3xl overflow-y-auto flex flex-col">
+      <button onClick={onClose} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors z-[220]"><X size={24} /></button>
+      <header className="mb-10 text-center space-y-2 uppercase">
+        <div className="text-[18px] md:text-[22px] font-['Poppins'] tracking-[0.05em] leading-none text-white">CLASSCODE</div>
+        <p className="text-purple-400 text-[9px] md:text-[11px] font-black tracking-[0.3em]">MASTERCLASS NIVELACIÓN</p>
+      </header>
+      <div className="aspect-video bg-black rounded-[2rem] overflow-hidden border border-white/10 shadow-inner w-full">
+        <iframe src={`${video.videoUrl}?badge=0&autopause=0&player_id=0&app_id=58479`} className="w-full h-full" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen title={video.title}></iframe>
+      </div>
+      <div className="mt-10 space-y-8 text-center">
+        <p className="text-[10px] md:text-[12px] text-gray-500 tracking-widest leading-relaxed max-w-2xl mx-auto font-normal">{video.description}</p>
+        {!completed && (
+          <button onClick={() => navigate(`/academy-test/${encodeURIComponent(video.category)}`)} className="w-full max-w-md mx-auto py-5 bg-white text-black rounded-2xl text-[10px] font-black tracking-[0.4em] flex items-center justify-center gap-4 hover:bg-gray-200 transition-all shadow-2xl active:scale-95 uppercase">
+            <Zap size={16} fill="black" /> COMENZAR TEST DE NIVELACIÓN
+          </button>
+        )}
+      </div>
+    </motion.div>
+  </div>
+);

@@ -24,3 +24,4 @@ const Hero = ({ categories, activeTab, setActiveTab }) => {
   );
 };
 export default Hero;
+

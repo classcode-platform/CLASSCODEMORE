@@ -47,7 +47,6 @@ export default function CustomModal({
         >
           <X size={18} />
         </button>
-
         <div className="flex flex-col items-center text-center">
           {/* Icono Success */}
           {type === 'success' && (

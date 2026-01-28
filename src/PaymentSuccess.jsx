@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { db, auth } from './firebase';
-import { doc, updateDoc, increment } from 'firebase/firestore'; // Importamos increment
+import { doc, updateDoc, increment } from 'firebase/firestore';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle, Trophy, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ShieldCheck, ArrowRight, Loader2, Star, XCircle } from 'lucide-react'; // Cambiamos Trophy por Star
 
 export default function PaymentSuccess() {
   const [status, setStatus] = useState('procesando');
@@ -11,7 +12,6 @@ export default function PaymentSuccess() {
 
   useEffect(() => {
     const activatePro = async () => {
-      // Mercado Pago envía por URL el estado: collection_status=approved
       const paymentStatus = searchParams.get('collection_status'); 
       const user = auth.currentUser;
 
@@ -19,25 +19,17 @@ export default function PaymentSuccess() {
         try {
           const proRef = doc(db, "professionals", user.uid);
           
-          // --- AUTOMATIZACIÓN DE BENEFICIOS PRO ---
+          // ACTUALIZACIÓN DE PUNTOS PRO: Ahora suma 1000 puntos
           await updateDoc(proRef, {
-            isPro: true,                // Activa flag PRO
-            planStatus: 'active',       // Estado de suscripción
-            premiumSince: new Date(),   // Fecha de inicio
-            
-            // PROMESA 1: Badge de Verificado
+            isPro: true,
+            planStatus: 'active',
+            premiumSince: new Date(),
             verified: true,             
-            
-            // PROMESA 2: Bonus de XP (All Access Academy)
-            academyPoints: increment(500), 
-            
-            // PROMESA 3: Mejor posicionamiento (Score base más alto)
-            scoreBonus: 1000            // Campo auxiliar para ordenar en Results.jsx
+            academyPoints: increment(1000), // Ajustado a 1000 puntos
+            scoreBonus: 1000            
           });
 
           setStatus('success');
-          // Lo enviamos al Dashboard después de 4 segundos
-          setTimeout(() => navigate('/dashboard'), 4000);
         } catch (error) {
           console.error("Error al activar:", error);
           setStatus('error');
@@ -47,50 +39,78 @@ export default function PaymentSuccess() {
       }
     };
 
-    // Esperamos 1.5 segundos para asegurar que el usuario esté logueado
     const timer = setTimeout(() => activatePro(), 1500);
     return () => clearTimeout(timer);
   }, [searchParams, navigate]);
-
+  
   return (
-    <div className="min-h-screen bg-[#282929] flex flex-col items-center justify-center text-white font-['Open_Sans']">
-      <div className="max-w-md w-full text-center space-y-8">
+    <div className="min-h-screen bg-[#282929] text-white flex items-center justify-center p-6 font-['Open_Sans'] antialiased">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="max-w-md w-full bg-[#171717] rounded-[2rem] p-10 border border-white/10 text-center shadow-2xl relative overflow-hidden"
+      >
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-600/20 rounded-full blur-3xl"></div>
         
-        {status === 'procesando' && (
-          <div className="space-y-4">
-            <Loader2 size={40} className="text-purple-500 animate-spin mx-auto" />
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em]">Sincronizando Pago...</h2>
-          </div>
-        )}
+        <div className="relative z-10">
+          {status === 'procesando' && (
+            <div className="py-10">
+              <Loader2 size={50} className="text-purple-500 animate-spin mx-auto mb-6" />
+              <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">Validando Suscripción...</h2>
+            </div>
+          )}
 
-        {status === 'success' && (
-          <div className="space-y-6 animate-in fade-in zoom-in duration-700">
-            <Trophy size={60} className="text-[#f1ad02] mx-auto shadow-[0_0_30px_rgba(241,173,2,0.3)]" />
-            <h1 className="text-2xl font-normal uppercase font-['Poppins'] tracking-tighter">¡Nivel PRO Activado!</h1>
-            
-            <div className="space-y-2">
-                <p className="text-[10px] text-gray-500 uppercase tracking-widest">Tu perfil ha sido actualizado:</p>
-                <ul className="text-[9px] text-purple-400 font-bold uppercase tracking-widest space-y-1">
-                    <li>✓ Badge de Verificado</li>
-                    <li>✓ +500 XP Academy Bonus</li>
+          {status === 'success' && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <div className="w-20 h-20 rounded-full bg-gradient-to-r from-[#8A2BE2] to-[#4B0082] flex items-center justify-center mx-auto mb-8 shadow-lg shadow-purple-500/30">
+                <ShieldCheck size={40} className="text-white" strokeWidth={1.5} />
+              </div>
+
+              <h1 className="text-2xl md:text-3xl font-normal font-['Poppins'] mb-4 tracking-[0.1em] uppercase">
+                ¡Miembro <span className="text-purple-400 font-bold">PRO</span> Activo!
+              </h1>
+              
+              <p className="text-gray-400 text-[11px] uppercase tracking-widest font-light leading-relaxed mb-8">
+                Bienvenido a la comunidad de <span className="text-white font-bold">CLASSCODE</span>. 
+                Tu perfil ha sido elevado a estatus profesional.
+              </p>
+
+              <div className="bg-black/40 border border-purple-500/20 rounded-2xl p-6 mb-10 flex flex-col items-center gap-3">
+                 <div className="flex items-center gap-2 px-3 py-1 bg-purple-500/10 border border-purple-500/20 rounded-full">
+                    <Star size={14} className="text-[#f1ad02] fill-[#f1ad02]" />
+                    <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-purple-300">+1000 PUNTOS OBTENIDOS</span>
+                 </div>
+                 <ul className="text-[8px] text-gray-500 uppercase tracking-widest space-y-1 mt-2 font-bold italic">
+                    <li>✓ Sello Miembro PRO</li>
+                    <li>✓ Acceso Total Academy</li>
                     <li>✓ Posicionamiento Elite</li>
-                </ul>
-            </div>
+                 </ul>
+              </div>
+              
+              <button 
+                onClick={() => navigate('/dashboard')}
+                className="w-full py-4 bg-gradient-to-r from-[#8A2BE2] to-[#4B0082] rounded-lg font-bold text-[10px] tracking-[0.3em] uppercase hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20"
+              >
+                IR AL DASHBOARD <ArrowRight size={14} />
+              </button>
+            </motion.div>
+          )}
 
-            <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-6">
-                <div className="h-full bg-purple-600 animate-[loading_4s_ease-in-out]" style={{width: '100%'}} />
+          {status === 'error' && (
+            <div className="py-10">
+              <XCircle size={60} className="text-red-500 mx-auto mb-6" />
+              <h2 className="text-red-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Error en la transacción</h2>
+              <p className="text-gray-500 text-xs mb-8">No pudimos validar la suscripción. Intenta nuevamente.</p>
+              <button 
+                onClick={() => navigate('/plans')}
+                className="text-white text-[9px] font-bold uppercase tracking-widest border border-white/10 px-8 py-3 rounded-lg hover:bg-white/5"
+              >
+                VOLVER A PLANES
+              </button>
             </div>
-          </div>
-        )}
-
-        {status === 'error' && (
-          <div className="space-y-6">
-            <h2 className="text-red-500 text-[10px] font-black uppercase tracking-widest">Hubo un problema</h2>
-            <p className="text-gray-400 text-xs">No pudimos validar el pago o fue cancelado.</p>
-            <button onClick={() => navigate('/plans')} className="text-white text-[8px] font-black uppercase tracking-widest border border-white/10 px-6 py-2 rounded-full hover:bg-white/5">Reintentar</button>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </motion.div>
     </div>
   );
 }

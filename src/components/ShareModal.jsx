@@ -48,9 +48,8 @@ const ShareModal = ({ isOpen, onClose, userProfile }) => {
               {userProfile?.job || 'PROFESIONAL'}
             </p>
           </div>
-
-          {/* QR Code Placeholder */}
-          <div className="bg-white p-2 rounded-xl mb-8">
+                    {/* QR Code Placeholder */}
+                    <div className="bg-white p-2 rounded-xl mb-8">
              <div className="w-32 h-32 bg-gray-100 flex items-center justify-center">
                 <span className="text-black text-xs font-mono font-bold">QR CODE</span>
              </div>

@@ -1,16 +1,53 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Open+Sans:wght@400;600;700&display=swap');
+/* Importamos Poppins con los pesos que usás en el logo: 300 (Light) y 400 (Regular) + Pesos de impacto */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&family=Open+Sans:wght@400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  background-color: #282929;
+/* 1. RESETEO UNIVERSAL: Esto quita el "aire" desprolijo de todos los elementos */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background-color: #000000; /* Negro puro para el video */
   color: white;
   font-family: 'Open Sans', sans-serif;
   margin: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased; /* Hace que las letras se vean más finas y caras */
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3 {
+/* 2. TIPOGRAFÍA DE MARCA: Forzamos Poppins para que respete tu logo */
+h1, h2, h3, h4, h5, h6, .font-poppins {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* 3. SCROLLBAR PERSONALIZADA: Para que no aparezca esa barra gris fea de Windows */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: #252526; /* Gris sutil Japandi */
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7c3aed; /* Violeta al pasar el mouse */
+}
+
+/* 4. UTILITY PARA EL LOGO (Poppins Regular + tracking) */
+.logo-style {
   font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
