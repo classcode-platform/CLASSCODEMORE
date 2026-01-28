@@ -3,12 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { db, auth } from './firebase';
 import { doc, collection, serverTimestamp, setDoc, addDoc, deleteDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MapPin, Search, X, Heart, Send, Share2, Star, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, MapPin, Search, X, Heart, Send, Share2, Star, ShieldCheck, Zap, Award } from 'lucide-react';
 
 // --- SHARE MODAL ---
 const ShareModal = ({ isOpen, onClose, userProfile, profileId }) => {
   const [copied, setCopied] = useState(false);
-  // URL Actualizada al dominio oficial .com.ar
   const profileUrl = `https://www.classcode.com.ar/profile/${profileId}`; 
   
   const handleCopy = () => {
@@ -40,6 +39,7 @@ const ShareModal = ({ isOpen, onClose, userProfile, profileId }) => {
     </div>
   );
 };
+
 export default function ProfileP() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -88,6 +88,7 @@ export default function ProfileP() {
       setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     });
   }, [showChat, currentChatId]);
+
   const handleToggleFavorite = async () => {
     if (!auth.currentUser) return alert("Inicia sesión.");
     const favRef = doc(db, "users", auth.currentUser.uid, "favorites", id);
@@ -138,6 +139,7 @@ export default function ProfileP() {
     await addDoc(collection(db, "chats", currentChatId, "messages"), { text: newMessage.toUpperCase(), senderId: auth.currentUser.uid, createdAt: serverTimestamp() });
     setNewMessage('');
   };
+
   if (!user) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white text-[10px] tracking-[0.4em] uppercase font-['Poppins']">Sincronizando...</div>;
 
   return (
@@ -194,6 +196,29 @@ export default function ProfileP() {
         </div>
 
         <div className="lg:col-span-8 xl:col-span-9 space-y-16 md:space-y-24">
+          
+          {/* SECCIÓN DE MEDALLAS ACADÉMICAS (Añadido) */}
+          {user.completedCourses && user.completedCourses.length > 0 && (
+            <section className="space-y-8">
+              <h3 className="text-[10px] text-gray-600 uppercase tracking-[0.4em] font-black border-l-2 border-purple-500 pl-4">Certificaciones Classcode®</h3>
+              <div className="flex flex-wrap gap-4">
+                {user.completedCourses.includes('cert_fotografia_triangulo') && (
+                  <div className="flex items-center gap-3 bg-purple-500/5 border border-purple-500/20 px-5 py-3 rounded-2xl">
+                    <Zap size={14} className="text-purple-400 fill-purple-400/20" />
+                    <span className="text-[9px] font-black tracking-widest text-white">TECH PRO EXPOSICIÓN</span>
+                  </div>
+                )}
+                {user.completedCourses.includes('cert_generico') && (
+                  <div className="flex items-center gap-3 bg-blue-500/5 border border-blue-500/20 px-5 py-3 rounded-2xl">
+                    <Award size={14} className="text-blue-400" />
+                    <span className="text-[9px] font-black tracking-widest text-white">ÉTICA</span>
+                  </div>
+                )}
+                {/* Aquí se pueden añadir más medallas según el array de completados */}
+              </div>
+            </section>
+          )}
+
           {user.videoLink && (
             <section className="space-y-8">
               <h3 className="text-[10px] text-gray-600 uppercase tracking-[0.4em] font-black border-l-2 border-purple-500 pl-4">Showreel</h3>
@@ -223,6 +248,7 @@ export default function ProfileP() {
         </div>
       </main>
 
+      {/* CHAT Y MODALES (Sin cambios) */}
       <AnimatePresence>
         {showChat && (
           <motion.aside initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}
@@ -240,7 +266,7 @@ export default function ProfileP() {
                   </div>
                 </div>
               ))}
-                            <div ref={scrollRef} />
+              <div ref={scrollRef} />
             </div>
             <form onSubmit={sendDirectMessage} className="p-5 bg-white/5 border-t border-white/5 flex gap-3">
               <input value={newMessage} onChange={e => setNewMessage(e.target.value)} placeholder="ESCRIBIR..." className="flex-1 bg-black border border-white/10 rounded-full py-4 px-6 text-[10px] text-white uppercase outline-none focus:border-purple-500/50" />

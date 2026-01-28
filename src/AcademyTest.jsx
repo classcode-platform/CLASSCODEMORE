@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth } from './firebase';
-import { doc, setDoc, increment, arrayUnion, serverTimestamp } from 'firebase/firestore'; // Importamos setDoc
+import { doc, setDoc, increment, arrayUnion, serverTimestamp } from 'firebase/firestore';
 import { Zap, ShieldCheck, Trophy, RefreshCw, X, ArrowRight } from 'lucide-react';
 import { ACADEMY_DB } from './AcademyData'; 
 
@@ -13,8 +13,11 @@ export default function AcademyTest() {
   const [score, setScore] = useState(0);
   const [testFinished, setTestFinished] = useState(false);
 
+  // Decodificamos y limpiamos el nombre de la categoría
   const decodedCategory = category ? decodeURIComponent(category) : "Generico";
   const questions = ACADEMY_DB[decodedCategory] || ACADEMY_DB["Generico"];
+  
+  // Puntos: 150 para genérico, 250 para especialización técnica
   const puntosAOtorgar = decodedCategory === "Generico" ? 150 : 250;
 
   const handleAnswer = (isCorrect) => {
@@ -30,9 +33,12 @@ export default function AcademyTest() {
     const user = auth.currentUser;
     if (user && approved) {
       try {
-        const courseId = decodedCategory === "Generico" ? "cert_generico" : `cert_${decodedCategory.toLowerCase().replace(/\s/g, '')}`;
+        // CORRECCIÓN DE ID: Aseguramos que el ID coincida con los de la videoLibrary de Academy.jsx
+        // Si es el test técnico, el ID es 'cert_fotografia_triangulo', si es el de entrada es 'cert_fotografia'
+        const courseId = decodedCategory === "Generico" 
+          ? "cert_generico" 
+          : `cert_${decodedCategory.toLowerCase().replace(/\s/g, '_')}`;
         
-        // UNIFICACIÓN: Impactamos directamente en 'professionals' para sincronizar con Dashboard, ProfileP y Results
         await setDoc(doc(db, "professionals", user.uid), {
           score: increment(puntosAOtorgar),
           completedCourses: arrayUnion(courseId),
@@ -49,6 +55,7 @@ export default function AcademyTest() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] fixed inset-0 z-[100] flex items-center justify-center p-4 antialiased font-['Open_Sans'] text-white overflow-hidden uppercase">
       
+      {/* Fondo Animado */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div 
           animate={{ x: [-20, 20], y: [-20, 20] }}
@@ -71,12 +78,12 @@ export default function AcademyTest() {
             <div className="space-y-10">
               <header className="text-center space-y-2">
                 <h1 className="text-xl md:text-2xl font-['Poppins'] tracking-[0.05em] leading-none">CLASSCODE</h1>
-                <p className="text-purple-400 text-[8px] font-black tracking-[0.4em]">TEST NIVELACIÓN • {decodedCategory}</p>
+                <p className="text-purple-400 text-[8px] font-black tracking-[0.4em]">EXAMEN DE MÓDULO • {decodedCategory.replace('_', ' ')}</p>
               </header>
 
               <div className="space-y-6">
                 <div className="flex justify-between items-center px-1">
-                  <span className="text-[9px] text-gray-600 font-black tracking-[0.3em]">PASO {currentStep + 1} / {questions.length}</span>
+                  <span className="text-[9px] text-gray-600 font-black tracking-[0.3em]">PREGUNTA {currentStep + 1} / {questions.length}</span>
                   <div className="flex gap-2">
                     {questions.map((_, i) => (
                       <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${i <= currentStep ? 'bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]' : 'bg-white/5'}`} />
@@ -96,7 +103,7 @@ export default function AcademyTest() {
                     className="w-full py-5 px-8 text-left bg-white/[0.03] border border-white/5 rounded-2xl text-[10px] md:text-[11px] font-bold tracking-widest hover:bg-purple-600/10 hover:border-purple-500/30 transition-all group flex justify-between items-center"
                   >
                     <span className="normal-case opacity-70 group-hover:opacity-100">{ans}</span>
-                    <ArrowRight size={14} className="text-purple-500/0 group-hover:text-purple-500 transition-all translate-x-2 group-hover:translate-x-0" />
+                    <ArrowRight size={14} className="text-purple-500 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
                   </button>
                 ))}
               </div>
@@ -112,36 +119,28 @@ export default function AcademyTest() {
                     </motion.div>
                   </div>
                   <div className="space-y-3">
-                    <h2 className="text-2xl font-['Poppins'] tracking-[0.2em]">NIVELADO</h2>
+                    <h2 className="text-2xl font-['Poppins'] tracking-[0.2em]">CERTIFICADO</h2>
                     <p className="text-gray-500 text-[10px] tracking-widest font-black max-w-[250px] mx-auto leading-relaxed">
-                      CERTIFICACIÓN CLASSCODE® OBTENIDA. TU STATUS HA SIDO ACTUALIZADO.
+                      HAS COMPLETADO EL MÓDULO CON ÉXITO. TUS PUNTOS HAN SIDO SUMADOS.
                     </p>
                   </div>
-                  <button onClick={() => navigate('/dashboard')} className="w-full py-5 bg-white text-black rounded-2xl text-[10px] font-black tracking-[0.4em] shadow-2xl hover:bg-gray-200 transition-all">
-                    IR AL DASHBOARD
+                  <button onClick={() => navigate('/academy')} className="w-full py-5 bg-white text-black rounded-2xl text-[10px] font-black tracking-[0.4em] shadow-2xl hover:bg-gray-200 transition-all uppercase">
+                    VOLVER A ACADEMY
                   </button>
                 </div>
               ) : (
                 <div className="space-y-8">
                   <div className="space-y-4">
-                    <h2 className="text-[18px] font-['Poppins'] tracking-[0.2em]">CAPACITACIÓN PENDIENTE</h2>
-                    <p className="text-[9px] text-gray-500 font-black tracking-widest leading-relaxed">
-                      REPASÁ EL ESTÁNDAR DE CALIDAD CLASSCODE PARA DESBLOQUEAR EL NIVEL.
+                    <h2 className="text-[18px] font-['Poppins'] tracking-[0.2em]">REPASO NECESARIO</h2>
+                    <p className="text-[9px] text-gray-500 font-black tracking-widest leading-relaxed uppercase">
+                      Debes acertar todas las preguntas para certificar este módulo.
                       </p>
                   </div>
-
-                  <div className="w-full aspect-video bg-black rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl">
-                    <iframe 
-                      src={decodedCategory === "Fotografía" ? "https://player.vimeo.com/video/1156357123" : "https://player.vimeo.com/video/1151434449"} 
-                      className="w-full h-full" frameBorder="0" allowFullScreen
-                    ></iframe>
-                  </div>
-
                   <div className="space-y-4 pt-4">
                     <button onClick={() => window.location.reload()} className="w-full py-5 bg-purple-600 text-white rounded-2xl text-[10px] font-black tracking-[0.4em] shadow-xl shadow-purple-900/20 flex items-center justify-center gap-3 active:scale-95 transition-all">
                       <RefreshCw size={14}/> REINTENTAR TEST
                     </button>
-                    <button onClick={() => navigate('/dashboard')} className="w-full py-4 text-gray-600 hover:text-white text-[9px] font-black tracking-widest">SALIR</button>
+                    <button onClick={() => navigate('/academy')} className="w-full py-4 text-gray-600 hover:text-white text-[9px] font-black tracking-widest uppercase">VOLVER</button>
                   </div>
                 </div>
               )}

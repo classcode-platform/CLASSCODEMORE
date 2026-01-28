@@ -4,7 +4,7 @@ import { db, auth } from './firebase';
 import { collection, onSnapshot, query } from 'firebase/firestore'; 
 import { onAuthStateChanged } from 'firebase/auth'; 
 import { motion } from 'framer-motion';
-import { MapPin, ArrowRight, Search, Star, ShieldCheck } from 'lucide-react';
+import { MapPin, ArrowRight, Search, Star, ShieldCheck, Zap, Award } from 'lucide-react';
 
 export default function Results() {
   const navigate = useNavigate();
@@ -16,7 +16,6 @@ export default function Results() {
       if (!user) navigate('/');
     });
 
-    // SUSCRIPCIÓN EN TIEMPO REAL
     const q = query(collection(db, "professionals"));
     const unsubscribeDocs = onSnapshot(q, (snapshot) => {
       const allDocs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -26,7 +25,6 @@ export default function Results() {
       const qParam = params.get('q'); 
       const loc = params.get('location');
 
-      // FILTRADO DE CALIDAD: Solo nombre y fotos (sin trayectoria)
       let filtered = allDocs.filter(p => 
         p.name && 
         p.photos && 
@@ -53,13 +51,11 @@ export default function Results() {
     };
   }, [navigate]);
 
-  
   if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white font-['Poppins'] tracking-[0.35em] text-[10px]">SINCRONIZANDO...</div>;
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-['Open_Sans'] antialiased flex flex-col relative overflow-hidden uppercase">
       
-      {/* LUCES DINÁMICAS */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div animate={{ x: [-50, 50, -50], y: [-30, 30, -30], scale: [1, 1.2, 1] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className="absolute top-0 left-0 w-[250px] md:w-[600px] h-[250px] md:h-[600px] bg-purple-600/10 rounded-full blur-[100px] md:blur-[150px]" />
@@ -104,17 +100,33 @@ export default function Results() {
                     </div>
                   </div>
                 </div>
+
                 <div className="p-3 md:p-8 flex flex-col flex-grow">
-                  <div className="space-y-2 md:space-y-3">
+                  <div className="space-y-2 md:space-y-4">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-[12px] md:text-2xl font-normal tracking-wide text-white font-['Poppins'] line-clamp-1">{pro.name}</h3>
-                      
+                      <h3 className="text-[12px] md:text-2xl font-normal tracking-wide text-white font-['Poppins'] line-clamp-1 uppercase leading-none">{pro.name}</h3>
                       {pro.isPro ? (
                         <ShieldCheck size={18} className="text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
                       ) : pro.verified ? (
                         <ShieldCheck size={18} className="text-purple-500 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
                       ) : null}
                     </div>
+
+                    {/* INSIGNIAS DINÁMICAS (NUEVO) */}
+                    {(pro.completedCourses && pro.completedCourses.length > 0) && (
+                      <div className="flex flex-wrap gap-1 md:gap-2">
+                        {pro.completedCourses.includes('cert_fotografia_triangulo') && (
+                          <div className="flex items-center gap-1 bg-purple-500/10 border border-purple-500/20 px-1.5 md:px-2 py-0.5 rounded text-[6px] md:text-[7px] font-black tracking-widest text-purple-400">
+                            <Zap size={8} className="fill-purple-400" /> TECH PRO
+                          </div>
+                        )}
+                        {pro.completedCourses.includes('cert_generico') && (
+                          <div className="flex items-center gap-1 bg-blue-500/10 border border-blue-500/20 px-1.5 md:px-2 py-0.5 rounded text-[6px] md:text-[7px] font-black tracking-widest text-blue-400">
+                            <Award size={8} /> ÉTICA
+                          </div>
+                        )}
+                      </div>
+                    )}
                     
                     <div className="flex items-center gap-1.5 text-gray-500 text-[8px] md:text-xs tracking-[0.15em] font-bold">
                       <MapPin size={10} className="text-purple-500/50 md:w-4"/> 
