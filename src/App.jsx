@@ -19,6 +19,7 @@ import BusinessChat from './components/BusinessChat';
 import PaymentSuccess from './PaymentSuccess'; 
 import GuestUpload from './components/GuestUpload';
 import LiveGallery from './components/LiveGallery'; 
+import ProtectedRoute from './components/ProtectedRoute'; // <-- EL PROTECTOR
 
 function AppContent() {
   const location = useLocation();
@@ -27,41 +28,37 @@ function AppContent() {
   return (
     <div className="relative min-h-screen">
       <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/home" element={<Home />} />
-        
-        {/* RUTAS LEGALES */}
+        {/* --- RUTAS PÚBLICAS (ACCESO LIBRE) --- */}
+        <Route path="/" element={<Home />} />
+  <Route path="/home" element={<Home />} /> 
+  <Route path="/auth" element={<Auth />} />{/* <-- Home ahora es libre */}
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} /> 
-
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/client-profile" element={<ClientProfile />} /> 
-        <Route path="/academy" element={<Academy />} />      
-        <Route path="/academy-test/:category" element={<AcademyTest />} /> 
-        <Route path="/academy-test/Generico" element={<AcademyTest />} />
-        
-        <Route path="/chat/:chatId" element={
-          <>
-            <ClientProfile /> 
-            <BusinessChat />
-          </>
-        } />
-
         <Route path="/results" element={<Results />} />
         <Route path="/profile/:id" element={<ProfileP />} /> 
-        <Route path="/plans" element={<Plans />} />
-        <Route path="/success" element={<PaymentSuccess />} />
-
-        {/* --- CORRECCIÓN CRÍTICA AQUÍ --- */}
-        {/* Cambié /live por /guest-upload para que coincida con el link del perfil */}
-        <Route path="/guest-upload/:eventCode" element={<GuestUpload />} />
-        {/* Mantengo /live por si acaso tenías códigos QR viejos impresos, ambos llevarán al mismo lugar */}
-        <Route path="/live/:eventCode" element={<GuestUpload />} />
         
+        {/* --- RUTAS GUEST (QR - PÚBLICO) --- */}
+        <Route path="/guest-upload/:eventCode" element={<GuestUpload />} />
+        <Route path="/live/:eventCode" element={<GuestUpload />} />
         <Route path="/live-gallery/:eventCode" element={<LiveGallery />} />
 
-        {/* RUTA DE RESPALDO (404) para evitar pantallas negras */}
+        {/* --- RUTAS PROTEGIDAS (REQUIEREN LOGIN) --- */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/client-profile" element={<ProtectedRoute><ClientProfile /></ProtectedRoute>} /> 
+        <Route path="/academy" element={<ProtectedRoute><Academy /></ProtectedRoute>} />      
+        <Route path="/academy-test/:category" element={<ProtectedRoute><AcademyTest /></ProtectedRoute>} /> 
+        <Route path="/academy-test/Generico" element={<ProtectedRoute><AcademyTest /></ProtectedRoute>} />
+        <Route path="/plans" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
+        <Route path="/success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
+        
+        <Route path="/chat/:chatId" element={
+          <ProtectedRoute>
+            <ClientProfile /> 
+            <BusinessChat />
+          </ProtectedRoute>
+        } />
+
+        {/* RUTA DE RESPALDO */}
         <Route path="*" element={<Landing />} />
       </Routes>
 
@@ -80,7 +77,6 @@ export default function App() {
       {showSplash ? (
         <SplashScreen onFinished={() => setShowSplash(false)} />
       ) : (
-        // Añadí h-full y bg-black para evitar destellos blancos entre transiciones
         <div className="animate-in fade-in duration-1000 min-h-screen bg-[#0a0a0a]">
           <AppContent />
         </div>

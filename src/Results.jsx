@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { db, auth } from './firebase'; 
 import { collection, onSnapshot, query } from 'firebase/firestore'; 
 import { onAuthStateChanged } from 'firebase/auth'; 
 import { motion } from 'framer-motion';
 import { MapPin, ArrowRight, Search, Star, ShieldCheck, Zap, Award } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Results() {
   const navigate = useNavigate();
+  const location = useLocation(); 
   const [professionals, setProfessionals] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,38 +20,46 @@ export default function Results() {
     const q = query(collection(db, "professionals"));
     const unsubscribeDocs = onSnapshot(q, (snapshot) => {
       const allDocs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      
-      const params = new URLSearchParams(window.location.search);
+
+      // 1. PRIMERO declaramos las variables de búsqueda
+      const params = new URLSearchParams(location.search);
       const cat = params.get('category');
-      const qParam = params.get('q'); 
+      const qParam = params.get('q');
       const loc = params.get('location');
 
-      let filtered = allDocs.filter(p => 
-        p.name && 
-        p.photos && 
-        p.photos.length > 0
-      );
+      console.log("Datos recibidos:", allDocs.length);
 
-      if (cat) filtered = filtered.filter(p => p.job?.toLowerCase() === cat.toLowerCase());
+      // 2. AHORA usamos esas variables para filtrar
+      let filtered = allDocs.filter(p => p.name && p.photos && p.photos.length > 0);
+
+      if (cat) {
+        filtered = filtered.filter(p => p.job?.toLowerCase() === cat.toLowerCase());
+      }
+      
       if (qParam) {
         filtered = filtered.filter(p => 
           p.name?.toLowerCase().includes(qParam.toLowerCase()) || 
           p.job?.toLowerCase().includes(qParam.toLowerCase())
         );
       }
-      if (loc) filtered = filtered.filter(p => p.location?.toLowerCase().includes(loc.toLowerCase()));
-
+      
+      if (loc) {
+        filtered = filtered.filter(p => p.location?.toLowerCase().includes(loc.toLowerCase()));
+      }
+  
       filtered.sort((a, b) => (b.score || 0) - (a.score || 0));
+      
       setProfessionals(filtered);
       setLoading(false);
     });
-
+  
     return () => {
-      unsubscribeAuth();
+      unsubscribeAuth(); // Asegúrate de limpiar también esto
       unsubscribeDocs();
     };
-  }, [navigate]);
+  }, [location.search, navigate]);
 
+  // EL RENDER CONDICIONAL VA AFUERA DEL USEEFFECT
   if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white font-['Poppins'] tracking-[0.35em] text-[10px]">SINCRONIZANDO...</div>;
 
   return (
@@ -112,7 +121,6 @@ export default function Results() {
                       ) : null}
                     </div>
 
-                    {/* INSIGNIAS DINÁMICAS (NUEVO) */}
                     {(pro.completedCourses && pro.completedCourses.length > 0) && (
                       <div className="flex flex-wrap gap-1 md:gap-2">
                         {pro.completedCourses.includes('cert_fotografia_triangulo') && (

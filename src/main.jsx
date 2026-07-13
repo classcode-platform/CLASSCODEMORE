@@ -1,16 +1,18 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App' 
-import './index.css'    
+import './index.css'
+import { AuthProvider } from './context/AuthContext' // 1. Importa el provider
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <AuthProvider> {/* 2. Envuelve App aquí */}
+      <App />
+    </AuthProvider>
   </React.StrictMode>,
 )
 
 // REGISTRO DEL SERVICE WORKER (PWA)
-// Esto permite que CLASSCODE se pueda instalar en el celular como una App
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
