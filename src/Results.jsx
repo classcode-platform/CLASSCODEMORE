@@ -13,58 +13,40 @@ export default function Results() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (!user) navigate('/');
-    });
-
     const q = query(collection(db, "professionals"));
     const unsubscribeDocs = onSnapshot(q, (snapshot) => {
       const allDocs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      // 1. PRIMERO declaramos las variables de búsqueda
       const params = new URLSearchParams(location.search);
       const cat = params.get('category');
       const qParam = params.get('q');
       const loc = params.get('location');
 
-      console.log("Datos recibidos:", allDocs.length);
-
-      // 2. AHORA usamos esas variables para filtrar
       let filtered = allDocs.filter(p => p.name && p.photos && p.photos.length > 0);
 
-      if (cat) {
-        filtered = filtered.filter(p => p.job?.toLowerCase() === cat.toLowerCase());
-      }
-      
+      if (cat) filtered = filtered.filter(p => p.job?.toLowerCase() === cat.toLowerCase());
       if (qParam) {
         filtered = filtered.filter(p => 
           p.name?.toLowerCase().includes(qParam.toLowerCase()) || 
           p.job?.toLowerCase().includes(qParam.toLowerCase())
         );
       }
-      
-      if (loc) {
-        filtered = filtered.filter(p => p.location?.toLowerCase().includes(loc.toLowerCase()));
-      }
-  
+      if (loc) filtered = filtered.filter(p => p.location?.toLowerCase().includes(loc.toLowerCase()));
+
       filtered.sort((a, b) => (b.score || 0) - (a.score || 0));
       
       setProfessionals(filtered);
       setLoading(false);
     });
-  
-    return () => {
-      unsubscribeAuth(); // Asegúrate de limpiar también esto
-      unsubscribeDocs();
-    };
-  }, [location.search, navigate]);
 
-  // EL RENDER CONDICIONAL VA AFUERA DEL USEEFFECT
+    return () => unsubscribeDocs();
+  }, [location.search]);
+
   if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white font-['Poppins'] tracking-[0.35em] text-[10px]">SINCRONIZANDO...</div>;
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-['Open_Sans'] antialiased flex flex-col relative overflow-hidden uppercase">
-      
+  
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div animate={{ x: [-50, 50, -50], y: [-30, 30, -30], scale: [1, 1.2, 1] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className="absolute top-0 left-0 w-[250px] md:w-[600px] h-[250px] md:h-[600px] bg-purple-600/10 rounded-full blur-[100px] md:blur-[150px]" />
@@ -150,7 +132,7 @@ export default function Results() {
                   </div>
                 </div>
               </motion.div>
-            ))}
+))}
           </div>
         )}
       </main>
@@ -159,6 +141,6 @@ export default function Results() {
         <h2 className="text-white text-2xl md:text-4xl font-['Poppins'] tracking-[0.05em] uppercase mb-4 opacity-40">CLASSCODE</h2>
         <p className="text-[9px] md:text-xs uppercase tracking-[0.5em] font-bold opacity-20 leading-loose">© 2026 — TODOS LOS DERECHOS RESERVADOS</p>
       </footer>
-    </div>
+      </div>
   );
 }
