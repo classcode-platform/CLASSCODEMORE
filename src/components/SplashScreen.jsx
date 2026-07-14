@@ -1,21 +1,34 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 const SplashScreen = ({ onFinished }) => {
+  // Usamos un 'ref' en lugar de querySelector para mayor seguridad en React
+  const videoRef = useRef(null);
+
   useEffect(() => {
-    const timer = setTimeout(() => {
+    // Temporizador de seguridad: Si pasan 6 segundos, cerramos el splash pase lo que pase
+    const safetyTimer = setTimeout(() => {
       onFinished();
-    }, 4000);
-    return () => clearTimeout(timer);
+    }, 6000);
+
+    // Lógica robusta de control de video
+    const video = videoRef.current;
+    if (video) {
+      video.play().catch((error) => {
+        console.warn("Autoplay bloqueado, saltando splash:", error);
+        onFinished();
+      });
+    }
+
+    return () => clearTimeout(safetyTimer);
   }, [onFinished]);
 
   return (
-    /* bg-[#000000] sólido y z-[9999] para bloquear la Landing */
     <div 
       onClick={onFinished}
       className="fixed inset-0 bg-[#000000] flex items-center justify-center z-[9999] cursor-pointer overflow-hidden"
     >
-      {/* LUCES: Solo resplandores en las esquinas muy lejos del centro */}
+      {/* LUCES */}
       <div className="hidden md:block absolute inset-0 pointer-events-none">
         <motion.div 
           animate={{ opacity: [0.2, 0.4, 0.2] }}
@@ -29,19 +42,20 @@ const SplashScreen = ({ onFinished }) => {
         />
       </div>
 
-      {/* VIDEO: Centrado y sin transparencias raras */}
+      {/* VIDEO */}
       <div className="relative z-10 w-full max-w-[600px] px-6">
         <video 
+          ref={videoRef}
           autoPlay 
           muted 
           playsInline
-          preload="auto"
+          preload="metadata" // Cambiado de 'auto' a 'metadata' para evitar bloqueos
           onEnded={onFinished}
           onError={onFinished}
           className="w-full h-auto block"
-          /* Quitamos el mix-blend-mode si el fondo del video ya es negro, 
-             esto evita que se vea lo de abajo */
-          style={{ mixBlendMode: 'screen' }} 
+          // Si el blend mode te da problemas, quítalo. 
+          // Si el video tiene fondo negro, se verá bien sin él.
+          style={{ mixBlendMode: 'normal' }} 
         >
           <source src="/INT.mp4" type="video/mp4" />
         </video>

@@ -193,33 +193,65 @@ export default function Dashboard() {
            <button onClick={() => setIsMobileMenuOpen(true)} className="text-white"><Menu size={28} /></button>
         </div>
       </header>
-
       <AnimatePresence>
-        {isMobileMenuOpen && (
-          <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileMenuOpen(false)} className="fixed inset-0 bg-black/90 backdrop-blur-md z-[110] md:hidden" />
-            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed top-0 right-0 bottom-0 w-[85%] bg-[#050505] z-[120] p-12 flex flex-col md:hidden shadow-2xl">
-              <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-12 text-gray-500"><X size={32} /></button>
-              
-              <button onClick={handleSwitchToClient} className="mb-12 w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-5 rounded-2xl group hover:bg-purple-500/10 transition-all">
-                <div className="flex items-center gap-4 text-left leading-none">
-                  <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400"><RefreshCcw size={20} /></div>
-                  <div>
-                    <p className="text-[7px] font-black text-gray-500 tracking-[0.2em]">SWITCH MOOD</p>
-                    <p className="text-[11px] font-black text-white tracking-widest uppercase mt-1">MODO EXPERIENCE</p>
-                  </div>
-                </div>
-              </button>
+  {isEditingProfile && (
+    <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[150] flex items-center justify-center p-6 antialiased uppercase">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+        animate={{ opacity: 1, scale: 1, y: 0 }} 
+        exit={{ opacity: 0, scale: 0.95, y: 20 }} 
+        className="bg-[#050505] border border-white/10 rounded-[2.5rem] p-10 max-w-md w-full space-y-8 shadow-2xl relative border-t-purple-500/20"
+      >
+        <button onClick={() => setIsEditingProfile(false)} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors"><X size={24} /></button>
+        
+        <h3 className="text-[14px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/5 pb-6 font-bold">Editar Identidad</h3>
+        
+        <div className="space-y-6 text-left">
+          {/* Nombre */}
+          <div className="space-y-2">
+            <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Nombre Profesional</label>
+            <input className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase outline-none focus:border-purple-500 transition-all text-white" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
+          </div>
 
-              <nav className="flex-1 space-y-12">
-                <button onClick={() => {navigate('/dashboard'); setIsMobileMenuOpen(false);}} className="flex items-center gap-6 text-[12px] font-black tracking-widest leading-none"><LayoutDashboard size={22} className="text-purple-500"/> DASHBOARD</button>
-                <button onClick={() => {navigate('/academy'); setIsMobileMenuOpen(false);}} className="flex items-center gap-6 text-[12px] font-black tracking-widest leading-none text-gray-400"><GraduationCap size={22}/> ACADEMY</button>
-              </nav>
-              <button onClick={() => auth.signOut()} className="flex items-center gap-6 text-gray-700 text-[10px] font-black tracking-widest leading-none"><LogOut size={20}/> SALIR</button>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+          {/* Especialidad (Fijo el color) */}
+          <div className="space-y-2">
+            <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Especialidad</label>
+            <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase outline-none cursor-pointer text-white" value={profile.job} onChange={e => setProfile({...profile, job: e.target.value})}>
+              <option value="" className="bg-[#1a1a1a]">SELECCIONAR RUBRO</option>
+              {categories.map(cat => <option key={cat.name} value={cat.name} className="bg-[#1a1a1a]">{cat.name.toUpperCase()}</option>)}
+            </select>
+          </div>
+
+          {/* Ubicación (Provincias) */}
+          <div className="space-y-2">
+            <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Ubicación (Provincia)</label>
+            <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase outline-none cursor-pointer text-white" value={profile.location} onChange={e => setProfile({...profile, location: e.target.value})}>
+              <option value="" className="bg-[#1a1a1a]">SELECCIONAR PROVINCIA</option>
+              {["Buenos Aires", "Córdoba", "Santa Fe", "Mendoza", "Tucumán", "Entre Ríos", "Salta", "Misiones", "Chaco", "Corrientes", "Río Negro", "Neuquén", "Chubut", "Formosa", "Jujuy", "San Luis", "San Juan", "La Rioja", "La Pampa", "Santiago del Estero", "Catamarca", "Santa Cruz", "Tierra del Fuego"].map(prov => <option key={prov} value={prov} className="bg-[#1a1a1a]">{prov.toUpperCase()}</option>)}
+            </select>
+          </div>
+
+          {/* Toggle Visibilidad */}
+          <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
+            <label className="text-[8px] text-gray-600 font-black tracking-[0.3em]">Perfil Público (Visible)</label>
+            <input type="checkbox" checked={profile.isVisible || false} onChange={e => setProfile({...profile, isVisible: e.target.checked})} className="toggle toggle-primary" />
+          </div>
+
+          {/* Bio */}
+          <div className="space-y-2">
+            <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Biografía</label>
+            <textarea className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-[11px] h-24 resize-none font-bold outline-none focus:border-purple-500 transition-all text-white" value={profile.bio} onChange={e => setProfile({...profile, bio: e.target.value})} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <button onClick={() => setIsEditingProfile(false)} className="py-4 bg-white/5 text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10">Descartar</button>
+          <button onClick={handleSaveProfileData} className="py-4 bg-purple-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-purple-500">Guardar</button>
+        </div>
+      </motion.div>
+    </div>
+  )}
+</AnimatePresence>
 
       <aside className="hidden md:flex w-72 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50">
         <header className="mb-12 text-left leading-none">
