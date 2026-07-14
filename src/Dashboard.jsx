@@ -37,9 +37,13 @@ export default function Dashboard() {
   const UPLOAD_PRESET = "CLASSCODE"; 
 
   const categories = [
-    'Fotografía', 'Video / Filmmaker', 'DJ / Sonido', 'Modelo / Presencia', 
-    'Locaciones', 'Makeup / Pelo', 'Estilismo / Moda', 'Diseño Gráfico',
-    'Catering / Barra', 'Animación / Show', 'Ambientación', 'Técnica / Ilum.'
+    { name: 'Fotografía' }, { name: 'Audiovisual' }, { name: 'Modelo' }, 
+    { name: 'Escénico' }, { name: 'Digital' }, { name: 'Show' }, 
+    { name: 'Producción / Dirección' }, { name: 'Makeup / Pelo' }, 
+    { name: 'Estilismo / Moda' }, { name: 'Diseño / Arte' }, 
+    { name: 'DJ / Sonido' }, { name: 'Catering / Barra' }, 
+    { name: 'Planner / Eventos' }, { name: 'Técnica / Iluminación' }, 
+    { name: 'Agencia' }, { name: 'Locaciones' }
   ];
 
   const isGenericoDone = profile.completedCourses?.includes('cert_generico');
@@ -376,10 +380,16 @@ export default function Dashboard() {
                 </div>
                 <div className="space-y-3 leading-none uppercase">
                   <label className="text-[8px] text-gray-600 font-black uppercase tracking-[0.3em] pl-1 leading-none">Especialidad</label>
-                  <select className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-[12px] font-bold uppercase outline-none focus:border-purple-500 transition-all text-white appearance-none cursor-pointer leading-none shadow-inner" value={profile.job} onChange={e => setProfile({...profile, job: e.target.value})}>
-                    <option value="" className="bg-black text-white uppercase">RUBRO</option>
-                    {categories.map(cat => <option key={cat} value={cat} className="bg-black text-white uppercase">{cat.toUpperCase()}</option>)}
-                  </select>
+                  <select 
+  className="..." 
+  value={profile.job} 
+  onChange={e => setProfile({...profile, job: e.target.value})}
+>
+  <option value="">SELECCIONAR RUBRO</option>
+  {categories.map(cat => (
+    <option key={cat.name} value={cat.name}>{cat.name.toUpperCase()}</option>
+  ))}
+</select>
                 </div>
                 <div className="space-y-3 leading-none uppercase">
                   <label className="text-[8px] text-gray-600 font-black uppercase tracking-[0.3em] pl-1 leading-none">Biografía</label>

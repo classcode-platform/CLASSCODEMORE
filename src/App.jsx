@@ -19,7 +19,7 @@ import BusinessChat from './components/BusinessChat';
 import PaymentSuccess from './PaymentSuccess'; 
 import GuestUpload from './components/GuestUpload';
 import LiveGallery from './components/LiveGallery'; 
-import ProtectedRoute from './components/ProtectedRoute'; // <-- EL PROTECTOR
+import ProtectedRoute from './components/ProtectedRoute';
 
 function AppContent() {
   const location = useLocation();
@@ -28,21 +28,21 @@ function AppContent() {
   return (
     <div className="relative min-h-screen">
       <Routes>
-        {/* --- RUTAS PÚBLICAS (ACCESO LIBRE) --- */}
+        {/* --- RUTAS PÚBLICAS --- */}
         <Route path="/" element={<Home />} />
-  <Route path="/home" element={<Home />} /> 
-  <Route path="/auth" element={<Auth />} />{/* <-- Home ahora es libre */}
+        <Route path="/home" element={<Home />} /> 
+        <Route path="/auth" element={<Auth />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} /> 
         <Route path="/results" element={<Results />} />
         <Route path="/profile/:id" element={<ProfileP />} /> 
         
-        {/* --- RUTAS GUEST (QR - PÚBLICO) --- */}
+        {/* --- RUTAS GUEST --- */}
         <Route path="/guest-upload/:eventCode" element={<GuestUpload />} />
         <Route path="/live/:eventCode" element={<GuestUpload />} />
         <Route path="/live-gallery/:eventCode" element={<LiveGallery />} />
 
-        {/* --- RUTAS PROTEGIDAS (REQUIEREN LOGIN) --- */}
+        {/* --- RUTAS PROTEGIDAS --- */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/client-profile" element={<ProtectedRoute><ClientProfile /></ProtectedRoute>} /> 
         <Route path="/academy" element={<ProtectedRoute><Academy /></ProtectedRoute>} />      

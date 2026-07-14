@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Search, MapPin, ChevronDown, Camera, Music, Sparkles, 
-  Lightbulb, Utensils, Video, ArrowRight, User, LogOut, 
-  Home as HomeIcon, Shirt, Palette, PartyPopper, Layout, Zap, 
+  Utensils, Video, ArrowRight, User, LogOut, 
+  Home as HomeIcon, Shirt, Palette, PartyPopper, Zap, 
   GraduationCap, Users, Star, Trophy,
   Theater, Smartphone, Clapperboard, CalendarDays,
   Instagram, Linkedin, MessageCircle, Send, Globe, ShieldCheck
 } from 'lucide-react';
 import { auth, db } from './firebase'; 
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore'; 
 
 export default function Home() {
@@ -19,45 +19,6 @@ export default function Home() {
   const [location, setLocation] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [email, setEmail] = useState('');
-const handleSubscribe = (e) => { e.preventDefault(); /* ... */ };
-
-  const handleAccount = async () => {
-    const user = auth.currentUser;
-    if (user) {
-      try {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          const role = userDoc.data().role;
-          navigate(role === 'professional' ? '/dashboard' : '/client-profile');
-        } else {
-          navigate('/onboarding');
-        }
-      } catch (error) {
-        navigate('/dashboard');
-      }
-    } else {
-      
-      navigate('/auth');
-    }
-  };
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    navigate('/');
-  };
-  const handleSearch = () => {
-    try {
-      console.log("Iniciando búsqueda...");
-      console.log("Valores:", { searchTerm, selectedCategory, location });
-      
-      // Forzamos la navegación
-      navigate('/results'); 
-      
-      console.log("Navegación ejecutada.");
-    } catch (error) {
-      console.error("Error al intentar navegar:", error);
-    }
-  };
 
   const categories = [
     { name: 'Fotografía', count: '+ profesionales', icon: Camera, gradient: 'from-cyan-400 to-blue-500' },
@@ -78,9 +39,36 @@ const handleSubscribe = (e) => { e.preventDefault(); /* ... */ };
     { name: 'Locaciones', count: '+ profesionales', icon: HomeIcon, gradient: 'from-slate-400 to-slate-700' }
   ];
 
+  const handleAccount = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      navigate(userDoc.exists() ? (userDoc.data().role === 'professional' ? '/dashboard' : '/client-profile') : '/onboarding');
+    } else {
+      navigate('/auth');
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate('/');
+  };
+
+  const handleSearch = () => {
+    navigate(`/results?category=${encodeURIComponent(selectedCategory)}&q=${encodeURIComponent(searchTerm)}&location=${encodeURIComponent(location)}`);
+  };
+
+  const handleCategoryClick = (catName) => {
+    navigate(`/results?category=${encodeURIComponent(catName)}`);
+  };
+
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    console.log("Suscrito:", email);
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] font-['Open_Sans'] flex flex-col relative overflow-hidden antialiased text-white">
-      
       {/* LUCES DINÁMICAS */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div 
@@ -89,6 +77,7 @@ const handleSubscribe = (e) => { e.preventDefault(); /* ... */ };
           className="absolute top-0 left-0 w-[250px] md:w-[600px] h-[250px] md:h-[600px] bg-purple-600/10 rounded-full blur-[100px] md:blur-[150px]"
         />
         <motion.div 
+        
           animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }}
           transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
           className="absolute bottom-0 right-0 w-[200px] md:w-[500px] h-[200px] md:h-[500px] bg-indigo-600/10 rounded-full blur-[90px] md:blur-[130px]"
