@@ -19,7 +19,7 @@ export default function Dashboard() {
   const [messages, setMessages] = useState([]);
   
   const [profile, setProfile] = useState({
-    name: '', job: '', location: '', bio: '', instagram: '', videoLink: '', 
+    name: '', job: '', specialty: '', location: '', bio: '', instagram: '', videoLink: '', 
     photo1: '', photo2: '', photo3: '', photo4: '', photo5: '', 
     photo6: '', photo7: '', photo8: '', photo9: '', photo10: '',
     academyPoints: 0, verified: false, score: 0,
@@ -36,21 +36,37 @@ export default function Dashboard() {
   const CLOUD_NAME = "dsyfitywd";
   const UPLOAD_PRESET = "CLASSCODE"; 
 
-  const categories = [
-    { name: 'Fotografía' }, { name: 'Audiovisual' }, { name: 'Modelo' }, 
-    { name: 'Escénico' }, { name: 'Digital' }, { name: 'Show' }, 
-    { name: 'Producción / Dirección' }, { name: 'Makeup / Pelo' }, 
-    { name: 'Estilismo / Moda' }, { name: 'Diseño / Arte' }, 
-    { name: 'DJ / Sonido' }, { name: 'Catering / Barra' }, 
-    { name: 'Planner / Eventos' }, { name: 'Técnica / Iluminación' }, 
-    { name: 'Agencia' }, { name: 'Locaciones' }
-  ];
+  const RUBROS = {
+    "📸 FOTOGRAFÍA": ["Fotografía Social", "Fotografía de Moda", "Fotografía Publicitaria", "Fotografía de Producto", "Fotografía Gastronómica", "Fotografía Inmobiliaria", "Fotografía Corporativa", "Fotografía Editorial", "Fotografía Deportiva", "Fotografía de Naturaleza", "Retrato", "Drone"],
+    "🎥 AUDIOVISUAL": ["Filmmaker", "Dirección de Fotografía", "Edición de Video", "Color Grading", "Motion Graphics", "Animación 2D / 3D", "Streaming", "Operador de Cámara", "Drone", "Producción de Contenido"],
+    "👗 MODELO": ["Moda", "Publicidad", "E-commerce", "Pasarela", "Presencia para Eventos", "Fitness", "Curvy", "Comercial", "Editorial", "Partes del cuerpo (Hands / Feet / Hair)"],
+    "🎭 ESCÉNICO": ["Actor / Actriz", "Bailarín/a", "Cantante", "Músico", "Performer", "Comediante", "Improvisación", "Voz", "Locución", "Doblaje"],
+    "📱 DIGITAL": ["Influencer", "UGC Creator", "Streamer", "Presentador/a de Contenido", "Community Creator", "Community Manager", "Social Media Manager", "Content Creator", "Podcaster"],
+    "🎉 SHOW": ["Animación", "Magia", "Circo", "Personajes", "Shows Infantiles", "Shows Temáticos", "Zanquistas", "Comparsas", "Bandas", "DJs en Vivo", "Karaoke", "Humor"],
+    "🎬 PRODUCCIÓN / DIRECCIÓN": ["Producción Audiovisual", "Producción de Moda", "Producción de Eventos", "Dirección General", "Dirección Creativa", "Dirección de Arte", "Dirección de Casting", "Asistencia de Producción"],
+    "💄 MAKEUP / PELO": ["Makeup Social", "Makeup Editorial", "Makeup FX", "Makeup Artístico", "Hairstylist", "Barbería", "Caracterización"],
+    "👠 ESTILISMO / MODA": ["Estilismo", "Vestuario", "Personal Shopper", "Asesoría de Imagen", "Diseño de Moda", "Sastrería"],
+    "🎨 DISEÑO / ARTE": ["Diseño Gráfico", "Ilustración", "Branding", "Identidad Visual", "UX/UI", "Escenografía", "Escaparatismo", "Arte Digital"],
+    "🎵 DJ / SONIDO": ["DJ", "Sonidista", "Operador de Audio", "Ingeniería de Sonido", "Musicalización", "Producción Musical", "Grabación", "Mezcla y Mastering"],
+    "🍽️ CATERING / BARRA": ["Catering", "Barra", "Bartender", "Barista", "Coffee Break", "Pastelería", "Food Truck", "Chef Privado"],
+    "🎉 PLANNER / EVENTOS": ["Wedding Planner", "Event Planner", "Coordinación de Eventos", "Organización Integral", "Maestro/a de Ceremonias", "Protocolo", "Logística"],
+    "💡 TÉCNICA / ILUMINACIÓN": ["Iluminación", "Operador de Luces", "Pantallas LED", "Escenarios", "Estructuras", "Rigging", "Efectos Especiales", "Mapping"],
+    "📍 LOCACIONES": ["Salones", "Quintas", "Estudios Fotográficos", "Estudios Audiovisuales", "Teatros", "Galpones", "Hoteles", "Rooftops", "Restaurantes", "Bares", "Espacios Corporativos", "Espacios al Aire Libre"]
+  };
+  
+  const PROVINCIAS = ["Buenos Aires", "Capital Federal", "Córdoba", "Santa Fe", "Mendoza", "Tucumán", "Entre Ríos", "Salta", "Misiones", "Chaco", "Corrientes", "Río Negro", "Neuquén", "Chubut", "Formosa", "Jujuy", "San Luis", "San Juan", "La Rioja", "La Pampa", "Santiago del Estero", "Catamarca", "Santa Cruz", "Tierra del Fuego"];
 
   const isGenericoDone = profile.completedCourses?.includes('cert_generico');
   const proCourseId = profile.job ? `cert_${profile.job.toLowerCase().replace(/\s/g, '')}` : null;
   const isProfessionalTestDone = proCourseId && profile.completedCourses?.includes(proCourseId);
 
-  const isProfileVisible = profile.name?.trim() && profile.bio?.trim() && profile.photo1;
+  const isProfileVisible = 
+  profile.name?.trim() && 
+  profile.job?.trim() && 
+  profile.specialty?.trim() && 
+  profile.location?.trim() && 
+  profile.photo1 && 
+  isProfessionalTestDone;
     // Lógica de cálculo corregida: Usa el score de la Academy (data.score) y suma lo del perfil
     const calculateTotalScore = (currentProfile) => {
       let bonus = 0;
@@ -212,24 +228,39 @@ export default function Dashboard() {
             <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Nombre Profesional</label>
             <input className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase outline-none focus:border-purple-500 transition-all text-white" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
           </div>
+          <div className="space-y-6 text-left">
+  {/* Especialidad (Rubro y Sub-especialidad) */}
+  <div className="space-y-4">
+    <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Especialidad</label>
+    
+    <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
+            value={profile.job || ""} 
+            onChange={e => setProfile({...profile, job: e.target.value, specialty: ""})}>
+      <option value="">SELECCIONAR RUBRO</option>
+      {Object.keys(RUBROS).map(rubro => <option key={rubro} value={rubro}>{rubro}</option>)}
+    </select>
 
-          {/* Especialidad (Fijo el color) */}
-          <div className="space-y-2">
-            <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Especialidad</label>
-            <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase outline-none cursor-pointer text-white" value={profile.job} onChange={e => setProfile({...profile, job: e.target.value})}>
-              <option value="" className="bg-[#1a1a1a]">SELECCIONAR RUBRO</option>
-              {categories.map(cat => <option key={cat.name} value={cat.name} className="bg-[#1a1a1a]">{cat.name.toUpperCase()}</option>)}
-            </select>
-          </div>
+    {profile.job && (
+      <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
+              value={profile.specialty || ""} 
+              onChange={e => setProfile({...profile, specialty: e.target.value})}>
+        <option value="">SELECCIONAR ESPECIALIDAD</option>
+        {RUBROS[profile.job].map(spec => <option key={spec} value={spec}>{spec.toUpperCase()}</option>)}
+      </select>
+    )}
+  </div>
 
-          {/* Ubicación (Provincias) */}
-          <div className="space-y-2">
-            <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Ubicación (Provincia)</label>
-            <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase outline-none cursor-pointer text-white" value={profile.location} onChange={e => setProfile({...profile, location: e.target.value})}>
-              <option value="" className="bg-[#1a1a1a]">SELECCIONAR PROVINCIA</option>
-              {["Buenos Aires", "Córdoba", "Santa Fe", "Mendoza", "Tucumán", "Entre Ríos", "Salta", "Misiones", "Chaco", "Corrientes", "Río Negro", "Neuquén", "Chubut", "Formosa", "Jujuy", "San Luis", "San Juan", "La Rioja", "La Pampa", "Santiago del Estero", "Catamarca", "Santa Cruz", "Tierra del Fuego"].map(prov => <option key={prov} value={prov} className="bg-[#1a1a1a]">{prov.toUpperCase()}</option>)}
-            </select>
-          </div>
+  {/* Ubicación (Provincias) */}
+  <div className="space-y-2">
+    <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Ubicación</label>
+    <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
+            value={profile.location || ""} 
+            onChange={e => setProfile({...profile, location: e.target.value})}>
+      <option value="">SELECCIONAR PROVINCIA</option>
+      {PROVINCIAS.map(prov => <option key={prov} value={prov}>{prov.toUpperCase()}</option>)}
+    </select>
+  </div>
+</div>
 
           {/* Toggle Visibilidad */}
           <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">

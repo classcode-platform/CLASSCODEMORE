@@ -169,10 +169,7 @@ export default function Home() {
           {/* Columna 2: Academy */}
           <div className="bg-white/[0.02] backdrop-blur-3xl rounded-[3.5rem] p-10 border border-white/5 shadow-2xl h-full flex flex-col justify-center">
             <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20">
-                <GraduationCap className="text-purple-400" size={16} />
-                <span className="text-[9px] text-purple-300 font-bold uppercase tracking-[0.2em]">Classcode Academy</span>
-              </div>
+
               
               <h2 className="text-3xl md:text-5xl font-light font-['Poppins'] leading-tight tracking-tight text-white">
                 Potenciá tu <span className="text-purple-500 font-normal">talento creativo</span>
@@ -222,7 +219,7 @@ export default function Home() {
             <div className="lg:col-span-5">
               <div className="bg-white/[0.02] backdrop-blur-3xl border border-white/10 p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden group leading-none">
                 <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity"><Send size={80} /></div>
-                <h4 className="text-[12px] font-black tracking-[0.4em] text-white mb-4 uppercase">CONECTÁ  |  APRENDÉ  |  TRABAJÁ.</h4>
+                <h4 className="text-[12px] font-normal tracking-[0.4em] text-white mb-4 uppercase">CONECTÁ  |  APRENDÉ  |  TRABAJÁ.</h4>
                 <p className="text-gray-500 text-[13px] tracking-widest leading-relaxed mb-8 normal-case font-light">Actualizaciones para el talento argentino.</p>
                 <form onSubmit={handleSubscribe} className="space-y-4 font-normal"><input type="email" required placeholder="EMAIL" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-[10px] font-bold tracking-widest outline-none focus:border-purple-500/50 transition-all text-white shadow-inner uppercase font-['Poppins']" /><button type="submit" className="w-full py-5 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl font-black text-[10px] tracking-[0.3em] transition-all uppercase leading-none shadow-xl">SUSCRIBITE</button></form>
               </div>
