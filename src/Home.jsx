@@ -37,11 +37,11 @@ export default function Home() {
     "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1200&auto=format&fit=crop"
   ];
 
-  // VIDEOS DE PROMO MOBILE
+  // VIDEOS DE PROMO MOBILE (con query param v=2 para forzar actualización de caché)
   const mobilePromoVideos = [
-    "https://res.cloudinary.com/dsyfitywd/video/upload/Copia_de_Video_C1_r2ysay.mp4",
-    "https://res.cloudinary.com/dsyfitywd/video/upload/Video_C1_4_woqohu.mp4",
-    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784949077/Copia_de_Copia_de_Video_C1_2_wkpqm9.mp4"
+    "https://res.cloudinary.com/dsyfitywd/video/upload/Copia_de_Video_C1_r2ysay.mp4?v=2",
+    "https://res.cloudinary.com/dsyfitywd/video/upload/Video_C1_4_woqohu.mp4?v=2",
+    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784949077/Copia_de_Copia_de_Video_C1_2_wkpqm9.mp4?v=2"
   ];
 
   const categories = [
@@ -174,16 +174,16 @@ export default function Home() {
           {/* ENCABEZADO ADAPTATIVO */}
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6 md:mb-12 flex flex-col items-center justify-center">
             
-            {/* SOLO MOBILE: Isotipo limpio en PNG sin fondo ni resplandores */}
+            {/* SOLO MOBILE: SVG limpia de alta nitidez */}
             <div className="block md:hidden">
               <img 
-                src="/logo192.png" 
+                src="/LOGOSTO.svg" 
                 alt="CLASSCODE" 
-                className="w-12 h-12 object-contain" 
+                className="w-10 h-10 object-contain" 
               />
             </div>
 
-            {/* SOLO DESKTOP: Tamaño original intacto */}
+            {/* SOLO DESKTOP */}
             <div className="hidden md:block text-center">
               <h1 className="text-4xl md:text-6xl text-white mb-2 md:mb-6 uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">
                 CLASSCODE
