@@ -37,6 +37,7 @@ export default function Home() {
     "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1200&auto=format&fit=crop"
   ];
 
+  // VIDEOS DE PROMO MOBILE
   const mobilePromoVideos = [
     "https://res.cloudinary.com/dsyfitywd/video/upload/Copia_de_Video_C1_r2ysay.mp4",
     "https://res.cloudinary.com/dsyfitywd/video/upload/Video_C1_4_woqohu.mp4",
@@ -69,7 +70,6 @@ export default function Home() {
     "La Rioja", "La Pampa", "Santiago del Estero", "Catamarca", "Santa Cruz", "Tierra del Fuego"
   ];
 
-  // Lógica para mostrar el pop-up tras 7 segundos si no lo cerró/suscribió antes
   useEffect(() => {
     const isSubscribed = localStorage.getItem('classcode_subscribed');
     const isModalDismissed = localStorage.getItem('classcode_modal_dismissed');
@@ -77,7 +77,7 @@ export default function Home() {
     if (!isSubscribed && !isModalDismissed) {
       const timer = setTimeout(() => {
         setShowSubscribeModal(true);
-      }, 7000); // 7 segundos tras ingresar
+      }, 7000);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -120,7 +120,6 @@ export default function Home() {
     navigate(`/results?category=${encodeURIComponent(catName)}`);
   };
 
-  // Función de suscripción conectada a Firestore
   const handleSubscribe = async (e) => {
     e.preventDefault();
     if (!email) return;
@@ -156,7 +155,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] font-['Open_Sans'] flex flex-col relative overflow-hidden antialiased text-white">
-      {/* LUCES DINÁMICAS */}
+      {/* LUCES DINÁMICAS DE FONDO */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div animate={{ x: [-50, 50, -50], y: [-30, 30, -30], scale: [1, 1.2, 1] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="absolute top-0 left-0 w-[250px] md:w-[600px] h-[250px] md:h-[600px] bg-purple-600/10 rounded-full blur-[100px] md:blur-[150px]" />
         <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-0 w-[200px] md:w-[500px] h-[200px] md:h-[500px] bg-indigo-600/10 rounded-full blur-[90px] md:blur-[130px]" />
@@ -171,9 +170,29 @@ export default function Home() {
 
       <main className="flex-grow relative z-10">
         <div className="pt-4 md:pt-12 pb-6 md:pb-16 px-4 text-center">
-          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6 md:mb-12">
-            <h1 className="text-4xl md:text-6xl text-white mb-2 md:mb-6 uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">CLASSCODE</h1>
-            <p className="hidden md:block text-gray-400 text-xs font-light tracking-[0.3em] uppercase">Descubre o comparte tu talento con el mundo</p>
+          
+          {/* ENCABEZADO ADAPTATIVO */}
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6 md:mb-12 flex flex-col items-center justify-center">
+            
+            {/* SOLO MOBILE: Isotipo limpio en PNG sin fondo ni resplandores */}
+            <div className="block md:hidden">
+              <img 
+                src="/logo192.png" 
+                alt="CLASSCODE" 
+                className="w-12 h-12 object-contain" 
+              />
+            </div>
+
+            {/* SOLO DESKTOP: Tamaño original intacto */}
+            <div className="hidden md:block text-center">
+              <h1 className="text-4xl md:text-6xl text-white mb-2 md:mb-6 uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">
+                CLASSCODE
+              </h1>
+              <p className="text-gray-400 text-xs font-light tracking-[0.3em] uppercase">
+                Descubre o comparte tu talento con el mundo
+              </p>
+            </div>
+
           </motion.div>
 
           {/* BUSCADOR */}
@@ -416,7 +435,7 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* POP-UP MODAL SUSCRIPCIÓN (EMERGE TEMPORIZADO) */}
+      {/* POP-UP MODAL SUSCRIPCIÓN */}
       <AnimatePresence>
         {showSubscribeModal && (
           <motion.div 
@@ -433,7 +452,6 @@ export default function Home() {
               onClick={(e) => e.stopPropagation()}
               className="bg-[#0e0e10] border border-white/15 rounded-[2.5rem] p-6 md:p-8 max-w-md w-full relative shadow-[0_0_50px_rgba(168,85,247,0.2)] overflow-hidden"
             >
-              {/* Botón cerrar */}
               <button 
                 onClick={handleCloseModal}
                 className="absolute top-5 right-5 p-2 text-gray-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-all"
