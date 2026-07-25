@@ -5,8 +5,7 @@ import {
   Search, MapPin, ChevronDown, Camera, Music, Sparkles, 
   Utensils, Video, ArrowRight, User, LogOut, 
   Home as HomeIcon, Shirt, Palette, PartyPopper, Zap, 
-  GraduationCap, Users, Star, Trophy,
-  Theater, Smartphone, Clapperboard, CalendarDays,
+  Users, Theater, Smartphone, Clapperboard, CalendarDays,
   Instagram, Linkedin, MessageCircle, Send, Globe, ShieldCheck
 } from 'lucide-react';
 import { auth, db } from './firebase'; 
@@ -19,13 +18,19 @@ export default function Home() {
   const [location, setLocation] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [email, setEmail] = useState('');
-  const [liveProjects, setLiveProjects] = useState([]);
   const [currentPhoto, setCurrentPhoto] = useState(0);
+  const [currentVideo, setCurrentVideo] = useState(0);
 
   const eventPhotos = [
     "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1200&auto=format&fit=crop"
+  ];
+
+  const mobilePromoVideos = [
+    "https://res.cloudinary.com/dsyfitywd/video/upload/Copia_de_Video_C1_r2ysay.mp4",
+    "https://res.cloudinary.com/dsyfitywd/video/upload/Video_C1_4_woqohu.mp4",
+    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784949077/Copia_de_Copia_de_Video_C1_2_wkpqm9.mp4"
   ];
 
   const categories = [
@@ -67,6 +72,7 @@ export default function Home() {
   };
 
   const handleCategoryClick = (catName) => {
+    setSelectedCategory(catName);
     navigate(`/results?category=${encodeURIComponent(catName)}`);
   };
 
@@ -76,11 +82,18 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    const photoTimer = setInterval(() => {
       setCurrentPhoto((prev) => (prev + 1) % eventPhotos.length);
     }, 4000);
-    return () => clearInterval(timer);
+    return () => clearInterval(photoTimer);
   }, [eventPhotos.length]);
+
+  useEffect(() => {
+    const videoTimer = setInterval(() => {
+      setCurrentVideo((prev) => (prev + 1) % mobilePromoVideos.length);
+    }, 6000);
+    return () => clearInterval(videoTimer);
+  }, [mobilePromoVideos.length]);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] font-['Open_Sans'] flex flex-col relative overflow-hidden antialiased text-white">
@@ -120,7 +133,7 @@ export default function Home() {
               <MapPin className="text-purple-400 w-5 h-5 mr-4 shrink-0" />
               <select className="w-full bg-transparent text-white outline-none appearance-none cursor-pointer z-10 font-normal uppercase text-[11px] tracking-widest" value={location} onChange={(e) => setLocation(e.target.value)}>
                 <option value="" className="bg-[#1a1a1a]">UBICACIÓN</option>
-                {["Buenos Aires", "Córdoba", "Santa Fe", "Mendoza", "Tucumán", "Entre Ríos", "Salta", "Misiones", "Chaco", "Corrientes", "Río Negro", "Neuquén", "Chubut", "Formosa", "Jujuy", "San Luis", "San Juan", "La Rioja", "La Pampa", "Santiago del Estero", "Catamarca", "Santa Cruz", "Tierra del Fuego"].map(prov => (
+                {["CABA", "Buenos Aires", "Córdoba", "Santa Fe", "Mendoza", "Tucumán", "Entre Ríos", "Salta", "Misiones", "Chaco", "Corrientes", "Río Negro", "Neuquén", "Chubut", "Formosa", "Jujuy", "San Luis", "San Juan", "La Rioja", "La Pampa", "Santiago del Estero", "Catamarca", "Santa Cruz", "Tierra del Fuego"].map(prov => (
                   <option key={prov} value={prov} className="bg-[#1a1a1a]">{prov.toUpperCase()}</option>
                 ))}
               </select>
@@ -144,10 +157,8 @@ export default function Home() {
           </div>
         </div>
 
-{/* MÓDULO CONJUNTO: GALLERY + ACADEMY */}
-<section className="max-w-6xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-12 items-center">
-          
-          {/* Columna 1: Live Gallery */}
+        {/* DESKTOP (LIVE GALLERY + ACADEMY) */}
+        <section className="hidden lg:grid max-w-6xl mx-auto px-6 py-20 lg:grid-cols-2 gap-12 items-center">
           <div className="w-full relative group">
             <h2 className="text-white font-['Poppins'] text-2xl uppercase tracking-widest mb-8">Live Gallery</h2>
             <div className="relative aspect-video rounded-[2rem] overflow-hidden bg-[#050505] shadow-2xl border border-white/5">
@@ -166,11 +177,8 @@ export default function Home() {
             <p className="text-purple-400 text-[9px] font-black uppercase tracking-[0.3em] mt-6">Momentos reales, talentos reales</p>
           </div>
 
-          {/* Columna 2: Academy */}
           <div className="bg-white/[0.02] backdrop-blur-3xl rounded-[3.5rem] p-10 border border-white/5 shadow-2xl h-full flex flex-col justify-center">
             <div className="space-y-8">
-
-              
               <h2 className="text-3xl md:text-5xl font-light font-['Poppins'] leading-tight tracking-tight text-white">
                 Potenciá tu <span className="text-purple-500 font-normal">talento creativo</span>
               </h2>
@@ -180,6 +188,63 @@ export default function Home() {
               </p>
 
               <button onClick={() => navigate('/academy')} className="group flex items-center gap-5 text-[10px] font-black uppercase tracking-[0.3em] text-white hover:text-purple-400 transition-all">
+                EXPLORAR ACADEMY
+                <div className="p-3 rounded-full bg-white/5 group-hover:bg-purple-500/20 transition-all">
+                  <ArrowRight size={16} />
+                </div>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* MOBILE (PROMO VIDEOS + TARJETA ACADEMY) */}
+        <section className="block lg:hidden max-w-6xl mx-auto px-6 py-12 space-y-12">
+          <div className="w-full relative group">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-white font-['Poppins'] text-lg uppercase tracking-[0.2em] font-light">
+                Descubrí <span className="text-purple-500 font-normal">CLASSCODE</span>
+              </h2>
+            </div>
+
+            <div className="relative aspect-video rounded-[2rem] overflow-hidden bg-[#050505] shadow-[0_0_30px_rgba(168,85,247,0.15)] border border-white/10">
+              <AnimatePresence mode="wait">
+                <motion.video 
+                  key={currentVideo}
+                  src={mobilePromoVideos[currentVideo]} 
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }} 
+                  exit={{ opacity: 0 }} 
+                  transition={{ duration: 0.8 }} 
+                  className="w-full h-full object-cover" 
+                />
+              </AnimatePresence>
+            </div>
+
+            <div className="flex items-center justify-center gap-2 mt-4">
+              {mobilePromoVideos.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentVideo(idx)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${currentVideo === idx ? 'w-8 bg-purple-500' : 'w-2 bg-white/20 hover:bg-white/40'}`}
+                  aria-label={`Ver video ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white/[0.02] backdrop-blur-3xl rounded-[2.5rem] p-8 border border-white/5 shadow-2xl flex flex-col justify-center">
+            <div className="space-y-6">
+              <h2 className="text-2xl font-light font-['Poppins'] leading-tight tracking-tight text-white">
+                Potenciá tu <span className="text-purple-500 font-normal">talento creativo</span>
+              </h2>
+              <p className="text-gray-400 text-xs font-light leading-relaxed">
+                Descubre contenido técnico necesario para destacar en la industria creativa internacional.
+              </p>
+              <button onClick={() => navigate('/academy')} className="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-white hover:text-purple-400 transition-all">
                 EXPLORAR ACADEMY
                 <div className="p-3 rounded-full bg-white/5 group-hover:bg-purple-500/20 transition-all">
                   <ArrowRight size={16} />

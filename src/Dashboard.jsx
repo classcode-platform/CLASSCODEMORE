@@ -67,223 +67,147 @@ export default function Dashboard() {
   profile.location?.trim() && 
   profile.photo1 && 
   isProfessionalTestDone;
-    // Lógica de cálculo corregida: Usa el score de la Academy (data.score) y suma lo del perfil
-    const calculateTotalScore = (currentProfile) => {
-      let bonus = 0;
-      if (currentProfile.name?.trim()) bonus += 15;
-      if (currentProfile.job?.trim()) bonus += 15;
-      const photoCount = Array.from({ length: 10 }, (_, i) => currentProfile[`photo${i + 1}`]).filter(Boolean).length;
-      bonus += photoCount * 5; 
-      if (currentProfile.videoLink) bonus += 20;
-      
-      // El score base viene de lo que ya está en Firestore (Academy, etc)
-      return bonus + (currentProfile.academyBaseScore || 0);
+
+  const calculateTotalScore = (currentProfile) => {
+    let bonus = 0;
+    if (currentProfile.name?.trim()) bonus += 15;
+    if (currentProfile.job?.trim()) bonus += 15;
+    const photoCount = Array.from({ length: 10 }, (_, i) => currentProfile[`photo${i + 1}`]).filter(Boolean).length;
+    bonus += photoCount * 5; 
+    if (currentProfile.videoLink) bonus += 20;
+    
+    return bonus + (currentProfile.academyBaseScore || 0);
+  };
+
+  useEffect(() => {
+    let profUnsubscribe = () => {};
+    let chatUnsubscribe = () => {};
+
+    const authUnsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        profUnsubscribe = onSnapshot(doc(db, "professionals", user.uid), (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            const photosData = {};
+            data.photos?.forEach((url, i) => { if(i < 10) photosData[`photo${i+1}`] = url; });
+            
+            setProfile(prev => ({ 
+              ...prev, 
+              ...data, 
+              ...photosData, 
+              completedCourses: data.completedCourses || [],
+              academyBaseScore: data.score || 0 
+            }));
+          } else {
+            setProfile(prev => ({
+              ...prev,
+              name: user.displayName || 'NUEVO TALENTO',
+              completedCourses: []
+            }));
+          }
+          setLoading(false);
+        });
+        const q = query(collection(db, "chats"), where("participants", "array-contains", user.uid));
+        chatUnsubscribe = onSnapshot(q, (snap) => {
+            setMessages(snap.docs.map(chatDoc => ({ id: chatDoc.id, ...chatDoc.data() })));
+        });
+      } else { navigate('/'); }
+    });
+
+    return () => {
+      authUnsubscribe();
+      profUnsubscribe();
+      chatUnsubscribe();
     };
-  
-    useEffect(() => {
-      let profUnsubscribe = () => {};
-      let chatUnsubscribe = () => {};
-  
-      const authUnsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          profUnsubscribe = onSnapshot(doc(db, "professionals", user.uid), (docSnap) => {
-            if (docSnap.exists()) {
-              const data = docSnap.data();
-              const photosData = {};
-              data.photos?.forEach((url, i) => { if(i < 10) photosData[`photo${i+1}`] = url; });
-              
-              setProfile(prev => ({ 
-                ...prev, 
-                ...data, 
-                ...photosData, 
-                completedCourses: data.completedCourses || [],
-                // Guardamos el score de la DB por separado para el cálculo
-                academyBaseScore: data.score || 0 
-              }));
-            } else {
-              setProfile(prev => ({
-                ...prev,
-                name: user.displayName || 'NUEVO TALENTO',
-                completedCourses: []
-              }));
-            }
-            setLoading(false);
-          });
-          const q = query(collection(db, "chats"), where("participants", "array-contains", user.uid));
-          chatUnsubscribe = onSnapshot(q, (snap) => {
-              setMessages(snap.docs.map(chatDoc => ({ id: chatDoc.id, ...chatDoc.data() })));
-          });
-        } else { navigate('/'); }
-      });
-  
-      return () => {
-        authUnsubscribe();
-        profUnsubscribe();
-        chatUnsubscribe();
-      };
-    }, [navigate]);
-  
-    // FUNCIÓN DE GUARDADO ÚNICA (Persiste Score y Datos)
-    const persistProfile = async (updates) => {
-      const user = auth.currentUser;
-      if (!user) return;
-  
-      const newProfile = { ...profile, ...updates };
-      const photoList = Array.from({ length: 10 }, (_, i) => newProfile[`photo${i + 1}`]).filter(Boolean);
-      const finalScore = calculateTotalScore(newProfile);
-  
-      const dataToSave = {
-        ...updates,
-        photos: photoList,
-        score: finalScore,
-        uid: user.uid
-      };
-  
-      try {
-        await setDoc(doc(db, "professionals", user.uid), dataToSave, { merge: true });
-      } catch (e) { console.error("Error al persistir:", e); }
+  }, [navigate]);
+
+  const persistProfile = async (updates) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const newProfile = { ...profile, ...updates };
+    const photoList = Array.from({ length: 10 }, (_, i) => newProfile[`photo${i + 1}`]).filter(Boolean);
+    const finalScore = calculateTotalScore(newProfile);
+
+    const dataToSave = {
+      ...updates,
+      photos: photoList,
+      score: finalScore,
+      uid: user.uid
     };
-  
-    const handleSaveProfileData = async () => {
-      if (!profile.job) return setModal({ isOpen: true, title: 'ATENCIÓN', message: 'SELECCIONÁ CATEGORÍA.', type: 'warning' });
-      await persistProfile(profile);
-      setIsEditingProfile(false);
-      setModal({ isOpen: true, type: 'success', title: "ÉXITO", message: "PERFIL ACTUALIZADO." });
-    };
-  
-    const handleSwitchToClient = async () => {
-      try {
-        await updateDoc(doc(db, "users", auth.currentUser.uid), { role: 'client' });
-        navigate('/client-profile');
-      } catch (error) { console.error(error); }
-    };
-    const handleImageUpload = async (e, photoField) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      setUploadingStatus(prev => ({ ...prev, [photoField]: true }));
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', UPLOAD_PRESET);
-      try {
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
-        const data = await response.json();
-        if (data?.secure_url) {
-          const updates = { [photoField]: data.secure_url };
-          setProfile(prev => ({ ...prev, ...updates }));
-          await persistProfile(updates);
-        }
-      } finally { setUploadingStatus(prev => ({ ...prev, [photoField]: false })); }
-    };
-  
-    const handleVideoUpload = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      setUploadingStatus(prev => ({ ...prev, video: true }));
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', UPLOAD_PRESET);
-      formData.append('resource_type', 'video');
-      try {
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, { method: 'POST', body: formData });
-        const data = await response.json();
-        if (data?.secure_url) {
-          const updates = { videoLink: data.secure_url };
-          setProfile(prev => ({ ...prev, ...updates }));
-          await persistProfile(updates);
-        }
-      } finally { setUploadingStatus(prev => ({ ...prev, video: false })); }
-    };
-  
-    if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-black font-['Poppins']">Sincronizando...</div>;
-  
-    return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white font-['Open_Sans'] flex overflow-x-hidden uppercase antialiased relative">
-             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+
+    try {
+      await setDoc(doc(db, "professionals", user.uid), dataToSave, { merge: true });
+    } catch (e) { console.error("Error al persistir:", e); }
+  };
+
+  const handleSaveProfileData = async () => {
+    if (!profile.job) return setModal({ isOpen: true, title: 'ATENCIÓN', message: 'SELECCIONÁ CATEGORÍA.', type: 'warning' });
+    await persistProfile(profile);
+    setIsEditingProfile(false);
+    setModal({ isOpen: true, type: 'success', title: "ÉXITO", message: "PERFIL ACTUALIZADO." });
+  };
+
+  const handleSwitchToClient = async () => {
+    try {
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { role: 'client' });
+      navigate('/client-profile');
+    } catch (error) { console.error(error); }
+  };
+
+  const handleImageUpload = async (e, photoField) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingStatus(prev => ({ ...prev, [photoField]: true }));
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', UPLOAD_PRESET);
+    try {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+      const data = await response.json();
+      if (data?.secure_url) {
+        const updates = { [photoField]: data.secure_url };
+        setProfile(prev => ({ ...prev, ...updates }));
+        await persistProfile(updates);
+      }
+    } finally { setUploadingStatus(prev => ({ ...prev, [photoField]: false })); }
+  };
+
+  const handleVideoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingStatus(prev => ({ ...prev, video: true }));
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', UPLOAD_PRESET);
+    formData.append('resource_type', 'video');
+    try {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, { method: 'POST', body: formData });
+      const data = await response.json();
+      if (data?.secure_url) {
+        const updates = { videoLink: data.secure_url };
+        setProfile(prev => ({ ...prev, ...updates }));
+        await persistProfile(updates);
+      }
+    } finally { setUploadingStatus(prev => ({ ...prev, video: false })); }
+  };
+
+  if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-black font-['Poppins']">Sincronizando...</div>;
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-['Open_Sans'] flex overflow-x-hidden uppercase antialiased relative">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <motion.div animate={{ x: [-50, 50, -50], y: [-30, 30, -30], scale: [1, 1.2, 1] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="absolute top-0 left-0 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[150px]" />
         <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[130px]" />
       </div>
 
+      {/* TOPBAR MOBILE */}
       <header className="md:hidden fixed top-0 left-0 right-0 bg-black/60 backdrop-blur-xl border-b border-white/5 z-[100] px-8 py-6 flex justify-between items-center">
         <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer">CLASSCODE</div>
-        <div className="flex items-center gap-6">
-           <button onClick={() => setIsMobileMenuOpen(true)} className="text-white"><Menu size={28} /></button>
-        </div>
+        <button onClick={() => setIsMobileMenuOpen(true)} className="text-white"><Menu size={28} /></button>
       </header>
-      <AnimatePresence>
-  {isEditingProfile && (
-    <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[150] flex items-center justify-center p-6 antialiased uppercase">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 20 }} 
-        animate={{ opacity: 1, scale: 1, y: 0 }} 
-        exit={{ opacity: 0, scale: 0.95, y: 20 }} 
-        className="bg-[#050505] border border-white/10 rounded-[2.5rem] p-10 max-w-md w-full space-y-8 shadow-2xl relative border-t-purple-500/20"
-      >
-        <button onClick={() => setIsEditingProfile(false)} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors"><X size={24} /></button>
-        
-        <h3 className="text-[14px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/5 pb-6 font-bold">Editar Identidad</h3>
-        
-        <div className="space-y-6 text-left">
-          {/* Nombre */}
-          <div className="space-y-2">
-            <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Nombre Profesional</label>
-            <input className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase outline-none focus:border-purple-500 transition-all text-white" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
-          </div>
-          <div className="space-y-6 text-left">
-  {/* Especialidad (Rubro y Sub-especialidad) */}
-  <div className="space-y-4">
-    <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Especialidad</label>
-    
-    <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
-            value={profile.job || ""} 
-            onChange={e => setProfile({...profile, job: e.target.value, specialty: ""})}>
-      <option value="">SELECCIONAR RUBRO</option>
-      {Object.keys(RUBROS).map(rubro => <option key={rubro} value={rubro}>{rubro}</option>)}
-    </select>
 
-    {profile.job && (
-      <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
-              value={profile.specialty || ""} 
-              onChange={e => setProfile({...profile, specialty: e.target.value})}>
-        <option value="">SELECCIONAR ESPECIALIDAD</option>
-        {RUBROS[profile.job].map(spec => <option key={spec} value={spec}>{spec.toUpperCase()}</option>)}
-      </select>
-    )}
-  </div>
-
-  {/* Ubicación (Provincias) */}
-  <div className="space-y-2">
-    <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Ubicación</label>
-    <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
-            value={profile.location || ""} 
-            onChange={e => setProfile({...profile, location: e.target.value})}>
-      <option value="">SELECCIONAR PROVINCIA</option>
-      {PROVINCIAS.map(prov => <option key={prov} value={prov}>{prov.toUpperCase()}</option>)}
-    </select>
-  </div>
-</div>
-
-          {/* Toggle Visibilidad */}
-          <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
-            <label className="text-[8px] text-gray-600 font-black tracking-[0.3em]">Perfil Público (Visible)</label>
-            <input type="checkbox" checked={profile.isVisible || false} onChange={e => setProfile({...profile, isVisible: e.target.checked})} className="toggle toggle-primary" />
-          </div>
-
-          {/* Bio */}
-          <div className="space-y-2">
-            <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Biografía</label>
-            <textarea className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-[11px] h-24 resize-none font-bold outline-none focus:border-purple-500 transition-all text-white" value={profile.bio} onChange={e => setProfile({...profile, bio: e.target.value})} />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <button onClick={() => setIsEditingProfile(false)} className="py-4 bg-white/5 text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10">Descartar</button>
-          <button onClick={handleSaveProfileData} className="py-4 bg-purple-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-purple-500">Guardar</button>
-        </div>
-      </motion.div>
-    </div>
-  )}
-</AnimatePresence>
-
+      {/* SIDEBAR DESKTOP */}
       <aside className="hidden md:flex w-72 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50">
         <header className="mb-12 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">CLASSCODE</div>
@@ -303,20 +227,60 @@ export default function Dashboard() {
         </div>
 
         <nav className="flex-1 space-y-8 text-left">
-          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-4 text-white text-[10px] font-black tracking-widest leading-none"><LayoutDashboard size={18} className="text-purple-500"/> DASHBOARD</button>
-          <button onClick={() => navigate('/academy')} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all"><GraduationCap size={18}/> ACADEMY</button>
-          <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all"><Eye size={18}/> MI PERFIL PÚBLICO</button>
+          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-4 text-white text-[10px] font-black tracking-widest leading-none w-full"><LayoutDashboard size={18} className="text-purple-500"/> DASHBOARD</button>
+          <button onClick={() => navigate('/academy')} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all w-full"><GraduationCap size={18}/> ACADEMY</button>
+          <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all w-full"><Eye size={18}/> MI PERFIL PÚBLICO</button>
         </nav>
-        <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-700 hover:text-red-500 text-[10px] font-black tracking-widest transition-all mt-auto pt-8 border-t border-white/5 leading-none"><LogOut size={18}/> CERRAR SESIÓN</button>
+        <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-700 hover:text-red-500 text-[10px] font-black tracking-widest transition-all mt-auto pt-8 border-t border-white/5 leading-none w-full"><LogOut size={18}/> CERRAR SESIÓN</button>
       </aside>
 
+      {/* MENU MOBILE SIDEBAR OVERLAY */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[200] flex flex-col p-10 text-left md:hidden"
+          >
+            <div className="flex justify-between items-center mb-16">
+              <div>
+                <div onClick={() => { navigate('/home'); setIsMobileMenuOpen(false); }} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white cursor-pointer">CLASSCODE</div>
+                <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 uppercase">Talent</p>
+              </div>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="text-white p-2 bg-white/5 rounded-full"><X size={24} /></button>
+            </div>
+
+            <div className="mb-12">
+              <button onClick={() => { handleSwitchToClient(); setIsMobileMenuOpen(false); }} className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-5 rounded-2xl group transition-all">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400"><RefreshCcw size={16} /></div>
+                  <div>
+                    <p className="text-[7px] font-black text-gray-500 tracking-[0.2em]">SWITCH MOOD</p>
+                    <p className="text-[10px] font-black text-white tracking-widest uppercase mt-1">MODO EXPERIENCE</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            <nav className="flex-1 space-y-10 flex flex-col justify-center text-left pl-4">
+              <button onClick={() => { navigate('/dashboard'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-white text-[14px] font-black tracking-[0.2em]"><LayoutDashboard size={22} className="text-purple-500"/> DASHBOARD</button>
+              <button onClick={() => { navigate('/academy'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-400 hover:text-white text-[14px] font-black tracking-[0.2em] transition-all"><GraduationCap size={22}/> ACADEMY</button>
+              <button onClick={() => { navigate(`/profile/${auth.currentUser?.uid}`); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-400 hover:text-white text-[14px] font-black tracking-[0.2em] transition-all"><Eye size={22}/> MI PERFIL PÚBLICO</button>
+            </nav>
+
+            <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-500 hover:text-red-500 text-[12px] font-black tracking-[0.2em] transition-all pt-8 border-t border-white/5 mt-auto"><LogOut size={20}/> CERRAR SESIÓN</button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* MAIN CONTENT */}
       <main className="flex-1 md:ml-72 p-6 md:p-16 mt-24 md:mt-0 space-y-8 relative z-10 w-full max-w-[1600px] mx-auto">
-        
         <header className="flex justify-between items-center bg-white/[0.02] border border-white/5 p-6 rounded-[2rem] backdrop-blur-md">
           <div className="flex items-center gap-4 md:gap-6 text-left leading-none">
             <div className="relative group w-14 h-14 md:w-16 md:h-16 flex-shrink-0 leading-none">
                <div className="w-full h-full rounded-full border-2 border-purple-500/20 overflow-hidden bg-white/5 shadow-2xl leading-none">
-                 {profile.photo1 ? <img src={profile.photo1} className="w-full h-full object-cover" /> : <User size={24} className="m-auto mt-4 text-gray-700"/>}
+                 {profile.photo1 ? <img src={profile.photo1} className="w-full h-full object-cover" alt="" /> : <User size={24} className="m-auto mt-4 text-gray-700"/>}
                  {uploadingStatus.photo1 && <div className="absolute inset-0 bg-black/60 flex items-center justify-center animate-pulse text-[8px]">...</div>}
                </div>
                <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 rounded-full cursor-pointer transition-all leading-none">
@@ -376,14 +340,14 @@ export default function Dashboard() {
                     )}
                   </div>
                </div>
-               </section>
+            </section>
             <section className="space-y-6 leading-none">
                <h3 className="text-[9px] text-gray-500 font-black tracking-[0.4em] uppercase border-b border-white/5 pb-2 flex items-center gap-2 leading-none"><MessageSquare size={12}/> Mensajes</h3>
                <div className="space-y-3 max-h-[400px] overflow-y-auto no-scrollbar pr-2 leading-none">
                   {messages.length === 0 ? <p className="text-center py-10 text-[8px] text-gray-700 italic uppercase font-black tracking-widest leading-none">Sin conversaciones</p> : messages.map(chat => (
                     <div key={chat.id} onClick={() => navigate(`/chat/${chat.id}`)} className="flex justify-between items-center p-5 bg-white/[0.02] border border-white/5 hover:border-purple-500/30 rounded-[1.5rem] group transition-all cursor-pointer leading-none">
                        <div className="flex items-center gap-5 text-left leading-none">
-                          {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-12 h-12 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all border border-white/5" /> : <div className="w-12 h-12 rounded-full bg-white/5 text-gray-700 flex items-center justify-center leading-none"><User size={18}/></div>}
+                          {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-12 h-12 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all border border-white/5" alt="" /> : <div className="w-12 h-12 rounded-full bg-white/5 text-gray-700 flex items-center justify-center leading-none"><User size={18}/></div>}
                           <div className="leading-none">
                              <p className="text-[11px] font-black text-white uppercase tracking-tight leading-none">{chat.clientName || "USUARIO"}</p>
                              <p className="text-[8px] text-purple-400 font-black uppercase italic mt-1 leading-none">Nuevo mensaje</p>
@@ -409,7 +373,7 @@ export default function Dashboard() {
                   <div key={num} className="relative aspect-square bg-white/[0.02] border border-white/5 rounded-2xl md:rounded-3xl overflow-hidden group transition-all hover:border-purple-500/50 shadow-xl leading-none">
                     {profile[`photo${num}`] ? (
                       <>
-                        <img src={profile[`photo${num}`]} className="w-full h-full object-cover" />
+                        <img src={profile[`photo${num}`]} className="w-full h-full object-cover" alt="" />
                         <button onClick={async () => {
                           const updates = { [`photo${num}`]: '' };
                           setProfile(prev => ({ ...prev, ...updates }));
@@ -424,39 +388,61 @@ export default function Dashboard() {
                     )}
                   </div>
                 ))}
-                              </div>
+              </div>
             </section>
           </div>
         </div>
       </main>
 
+      {/* MODAL EDIT PROFILE */}
       <AnimatePresence>
         {isEditingProfile && (
           <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[150] flex items-center justify-center p-6 antialiased uppercase leading-none">
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-[#050505] border border-white/10 rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-12 max-w-md w-full space-y-12 shadow-2xl text-center relative leading-none border-t-purple-500/20 uppercase">
               <button onClick={() => setIsEditingProfile(false)} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full leading-none"><X size={24} /></button>
-              <h3 className="text-[14px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/5 pb-6 text-left leading-none font-bold uppercase">Editar Identidad</h3>
-              <div className="space-y-8 text-left leading-none uppercase">
+              <h3 className="text-[14px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/5 pb-6 text-left leading-none font-bold">Editar Identidad</h3>
+              <div className="space-y-8 text-left leading-none">
                 <div className="space-y-3 leading-none">
                   <label className="text-[8px] text-gray-600 font-black uppercase tracking-[0.3em] pl-1 leading-none">Nombre Profesional</label>
                   <input className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-[12px] font-bold uppercase outline-none focus:border-purple-500 transition-all text-white leading-none shadow-inner" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
                 </div>
-                <div className="space-y-3 leading-none uppercase">
-                  <label className="text-[8px] text-gray-600 font-black uppercase tracking-[0.3em] pl-1 leading-none">Especialidad</label>
-                  <select 
-  className="..." 
-  value={profile.job} 
-  onChange={e => setProfile({...profile, job: e.target.value})}
->
-  <option value="">SELECCIONAR RUBRO</option>
-  {categories.map(cat => (
-    <option key={cat.name} value={cat.name}>{cat.name.toUpperCase()}</option>
-  ))}
-</select>
+                <div className="space-y-4 text-left">
+                  <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Especialidad</label>
+                  <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500 mb-4" 
+                          value={profile.job || ""} 
+                          onChange={e => setProfile({...profile, job: e.target.value, specialty: ""})}>
+                    <option value="">SELECCIONAR RUBRO</option>
+                    {Object.keys(RUBROS).map(rubro => <option key={rubro} value={rubro}>{rubro}</option>)}
+                  </select>
+
+                  {profile.job && (
+                    <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
+                            value={profile.specialty || ""} 
+                            onChange={e => setProfile({...profile, specialty: e.target.value})}>
+                      <option value="">SELECCIONAR ESPECIALIDAD</option>
+                      {RUBROS[profile.job].map(spec => <option key={spec} value={spec}>{spec.toUpperCase()}</option>)}
+                    </select>
+                  )}
                 </div>
-                <div className="space-y-3 leading-none uppercase">
+
+                <div className="space-y-2">
+                  <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Ubicación</label>
+                  <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
+                          value={profile.location || ""} 
+                          onChange={e => setProfile({...profile, location: e.target.value})}>
+                    <option value="">SELECCIONAR PROVINCIA</option>
+                    {PROVINCIAS.map(prov => <option key={prov} value={prov}>{prov.toUpperCase()}</option>)}
+                  </select>
+                </div>
+
+                <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
+                  <label className="text-[8px] text-gray-600 font-black tracking-[0.3em]">Perfil Público (Visible)</label>
+                  <input type="checkbox" checked={profile.isVisible || false} onChange={e => setProfile({...profile, isVisible: e.target.checked})} className="toggle toggle-primary" />
+                </div>
+
+                <div className="space-y-3 leading-none">
                   <label className="text-[8px] text-gray-600 font-black uppercase tracking-[0.3em] pl-1 leading-none">Biografía</label>
-                  <textarea className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-[11px] h-32 resize-none font-bold outline-none focus:border-purple-500 transition-all text-white font-['Open_Sans'] leading-relaxed shadow-inner uppercase" value={profile.bio} onChange={e => setProfile({...profile, bio: e.target.value})} />
+                  <textarea className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-[11px] h-32 resize-none font-bold outline-none focus:border-purple-500 transition-all text-white font-['Open_Sans'] leading-relaxed shadow-inner" value={profile.bio} onChange={e => setProfile({...profile, bio: e.target.value})} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 pt-4 leading-none"><button onClick={() => setIsEditingProfile(false)} className="py-5 bg-white/5 text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all hover:bg-white/10 leading-none">DESCARTAR</button><button onClick={handleSaveProfileData} className="py-5 bg-purple-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-purple-900/40 hover:bg-purple-500 active:scale-95 transition-all leading-none">GUARDAR</button></div>
@@ -464,7 +450,8 @@ export default function Dashboard() {
           </div>
         )}
       </AnimatePresence>
+
       <CustomModal isOpen={modal.isOpen} onClose={() => setModal({ ...modal, isOpen: false })} title={modal.title} message={modal.message} type={modal.type} />
     </div>
   );
-}     
+}
