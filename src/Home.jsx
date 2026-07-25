@@ -6,11 +6,11 @@ import {
   Utensils, Video, ArrowRight, User, LogOut, 
   Home as HomeIcon, Shirt, Palette, PartyPopper, Zap, 
   Users, Theater, Smartphone, Clapperboard, CalendarDays,
-  Instagram, Linkedin, MessageCircle, Send, Globe, ShieldCheck, Check
+  Instagram, Linkedin, MessageCircle, Send, Globe, ShieldCheck, Check, X
 } from 'lucide-react';
 import { auth, db } from './firebase'; 
 import { signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore'; 
+import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore'; 
 
 export default function Home() {
   const navigate = useNavigate();
@@ -24,6 +24,9 @@ export default function Home() {
   // Estados desplegables custom
   const [isCatOpen, setIsCatOpen] = useState(false);
   const [isLocOpen, setIsLocOpen] = useState(false);
+
+  // Estado Modal Suscripción Pop-Up
+  const [showSubscribeModal, setShowSubscribeModal] = useState(false);
 
   const catRef = useRef(null);
   const locRef = useRef(null);
@@ -66,6 +69,24 @@ export default function Home() {
     "La Rioja", "La Pampa", "Santiago del Estero", "Catamarca", "Santa Cruz", "Tierra del Fuego"
   ];
 
+  // Lógica para mostrar el pop-up tras 7 segundos si no lo cerró/suscribió antes
+  useEffect(() => {
+    const isSubscribed = localStorage.getItem('classcode_subscribed');
+    const isModalDismissed = localStorage.getItem('classcode_modal_dismissed');
+
+    if (!isSubscribed && !isModalDismissed) {
+      const timer = setTimeout(() => {
+        setShowSubscribeModal(true);
+      }, 7000); // 7 segundos tras ingresar
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleCloseModal = () => {
+    setShowSubscribeModal(false);
+    localStorage.setItem('classcode_modal_dismissed', 'true');
+  };
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (catRef.current && !catRef.current.contains(event.target)) setIsCatOpen(false);
@@ -99,8 +120,24 @@ export default function Home() {
     navigate(`/results?category=${encodeURIComponent(catName)}`);
   };
 
-  const handleSubscribe = (e) => {
+  // Función de suscripción conectada a Firestore
+  const handleSubscribe = async (e) => {
     e.preventDefault();
+    if (!email) return;
+
+    try {
+      await addDoc(collection(db, "newsletter"), {
+        email: email,
+        createdAt: serverTimestamp(),
+        source: 'home_popup'
+      });
+
+      localStorage.setItem('classcode_subscribed', 'true');
+      setShowSubscribeModal(false);
+      setEmail('');
+    } catch (error) {
+      console.error("Error al guardar la suscripción en Firestore:", error);
+    }
   };
 
   useEffect(() => {
@@ -125,7 +162,7 @@ export default function Home() {
         <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-0 w-[200px] md:w-[500px] h-[200px] md:h-[500px] bg-indigo-600/10 rounded-full blur-[90px] md:blur-[130px]" />
       </div>
 
-      <header className="p-6 md:p-8 flex justify-end items-center max-w-7xl mx-auto w-full relative z-[60]">
+      <header className="p-4 md:p-8 flex justify-end items-center max-w-7xl mx-auto w-full relative z-[60]">
         <div className="flex items-center gap-6">
           <button onClick={handleAccount} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-white transition-all flex items-center gap-2 font-bold"><User size={12}/> MI CUENTA</button>
           <button onClick={handleLogout} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-red-400 transition-all flex items-center gap-2 font-bold"><LogOut size={12}/> SALIR</button>
@@ -133,19 +170,19 @@ export default function Home() {
       </header>
 
       <main className="flex-grow relative z-10">
-        <div className="pt-8 md:pt-12 pb-8 md:pb-16 px-4 text-center">
-          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 md:mb-12">
-            <h1 className="text-4xl md:text-6xl text-white mb-4 md:mb-6 uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">CLASSCODE</h1>
-            <p className="text-gray-400 text-[10px] md:text-xs font-light tracking-[0.3em] uppercase">Descubre o comparte tu talento con el mundo</p>
+        <div className="pt-4 md:pt-12 pb-6 md:pb-16 px-4 text-center">
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6 md:mb-12">
+            <h1 className="text-4xl md:text-6xl text-white mb-2 md:mb-6 uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">CLASSCODE</h1>
+            <p className="hidden md:block text-gray-400 text-xs font-light tracking-[0.3em] uppercase">Descubre o comparte tu talento con el mundo</p>
           </motion.div>
 
           {/* BUSCADOR */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="max-w-4xl mx-auto bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-3 flex flex-col md:flex-row items-center gap-2 shadow-[0_0_50px_rgba(0,0,0,0.3)] relative z-50">
             
             {/* INPUT BUSCAR */}
-            <div className="flex-1 flex items-center px-6 py-4 w-full border-b md:border-b-0 md:border-r border-white/10">
+            <div className="flex-1 flex items-center px-6 py-3.5 md:py-4 w-full border-b md:border-b-0 md:border-r border-white/10">
               <Search className="text-purple-400 w-5 h-5 mr-4 shrink-0" />
-              <input type="text" placeholder="BUSCAR PROFESIONALES..." className="bg-transparent border-none outline-none text-white w-full font-normal uppercase text-[11px] placeholder:text-gray-600 tracking-widest" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              <input type="text" placeholder="BUSCAR PROFESIONALES..." className="bg-transparent border-none outline-none text-white w-full font-normal uppercase text-[11px] placeholder:text-gray-500 tracking-widest" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
 
             {/* DROPDOWN CATEGORÍAS */}
@@ -153,7 +190,7 @@ export default function Home() {
               <button 
                 type="button"
                 onClick={() => { setIsCatOpen(!isCatOpen); setIsLocOpen(false); }}
-                className="w-full flex items-center justify-between px-6 py-4 text-left uppercase text-[11px] tracking-widest text-gray-300 hover:text-white transition-all"
+                className="w-full flex items-center justify-between px-6 py-3.5 md:py-4 text-left uppercase text-[11px] tracking-widest text-gray-300 hover:text-white transition-all"
               >
                 <span className={selectedCategory ? "text-purple-300 font-bold" : "text-gray-400"}>
                   {selectedCategory || "CATEGORÍAS"}
@@ -167,7 +204,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 right-0 mt-2 bg-[#0a0a0a]/95 backdrop-blur-3xl border border-white/15 rounded-2xl shadow-2xl max-h-72 overflow-y-auto z-50 p-2 space-y-1"
+                    className="absolute top-full left-0 right-0 mt-2 bg-[#0d0d0d] border border-white/20 rounded-2xl shadow-2xl max-h-72 overflow-y-auto z-[100] p-2 space-y-1"
                   >
                     <div 
                       onClick={() => { setSelectedCategory(''); setIsCatOpen(false); }}
@@ -185,7 +222,6 @@ export default function Home() {
                           className={`px-3 py-2.5 text-[10px] uppercase tracking-widest rounded-xl cursor-pointer transition-all flex items-center justify-between gap-3 ${selectedCategory === c.name ? 'bg-purple-600/20 text-white font-bold border border-purple-500/30' : 'text-gray-300 hover:bg-white/5'}`}
                         >
                           <div className="flex items-center gap-3">
-                            {/* ÍCONOS Y GRADIENTES SOLAMENTE EN MOBILE (lg:hidden) */}
                             <div className={`lg:hidden w-7 h-7 rounded-lg bg-gradient-to-br ${c.gradient} flex items-center justify-center shrink-0 shadow-sm`}>
                               <IconComponent className="text-white w-3.5 h-3.5" />
                             </div>
@@ -205,7 +241,7 @@ export default function Home() {
               <button 
                 type="button"
                 onClick={() => { setIsLocOpen(!isLocOpen); setIsCatOpen(false); }}
-                className="w-full flex items-center justify-between px-6 py-4 text-left uppercase text-[11px] tracking-widest text-gray-300 hover:text-white transition-all"
+                className="w-full flex items-center justify-between px-6 py-3.5 md:py-4 text-left uppercase text-[11px] tracking-widest text-gray-300 hover:text-white transition-all"
               >
                 <div className="flex items-center gap-3">
                   <MapPin className="text-purple-400 w-5 h-5 shrink-0" />
@@ -222,7 +258,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 right-0 mt-2 bg-[#0a0a0a]/95 backdrop-blur-3xl border border-white/15 rounded-2xl shadow-2xl max-h-60 overflow-y-auto z-50 p-2"
+                    className="absolute top-full left-0 right-0 mt-2 bg-[#0d0d0d] border border-white/20 rounded-2xl shadow-2xl max-h-60 overflow-y-auto z-[100] p-2"
                   >
                     <div 
                       onClick={() => { setLocation(''); setIsLocOpen(false); }}
@@ -246,11 +282,11 @@ export default function Home() {
               </AnimatePresence>
             </div>
 
-            <button type="button" onClick={handleSearch} className="w-full md:w-auto px-10 py-4 rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] hover:bg-gray-200 transition-all shadow-xl">BUSCAR</button>
+            <button type="button" onClick={handleSearch} className="w-full md:w-auto px-10 py-4 rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] hover:bg-gray-200 transition-all shadow-xl mt-1 md:mt-0">BUSCAR</button>
           </motion.div>
         </div>
 
-        {/* GRILLA DE TARJETAS (SOLO EN DESKTOP / OCULTA EN MOBILE) */}
+        {/* GRILLA DE TARJETAS (SOLO DESKTOP) */}
         <div className="hidden lg:block max-w-6xl mx-auto px-6 pb-20">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {categories.map((cat) => (
@@ -303,15 +339,9 @@ export default function Home() {
           </div>
         </section>
 
-        {/* MOBILE: CARRUSEL DE VIDEOS DIRECTO TRAS EL BUSCADOR */}
-        <section className="block lg:hidden max-w-6xl mx-auto px-6 py-8 space-y-10">
-          <div className="w-full relative group">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-white font-['Poppins'] text-lg uppercase tracking-[0.2em] font-light">
-                Descubrí <span className="text-purple-500 font-normal">CLASSCODE</span>
-              </h2>
-            </div>
-
+        {/* MOBILE: CARRUSEL DE VIDEOS */}
+        <section className="block lg:hidden max-w-6xl mx-auto px-4 py-4 space-y-6">
+          <div className="w-full relative">
             <div className="relative aspect-video rounded-[2rem] overflow-hidden bg-[#050505] shadow-[0_0_30px_rgba(168,85,247,0.15)] border border-white/10">
               <AnimatePresence mode="wait">
                 <motion.video 
@@ -330,12 +360,12 @@ export default function Home() {
               </AnimatePresence>
             </div>
 
-            <div className="flex items-center justify-center gap-2 mt-4">
+            <div className="flex items-center justify-center gap-2 mt-3">
               {mobilePromoVideos.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentVideo(idx)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${currentVideo === idx ? 'w-8 bg-purple-500' : 'w-2 bg-white/20 hover:bg-white/40'}`}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${currentVideo === idx ? 'w-6 bg-purple-500' : 'w-1.5 bg-white/20'}`}
                   aria-label={`Ver video ${idx + 1}`}
                 />
               ))}
@@ -343,74 +373,115 @@ export default function Home() {
           </div>
 
           {/* TARJETA ACADEMY MOBILE */}
-          <div className="bg-white/[0.02] backdrop-blur-3xl rounded-[2.5rem] p-8 border border-white/5 shadow-2xl flex flex-col justify-center">
-            <div className="space-y-6">
-              <h2 className="text-2xl font-light font-['Poppins'] leading-tight tracking-tight text-white">
-                Formación técnica <span className="text-purple-500 font-normal">especializada</span>
+          <div className="bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] p-6 border border-white/5 shadow-2xl flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-base font-normal font-['Poppins'] text-white">
+                CLASSCODE <span className="text-purple-400 font-light">Academy</span>
               </h2>
-              <p className="text-gray-400 text-xs font-light leading-relaxed">
-                Accedé a guías, workflows y tutoriales clave para potenciar tus producciones y proyectos.
-              </p>
-              <button onClick={() => navigate('/academy')} className="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-white hover:text-purple-400 transition-all">
-                EXPLORAR ACADEMY
-                <div className="p-3 rounded-full bg-white/5 group-hover:bg-purple-500/20 transition-all">
-                  <ArrowRight size={16} />
-                </div>
-              </button>
+              <p className="text-gray-400 text-[10px] font-light mt-1">Formación técnica para creativos.</p>
             </div>
+            <button onClick={() => navigate('/academy')} className="p-3.5 rounded-2xl bg-white/5 border border-white/10 text-white hover:text-purple-400 transition-all shrink-0">
+              <ArrowRight size={16} />
+            </button>
           </div>
         </section>
       </main>
 
-      {/* FOOTER */}
-      <footer className="relative bg-[#0a0a0a] border-t border-white/5 pt-16 pb-12 px-6 overflow-hidden uppercase font-normal">
-        <div className="absolute bottom-0 left-1/4 w-[500px] h-[400px] bg-purple-600/5 blur-[120px] pointer-events-none" />
+      {/* FOOTER LIGERO Y LIMPIO */}
+      <footer className="relative bg-[#0a0a0a] border-t border-white/5 pt-12 pb-10 px-6 overflow-hidden uppercase font-normal">
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16 text-center lg:text-left">
-            <div className="lg:col-span-7 space-y-10">
-              <div className="space-y-4">
-                <h2 className="text-[26px] font-['Poppins'] tracking-[0.05em] text-white leading-none font-normal">CLASSCODE<sup className="text-[10px] ml-1 font-bold">®</sup></h2>
-                <p className="text-purple-500 text-[9px] font-black tracking-[0.4em] mt-2 leading-none">TALENTO ARGENTINO</p>
-                <p className="text-gray-500 text-[11px] leading-relaxed max-w-sm normal-case font-light mx-auto lg:mx-0"> La plataforma que conecta talento creativo con oportunidades. </p>
-              </div>
-              <div className="flex flex-col md:flex-row items-center md:items-start justify-between lg:justify-start gap-10 lg:gap-20">
-                <div className="flex gap-4">
-                  <a href="https://www.instagram.com/classcodevisual/" target="_blank" rel="noreferrer" className="p-4 bg-white/[0.03] border border-white/10 rounded-2xl text-gray-400 hover:text-white transition-all shadow-xl hover:border-purple-500/50"><Instagram size={20} /></a>
-                  <a href="#" className="p-4 bg-white/[0.03] border border-white/10 rounded-2xl text-gray-400 hover:text-white transition-all shadow-xl hover:border-purple-500/50"><Linkedin size={20} /></a>
-                  <a href="#" className="p-4 bg-white/[0.03] border border-white/10 rounded-2xl text-gray-400 hover:text-white transition-all shadow-xl hover:border-purple-500/50"><MessageCircle size={20} /></a>
-                </div>
-                <div className="space-y-4">
-                  <h4 className="text-white text-[9px] font-black tracking-[0.3em] opacity-40 uppercase leading-none">Soluciones</h4>
-                  <nav className="flex flex-col gap-3 text-[10px] font-bold tracking-widest text-gray-500"><button onClick={() => navigate('/results')} className="hover:text-purple-400 transition-all text-center lg:text-left leading-none uppercase">MARKETPLACE</button><button onClick={() => navigate('/academy')} className="hover:text-purple-400 transition-all text-center lg:text-left leading-none uppercase">ACADEMY</button></nav>
-                </div>
-                <div className="space-y-4">
-                  <h4 className="text-white text-[9px] font-black tracking-[0.3em] opacity-40 uppercase leading-none">Legal</h4>
-                  <nav className="flex flex-col gap-3 text-[10px] font-bold tracking-widest text-gray-500"><button onClick={() => navigate('/terms')} className="hover:text-purple-400 transition-all text-center lg:text-left leading-none uppercase">TÉRMINOS</button><button onClick={() => navigate('/privacy')} className="hover:text-purple-400 transition-all text-center lg:text-left leading-none uppercase">PRIVACIDAD</button></nav>
-                </div>
-              </div>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-10 text-center md:text-left">
+            <div className="space-y-2">
+              <h2 className="text-[22px] font-['Poppins'] tracking-[0.05em] text-white leading-none font-normal">CLASSCODE<sup className="text-[10px] ml-1 font-bold">®</sup></h2>
+              <p className="text-purple-500 text-[9px] font-black tracking-[0.4em] leading-none">TALENTO ARGENTINO</p>
             </div>
 
-            <div className="lg:col-span-5">
-              <div className="bg-white/[0.02] backdrop-blur-3xl border border-white/10 p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity"><Send size={80} /></div>
-                <h4 className="text-[11px] font-normal tracking-[0.3em] text-white mb-4 uppercase leading-relaxed">
-                  CONECTÁ &nbsp;|&nbsp; APRENDÉ &nbsp;|&nbsp; TRABAJÁ.
-                </h4>
-                <p className="text-gray-500 text-[11px] tracking-widest leading-relaxed mb-6 normal-case font-light">Actualizaciones para el talento argentino.</p>
-                <form onSubmit={handleSubscribe} className="space-y-4 font-normal">
-                  <input type="email" required placeholder="EMAIL" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-[10px] font-bold tracking-widest outline-none focus:border-purple-500/50 transition-all text-white shadow-inner uppercase font-['Poppins']" />
-                  <button type="submit" className="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl font-black text-[10px] tracking-[0.3em] transition-all uppercase leading-none shadow-xl">SUSCRIBITE</button>
-                </form>
-              </div>
+            <div className="flex gap-4">
+              <a href="https://www.instagram.com/classcodevisual/" target="_blank" rel="noreferrer" className="p-3 bg-white/[0.03] border border-white/10 rounded-2xl text-gray-400 hover:text-white transition-all"><Instagram size={18} /></a>
+              <a href="#" className="p-3 bg-white/[0.03] border border-white/10 rounded-2xl text-gray-400 hover:text-white transition-all"><Linkedin size={18} /></a>
+              <a href="#" className="p-3 bg-white/[0.03] border border-white/10 rounded-2xl text-gray-400 hover:text-white transition-all"><MessageCircle size={18} /></a>
             </div>
+
+            <nav className="flex items-center gap-6 text-[10px] font-bold tracking-widest text-gray-500">
+              <button onClick={() => navigate('/results')} className="hover:text-purple-400 transition-all uppercase">MARKETPLACE</button>
+              <button onClick={() => navigate('/academy')} className="hover:text-purple-400 transition-all uppercase">ACADEMY</button>
+              <button onClick={() => navigate('/terms')} className="hover:text-purple-400 transition-all uppercase">TÉRMINOS</button>
+            </nav>
           </div>
 
-          <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 leading-none uppercase font-normal text-center md:text-left">
+          <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 leading-none uppercase font-normal text-center md:text-left">
             <div className="flex items-center gap-3 text-gray-700 leading-none"><Globe size={14} className="text-purple-500/50" /><p className="text-[9px] font-black tracking-[0.4em] leading-none">© 2026 CLASSCODE • ARGENTINA</p></div>
             <div className="flex items-center gap-3 text-gray-800 leading-none"><ShieldCheck size={14} /><span className="text-[8px] font-bold tracking-[0.2em] leading-none uppercase">Encrypted Infrastructure</span></div>
           </div>
         </div>
       </footer>
+
+      {/* POP-UP MODAL SUSCRIPCIÓN (EMERGE TEMPORIZADO) */}
+      <AnimatePresence>
+        {showSubscribeModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+            onClick={handleCloseModal}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#0e0e10] border border-white/15 rounded-[2.5rem] p-6 md:p-8 max-w-md w-full relative shadow-[0_0_50px_rgba(168,85,247,0.2)] overflow-hidden"
+            >
+              {/* Botón cerrar */}
+              <button 
+                onClick={handleCloseModal}
+                className="absolute top-5 right-5 p-2 text-gray-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-all"
+              >
+                <X size={18} />
+              </button>
+
+              <div className="text-center space-y-4 pt-2">
+                <div className="w-12 h-12 rounded-2xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center mx-auto text-purple-400">
+                  <Send size={20} />
+                </div>
+
+                <h3 className="text-xl font-['Poppins'] uppercase font-normal text-white tracking-wide">
+                  SUMATE A CLASSCODE
+                </h3>
+
+                <p className="text-gray-400 text-xs leading-relaxed font-light">
+                  Recibí novedades exclusivas, llamados a castings y actualizaciones para el talento argentino.
+                </p>
+
+                <form onSubmit={handleSubscribe} className="space-y-3 pt-2">
+                  <input 
+                    type="email" 
+                    required 
+                    placeholder="TU EMAIL..." 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    className="w-full bg-white/5 border border-white/15 p-4 rounded-2xl text-[11px] font-bold tracking-widest outline-none focus:border-purple-500 transition-all text-white uppercase text-center placeholder:text-gray-600" 
+                  />
+                  <button 
+                    type="submit" 
+                    className="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl font-black text-[10px] tracking-[0.3em] transition-all uppercase leading-none shadow-xl"
+                  >
+                    SUSCRIBIRME
+                  </button>
+                </form>
+
+                <button 
+                  onClick={handleCloseModal}
+                  className="text-[9px] uppercase tracking-widest text-gray-500 hover:text-gray-300 transition-all font-bold pt-1"
+                >
+                  NO, GRACIAS
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
