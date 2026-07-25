@@ -37,9 +37,9 @@ export default function Home() {
     "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1200&auto=format&fit=crop"
   ];
 
-  // VIDEOS DE PROMO MOBILE (con query param v=2 para forzar actualización de caché)
+  // VIDEOS DE PROMO MOBILE (con el nuevo link integrado y query param de caché)
   const mobilePromoVideos = [
-    "https://res.cloudinary.com/dsyfitywd/video/upload/Copia_de_Video_C1_r2ysay.mp4?v=2",
+    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784949077/Copia_de_Copia_de_Video_C1_4_pyxhsz.mp4?v=2",
     "https://res.cloudinary.com/dsyfitywd/video/upload/Video_C1_4_woqohu.mp4?v=2",
     "https://res.cloudinary.com/dsyfitywd/video/upload/v1784949077/Copia_de_Copia_de_Video_C1_2_wkpqm9.mp4?v=2"
   ];
@@ -174,24 +174,22 @@ export default function Home() {
           {/* ENCABEZADO ADAPTATIVO */}
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6 md:mb-12 flex flex-col items-center justify-center">
             
-            {/* SOLO MOBILE: SVG limpia de alta nitidez */}
-            <div className="block md:hidden">
+            {/* SOLO MOBILE: Isologotipo grande centrado */}
+            <div className="block md:hidden mb-4">
               <img 
                 src="/LOGOSTO.svg" 
                 alt="CLASSCODE" 
-                className="w-10 h-10 object-contain" 
+                className="w-16 h-16 object-contain mx-auto" 
               />
             </div>
 
-            {/* SOLO DESKTOP */}
-            <div className="hidden md:block text-center">
-              <h1 className="text-4xl md:text-6xl text-white mb-2 md:mb-6 uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">
-                CLASSCODE
-              </h1>
-              <p className="text-gray-400 text-xs font-light tracking-[0.3em] uppercase">
-                Descubre o comparte tu talento con el mundo
-              </p>
-            </div>
+            {/* TÍTULO PRINCIPAL (Visible en mobile y desktop) */}
+            <h1 className="text-3xl md:text-6xl text-white mb-2 md:mb-6 uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">
+              CLASSCODE
+            </h1>
+            <p className="text-gray-400 text-[10px] md:text-xs font-light tracking-[0.3em] uppercase">
+              Descubre o comparte tu talento con el mundo
+            </p>
 
           </motion.div>
 
