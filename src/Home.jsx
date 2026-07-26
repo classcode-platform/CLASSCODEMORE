@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, MapPin, ChevronDown, Camera, Music, Sparkles, 
-  Utensils, Video, ArrowRight, User, LogOut, 
+  Utensils, Video, User, LogOut, 
   Home as HomeIcon, Shirt, Palette, PartyPopper, Zap, 
   Users, Theater, Smartphone, Clapperboard, CalendarDays,
   Instagram, Linkedin, MessageCircle, Send, Globe, ShieldCheck, Check, X,
-  Layers, Calendar, GraduationCap, PlayCircle, Briefcase
+  GraduationCap, PlayCircle, Briefcase
 } from 'lucide-react';
 import { auth, db } from './firebase'; 
 import { signOut } from 'firebase/auth';
@@ -19,7 +19,6 @@ export default function Home() {
   const [location, setLocation] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [email, setEmail] = useState('');
-  const [currentPhoto, setCurrentPhoto] = useState(0);
   const [currentVideo, setCurrentVideo] = useState(0);
 
   // Estados desplegables custom
@@ -32,18 +31,20 @@ export default function Home() {
   const catRef = useRef(null);
   const locRef = useRef(null);
 
-  const eventPhotos = [
-    "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1200&auto=format&fit=crop"
+  // Orden exacto de los videos solicitado
+  const cloudinaryVideos = [
+    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784946617/Video_C1_4_woqohu.mp4",
+    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784946596/Copia_de_Video_C1_r2ysay.mp4",
+    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784958578/Copia_de_Copia_de_Copia_de_Video_C1_tj3kdn.mp4",
+    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784953979/Copia_de_Copia_de_Video_C1_4_pyxhsz.mp4"
   ];
 
-  const mobilePromoVideos = [
-    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784958578/Copia_de_Copia_de_Copia_de_Video_C1_tj3kdn.mp4",
-    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784949077/Copia_de_Copia_de_Video_C1_4_pyxhsz.mp4?v=2",
-    "https://res.cloudinary.com/dsyfitywd/video/upload/Video_C1_4_woqohu.mp4?v=2",
-    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784949077/Copia_de_Copia_de_Video_C1_2_wkpqm9.mp4?v=2"
-  ];
+  useEffect(() => {
+    const videoInterval = setInterval(() => {
+      setCurrentVideo((prev) => (prev + 1) % cloudinaryVideos.length);
+    }, 5000);
+    return () => clearInterval(videoInterval);
+  }, [cloudinaryVideos.length]);
 
   const categories = [
     { name: 'Fotografía', count: '+ profesionales', icon: Camera, gradient: 'from-cyan-400 to-blue-500' },
@@ -140,20 +141,6 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    const photoTimer = setInterval(() => {
-      setCurrentPhoto((prev) => (prev + 1) % eventPhotos.length);
-    }, 4000);
-    return () => clearInterval(photoTimer);
-  }, [eventPhotos.length]);
-
-  useEffect(() => {
-    const videoTimer = setInterval(() => {
-      setCurrentVideo((prev) => (prev + 1) % mobilePromoVideos.length);
-    }, 6000);
-    return () => clearInterval(videoTimer);
-  }, [mobilePromoVideos.length]);
-
   return (
     <div className="min-h-screen bg-[#0a0a0a] font-['Open_Sans'] flex flex-col relative overflow-hidden antialiased text-white">
       {/* LUCES DINÁMICAS DE FONDO */}
@@ -170,27 +157,20 @@ export default function Home() {
       </header>
 
       <main className="flex-grow relative z-10">
-        <div className="pt-4 md:pt-12 pb-6 md:pb-16 px-4 text-center">
+        <div className="max-w-4xl mx-auto px-4 pt-2 pb-12 flex flex-col items-center">
           
-          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 md:mb-16 flex flex-col items-center justify-center">
-            <div className="block md:hidden mb-4">
-              <img 
-                src="/LOGOSTO.svg" 
-                alt="CLASSCODE" 
-                className="w-20 h-20 object-contain mx-auto" 
-              />
-            </div>
-
-            <h1 className="text-4xl md:text-7xl text-white mb-3 md:mb-6 uppercase font-['Poppins'] font-normal tracking-[0.06em] leading-none">
+          {/* HEADER PRINCIPAL CON LOGO PROTAGONISTA AMPLIADO Y DESCRIPTOR */}
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 text-center">
+            <h1 className="text-6xl md:text-8xl text-white mb-3 uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">
               CLASSCODE
             </h1>
-            <p className="text-gray-400 text-[10px] md:text-xs font-light tracking-[0.3em] uppercase max-w-lg mx-auto">
-              Organiza producciones y eventos completos o conecta con el mejor talento
+            <p className="text-purple-400 text-[10px] md:text-xs font-black tracking-[0.4em] uppercase max-w-lg mx-auto">
+              TALENTO CREATIVO ARGENTINO
             </p>
           </motion.div>
 
           {/* BUSCADOR */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="max-w-4xl mx-auto bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-3 flex flex-col md:flex-row items-center gap-2 shadow-[0_0_50px_rgba(0,0,0,0.3)] relative z-50">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="w-full bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-3 flex flex-col md:flex-row items-center gap-2 shadow-[0_0_40px_rgba(0,0,0,0.3)] relative z-50 mb-8">
             
             <div className="flex-1 flex items-center px-6 py-3.5 md:py-4 w-full border-b md:border-b-0 md:border-r border-white/10">
               <Search className="text-purple-400 w-5 h-5 mr-4 shrink-0" />
@@ -294,14 +274,66 @@ export default function Home() {
 
             <button type="button" onClick={handleSearch} className="w-full md:w-auto px-10 py-4 rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] hover:bg-gray-200 transition-all shadow-xl mt-1 md:mt-0">BUSCAR</button>
           </motion.div>
+
+          {/* CONTENEDOR CENTRAL: VIDEO + BOTONES AL COSTADO (EN ESCRITORIO) */}
+          <div className="w-full max-w-3xl flex flex-col md:flex-row items-center justify-center gap-4 mb-6">
+            
+            {/* 3 BOTONES VERTICALES A LA IZQUIERDA EN ESCRITORIO (FILA EN MÓVIL) */}
+            <div className="flex md:flex-col items-center justify-center gap-4 order-2 md:order-1">
+              <button 
+                onClick={() => navigate('/academy')}
+                title="Academy"
+                className="w-14 h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-purple-500/50 flex items-center justify-center text-purple-400 transition-all shadow-lg group"
+              >
+                <GraduationCap size={22} className="group-hover:scale-110 transition-transform" />
+              </button>
+
+              <button 
+                onClick={() => navigate('/results')}
+                title="Live Gallery"
+                className="w-14 h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-blue-500/50 flex items-center justify-center text-blue-400 transition-all shadow-lg group"
+              >
+                <PlayCircle size={22} className="group-hover:scale-110 transition-transform" />
+              </button>
+
+              <button 
+                onClick={handleAccount}
+                title="Organizador"
+                className="w-14 h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-indigo-500/50 flex items-center justify-center text-indigo-400 transition-all shadow-lg group"
+              >
+                <Briefcase size={22} className="group-hover:scale-110 transition-transform" />
+              </button>
+            </div>
+
+            {/* DISPLAY FLOW AUTOMÁTICO */}
+            <div className="w-full max-w-xl aspect-video rounded-3xl overflow-hidden relative bg-white/5 border border-white/10 shadow-2xl order-1 md:order-2">
+              <AnimatePresence mode="wait">
+                <motion.video 
+                  key={currentVideo}
+                  src={cloudinaryVideos[currentVideo]}
+                  autoPlay 
+                  muted 
+                  loop 
+                  playsInline 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.8 }}
+                  className="w-full h-full object-cover"
+                />
+              </AnimatePresence>
+            </div>
+
+          </div>
+
         </div>
 
         {/* GRILLA DE CATEGORÍAS (DESKTOP) */}
-        <div className="hidden lg:block max-w-6xl mx-auto px-6 pb-20">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="hidden lg:block max-w-6xl mx-auto px-6 pb-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {categories.map((cat) => (
-              <motion.div key={cat.name} onClick={() => handleCategoryClick(cat.name)} whileHover={{ scale: 1.03, backgroundColor: 'rgba(255,255,255,0.08)' }} className="bg-white/5 backdrop-blur-md p-6 rounded-[1.5rem] flex items-center gap-5 border border-white/5 hover:border-white/20 transition-all cursor-pointer group shadow-lg">
-                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.4)]`}><cat.icon className="text-white w-5 h-5" /></div>
+              <motion.div key={cat.name} onClick={() => handleCategoryClick(cat.name)} whileHover={{ scale: 1.03, backgroundColor: 'rgba(255,255,255,0.08)' }} className="bg-white/5 backdrop-blur-md p-5 rounded-[1.5rem] flex items-center gap-4 border border-white/5 hover:border-white/20 transition-all cursor-pointer group shadow-lg">
+                <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center shadow-[0_0_15px_rgba(0,0,0,0.4)]`}><cat.icon className="text-white w-4 h-4" /></div>
                 <div>
                   <h3 className="text-white font-bold text-[10px] uppercase tracking-[0.1em] leading-tight">{cat.name}</h3>
                   <p className="text-[7px] text-gray-500 uppercase tracking-widest mt-1 font-bold">{cat.count}</p>
@@ -311,159 +343,21 @@ export default function Home() {
           </div>
         </div>
 
-        {/* --- SECCIÓN INTEGRADORA: LOS TRES PILARES DE CLASSCODE --- */}
-        <section className="max-w-6xl mx-auto px-4 md:px-6 py-16">
-          <div className="text-center mb-12">
-            <h2 className="text-xs uppercase font-black tracking-[0.4em] text-purple-400 mb-2">Ecosistema Creativo</h2>
-            <p className="text-2xl md:text-4xl font-light font-['Poppins'] tracking-tight text-white uppercase">
-              Del aprendizaje a la producción en vivo
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* PILAR 1: ACADEMY */}
-            <motion.div 
-              whileHover={{ y: -5 }}
-              className="bg-white/[0.02] backdrop-blur-2xl rounded-[2.5rem] p-8 border border-white/10 flex flex-col justify-between relative group overflow-hidden shadow-xl"
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/5 rounded-full blur-2xl group-hover:bg-purple-600/10 transition-all" />
-              
-              <div className="space-y-4 relative z-10">
-                <div className="w-12 h-12 rounded-2xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400">
-                  <GraduationCap size={22} />
-                </div>
-                <h3 className="text-lg font-['Poppins'] font-normal text-white uppercase tracking-wider">
-                  Academy
-                </h3>
-                <p className="text-gray-400 text-xs font-light leading-relaxed">
-                  Formación técnica y actualización continua diseñada para elevar el nivel del talento en cada disciplina.
-                </p>
-              </div>
-
-              <div className="pt-8 relative z-10">
-                <button 
-                  onClick={() => navigate('/academy')} 
-                  className="w-full py-3.5 px-5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] font-black uppercase tracking-[0.25em] transition-all flex items-center justify-between group-hover:border-purple-500/40"
-                >
-                  <span>EXPLORAR CURSOS</span>
-                  <ArrowRight size={14} className="text-purple-400 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
-            </motion.div>
-
-            {/* PILAR 2: LIVE GALLERY */}
-            <motion.div 
-              whileHover={{ y: -5 }}
-              className="bg-white/[0.02] backdrop-blur-2xl rounded-[2.5rem] p-8 border border-white/10 flex flex-col justify-between relative group overflow-hidden shadow-xl"
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 rounded-full blur-2xl group-hover:bg-blue-600/10 transition-all" />
-              
-              <div className="space-y-4 relative z-10">
-                <div className="w-12 h-12 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
-                  <PlayCircle size={22} />
-                </div>
-                <h3 className="text-lg font-['Poppins'] font-normal text-white uppercase tracking-wider">
-                  Live Gallery
-                </h3>
-                <p className="text-gray-400 text-xs font-light leading-relaxed">
-                  La vidriera visual donde se expone el trabajo real de la comunidad en producciones y sets activos.
-                </p>
-              </div>
-
-              <div className="pt-8 relative z-10">
-                <button 
-                  onClick={() => navigate('/results')} 
-                  className="w-full py-3.5 px-5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] font-black uppercase tracking-[0.25em] transition-all flex items-center justify-between group-hover:border-blue-500/40"
-                >
-                  <span>VER GALERÍA</span>
-                  <ArrowRight size={14} className="text-blue-400 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
-            </motion.div>
-
-            {/* PILAR 3: ORGANIZADOR INTEGRAL */}
-            <motion.div 
-              whileHover={{ y: -5 }}
-              className="bg-white/[0.02] backdrop-blur-2xl rounded-[2.5rem] p-8 border border-white/10 flex flex-col justify-between relative group overflow-hidden shadow-xl"
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/5 rounded-full blur-2xl group-hover:bg-indigo-600/10 transition-all" />
-              
-              <div className="space-y-4 relative z-10">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-                  <Briefcase size={22} />
-                </div>
-                <h3 className="text-lg font-['Poppins'] font-normal text-white uppercase tracking-wider">
-                  Organizador
-                </h3>
-                <p className="text-gray-400 text-xs font-light leading-relaxed">
-                  La herramienta central para coordinar proyectos, cronogramas y equipos de principio a fin sin fricciones.
-                </p>
-              </div>
-
-              <div className="pt-8 relative z-10">
-                <button 
-                  onClick={handleAccount} 
-                  className="w-full py-3.5 px-5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] font-black uppercase tracking-[0.25em] transition-all flex items-center justify-between group-hover:border-indigo-500/40"
-                >
-                  <span>GESTIONAR</span>
-                  <ArrowRight size={14} className="text-indigo-400 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
-            </motion.div>
-
-          </div>
-        </section>
-
-        {/* PREVIEW DE LIVE GALLERY (MULTIMEDIA) */}
-        <section className="max-w-6xl mx-auto px-4 md:px-6 py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-white/[0.01] border border-white/5 rounded-[3rem] p-6 md:p-10 backdrop-blur-xl">
-            <div className="relative aspect-video rounded-[2rem] overflow-hidden bg-[#050505] shadow-2xl border border-white/10">
-              <AnimatePresence mode="wait">
-                <motion.img 
-                  key={currentPhoto} 
-                  src={eventPhotos[currentPhoto]} 
-                  initial={{ opacity: 0 }} 
-                  animate={{ opacity: 0.9 }} 
-                  exit={{ opacity: 0 }} 
-                  transition={{ duration: 1 }} 
-                  className="w-full h-full object-cover" 
-                />
-              </AnimatePresence>
-            </div>
-            
-            <div className="space-y-4 text-center lg:text-left">
-              <h3 className="text-xl md:text-2xl font-['Poppins'] uppercase font-normal text-white">
-                Momentos reales en acción
-              </h3>
-              <p className="text-gray-400 text-xs md:text-sm font-light leading-relaxed">
-                Cada proyecto registrado refleja la sinergia de los profesionales que conforman la red. Conectá con quienes ya están marcando tendencia en cada set y escenario del país.
-              </p>
-              <div className="pt-2">
-                <button onClick={() => navigate('/results')} className="inline-flex items-center gap-3 px-6 py-3.5 rounded-xl bg-white text-black font-black text-[10px] tracking-[0.2em] uppercase hover:bg-gray-200 transition-all shadow-lg">
-                  <span>EXPLORAR TALENTO</span>
-                  <ArrowRight size={14} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
       </main>
 
       {/* FOOTER */}
-      <footer className="relative bg-[#0a0a0a] border-t border-white/5 pt-12 pb-10 px-6 overflow-hidden uppercase font-normal">
+      <footer className="relative bg-[#0a0a0a] border-t border-white/5 pt-10 pb-8 px-6 overflow-hidden uppercase font-normal">
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-10 text-center md:text-left">
-            <div className="hidden md:block space-y-2">
-              <h2 className="text-[22px] font-['Poppins'] tracking-[0.05em] text-white leading-none font-normal">CLASSCODE<sup className="text-[10px] ml-1 font-bold">®</sup></h2>
-              <p className="text-purple-500 text-[9px] font-black tracking-[0.4em] leading-none">TALENTO ARGENTINO</p>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-8 text-center md:text-left">
+            <div className="hidden md:block space-y-1">
+              <h2 className="text-[20px] font-['Poppins'] tracking-[0.05em] text-white leading-none font-normal">CLASSCODE<sup className="text-[9px] ml-1 font-bold">®</sup></h2>
+              <p className="text-purple-500 text-[8px] font-black tracking-[0.4em] leading-none">TALENTO ARGENTINO</p>
             </div>
 
             <div className="flex gap-4">
-              <a href="https://www.instagram.com/classcodevisual/" target="_blank" rel="noreferrer" className="p-3 bg-white/[0.03] border border-white/10 rounded-2xl text-gray-400 hover:text-white transition-all"><Instagram size={18} /></a>
-              <a href="#" className="p-3 bg-white/[0.03] border border-white/10 rounded-2xl text-gray-400 hover:text-white transition-all"><Linkedin size={18} /></a>
-              <a href="#" className="p-3 bg-white/[0.03] border border-white/10 rounded-2xl text-gray-400 hover:text-white transition-all"><MessageCircle size={18} /></a>
+              <a href="https://www.instagram.com/classcodevisual/" target="_blank" rel="noreferrer" className="p-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-gray-400 hover:text-white transition-all"><Instagram size={16} /></a>
+              <a href="#" className="p-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-gray-400 hover:text-white transition-all"><Linkedin size={16} /></a>
+              <a href="#" className="p-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-gray-400 hover:text-white transition-all"><MessageCircle size={16} /></a>
             </div>
 
             <nav className="flex items-center gap-6 text-[10px] font-bold tracking-widest text-gray-500">
@@ -473,9 +367,9 @@ export default function Home() {
             </nav>
           </div>
 
-          <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 leading-none uppercase font-normal text-center md:text-left">
-            <div className="flex items-center gap-3 text-gray-700 leading-none"><Globe size={14} className="text-purple-500/50" /><p className="text-[9px] font-black tracking-[0.4em] leading-none">© 2026 CLASSCODE • ARGENTINA</p></div>
-            <div className="flex items-center gap-3 text-gray-800 leading-none"><ShieldCheck size={14} /><span className="text-[8px] font-bold tracking-[0.2em] leading-none uppercase">Encrypted Infrastructure</span></div>
+          <div className="pt-5 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 leading-none uppercase font-normal text-center md:text-left">
+            <div className="flex items-center gap-3 text-gray-700 leading-none"><Globe size={13} className="text-purple-500/50" /><p className="text-[9px] font-black tracking-[0.4em] leading-none">© 2026 CLASSCODE • ARGENTINA</p></div>
+            <div className="flex items-center gap-3 text-gray-800 leading-none"><ShieldCheck size={13} /><span className="text-[8px] font-bold tracking-[0.2em] leading-none uppercase">Encrypted Infrastructure</span></div>
           </div>
         </div>
       </footer>
