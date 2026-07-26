@@ -149,30 +149,30 @@ export default function Home() {
         <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-0 w-[200px] md:w-[500px] h-[200px] md:h-[500px] bg-indigo-600/10 rounded-full blur-[90px] md:blur-[130px]" />
       </div>
 
-      <header className="p-4 md:p-8 flex justify-end items-center max-w-7xl mx-auto w-full relative z-[60]">
+      <header className="px-4 py-3 md:p-8 flex justify-end items-center max-w-7xl mx-auto w-full relative z-[60]">
         <div className="flex items-center gap-6">
           <button onClick={handleAccount} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-white transition-all flex items-center gap-2 font-bold"><User size={12}/> MI CUENTA</button>
           <button onClick={handleLogout} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-red-400 transition-all flex items-center gap-2 font-bold"><LogOut size={12}/> SALIR</button>
         </div>
       </header>
 
-      <main className="flex-grow relative z-10">
-        <div className="max-w-4xl mx-auto px-4 pt-2 pb-12 flex flex-col items-center">
+      <main className="flex-grow flex flex-col justify-center relative z-10">
+        <div className="max-w-4xl mx-auto px-4 py-4 md:py-8 flex flex-col items-center w-full">
           
           {/* HEADER PRINCIPAL CON LOGO PROTAGONISTA AMPLIADO Y DESCRIPTOR */}
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 text-center">
-            <h1 className="text-6xl md:text-8xl text-white mb-3 uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-4 md:mb-6 text-center">
+            <h1 className="text-5xl md:text-8xl text-white mb-2 md:mb-3 uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">
               CLASSCODE
             </h1>
-            <p className="text-purple-400 text-[10px] md:text-xs font-black tracking-[0.4em] uppercase max-w-lg mx-auto">
+            <p className="text-purple-400 text-[9px] md:text-xs font-black tracking-[0.4em] uppercase max-w-lg mx-auto">
               TALENTO CREATIVO ARGENTINO
             </p>
           </motion.div>
 
           {/* BUSCADOR */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="w-full bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-3 flex flex-col md:flex-row items-center gap-2 shadow-[0_0_40px_rgba(0,0,0,0.3)] relative z-50 mb-8">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="w-full bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-3 flex flex-col md:flex-row items-center gap-2 shadow-[0_0_40px_rgba(0,0,0,0.3)] relative z-50 mb-6 md:mb-8">
             
-            <div className="flex-1 flex items-center px-6 py-3.5 md:py-4 w-full border-b md:border-b-0 md:border-r border-white/10">
+            <div className="flex-1 flex items-center px-4 md:px-6 py-3 md:py-4 w-full border-b md:border-b-0 md:border-r border-white/10">
               <Search className="text-purple-400 w-5 h-5 mr-4 shrink-0" />
               <input type="text" placeholder="BUSCAR PROFESIONALES..." className="bg-transparent border-none outline-none text-white w-full font-normal uppercase text-[11px] placeholder:text-gray-500 tracking-widest" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
@@ -181,7 +181,7 @@ export default function Home() {
               <button 
                 type="button"
                 onClick={() => { setIsCatOpen(!isCatOpen); setIsLocOpen(false); }}
-                className="w-full flex items-center justify-between px-6 py-3.5 md:py-4 text-left uppercase text-[11px] tracking-widest text-gray-300 hover:text-white transition-all"
+                className="w-full flex items-center justify-between px-4 md:px-6 py-3 md:py-4 text-left uppercase text-[11px] tracking-widest text-gray-300 hover:text-white transition-all"
               >
                 <span className={selectedCategory ? "text-purple-300 font-bold" : "text-gray-400"}>
                   {selectedCategory || "CATEGORÍAS"}
@@ -231,7 +231,7 @@ export default function Home() {
               <button 
                 type="button"
                 onClick={() => { setIsLocOpen(!isLocOpen); setIsCatOpen(false); }}
-                className="w-full flex items-center justify-between px-6 py-3.5 md:py-4 text-left uppercase text-[11px] tracking-widest text-gray-300 hover:text-white transition-all"
+                className="w-full flex items-center justify-between px-4 md:px-6 py-3 md:py-4 text-left uppercase text-[11px] tracking-widest text-gray-300 hover:text-white transition-all"
               >
                 <div className="flex items-center gap-3">
                   <MapPin className="text-purple-400 w-5 h-5 shrink-0" />
@@ -275,33 +275,33 @@ export default function Home() {
             <button type="button" onClick={handleSearch} className="w-full md:w-auto px-10 py-4 rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] hover:bg-gray-200 transition-all shadow-xl mt-1 md:mt-0">BUSCAR</button>
           </motion.div>
 
-          {/* CONTENEDOR CENTRAL: VIDEO + BOTONES AL COSTADO (EN ESCRITORIO) */}
-          <div className="w-full max-w-3xl flex flex-col md:flex-row items-center justify-center gap-4 mb-6">
+          {/* CONTENEDOR CENTRAL: VIDEO + BOTONES AL COSTADO (EN ESCRITORIO) / ABAJO (EN MÓVIL) */}
+          <div className="w-full max-w-3xl flex flex-col md:flex-row items-center justify-center gap-4 mb-4">
             
-            {/* 3 BOTONES VERTICALES A LA IZQUIERDA EN ESCRITORIO (FILA EN MÓVIL) */}
-            <div className="flex md:flex-col items-center justify-center gap-4 order-2 md:order-1">
+            {/* 3 BOTONES: VERTICALES A LA IZQUIERDA EN ESCRITORIO, HORIZONTALES ABAJO EN MÓVIL */}
+            <div className="flex flex-row md:flex-col items-center justify-center gap-4 order-2 md:order-1">
               <button 
                 onClick={() => navigate('/academy')}
                 title="Academy"
-                className="w-14 h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-purple-500/50 flex items-center justify-center text-purple-400 transition-all shadow-lg group"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-purple-500/50 flex items-center justify-center text-purple-400 transition-all shadow-lg group"
               >
-                <GraduationCap size={22} className="group-hover:scale-110 transition-transform" />
+                <GraduationCap size={20} className="group-hover:scale-110 transition-transform" />
               </button>
 
               <button 
                 onClick={() => navigate('/results')}
                 title="Live Gallery"
-                className="w-14 h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-blue-500/50 flex items-center justify-center text-blue-400 transition-all shadow-lg group"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-blue-500/50 flex items-center justify-center text-blue-400 transition-all shadow-lg group"
               >
-                <PlayCircle size={22} className="group-hover:scale-110 transition-transform" />
+                <PlayCircle size={20} className="group-hover:scale-110 transition-transform" />
               </button>
 
               <button 
                 onClick={handleAccount}
                 title="Organizador"
-                className="w-14 h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-indigo-500/50 flex items-center justify-center text-indigo-400 transition-all shadow-lg group"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-indigo-500/50 flex items-center justify-center text-indigo-400 transition-all shadow-lg group"
               >
-                <Briefcase size={22} className="group-hover:scale-110 transition-transform" />
+                <Briefcase size={20} className="group-hover:scale-110 transition-transform" />
               </button>
             </div>
 
@@ -329,7 +329,7 @@ export default function Home() {
         </div>
 
         {/* GRILLA DE CATEGORÍAS (DESKTOP) */}
-        <div className="hidden lg:block max-w-6xl mx-auto px-6 pb-16">
+        <div className="hidden lg:block max-w-6xl mx-auto px-6 pb-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {categories.map((cat) => (
               <motion.div key={cat.name} onClick={() => handleCategoryClick(cat.name)} whileHover={{ scale: 1.03, backgroundColor: 'rgba(255,255,255,0.08)' }} className="bg-white/5 backdrop-blur-md p-5 rounded-[1.5rem] flex items-center gap-4 border border-white/5 hover:border-white/20 transition-all cursor-pointer group shadow-lg">
@@ -346,9 +346,9 @@ export default function Home() {
       </main>
 
       {/* FOOTER */}
-      <footer className="relative bg-[#0a0a0a] border-t border-white/5 pt-10 pb-8 px-6 overflow-hidden uppercase font-normal">
+      <footer className="relative bg-[#0a0a0a] border-t border-white/5 pt-8 pb-6 px-6 overflow-hidden uppercase font-normal">
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-8 text-center md:text-left">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6 text-center md:text-left">
             <div className="hidden md:block space-y-1">
               <h2 className="text-[20px] font-['Poppins'] tracking-[0.05em] text-white leading-none font-normal">CLASSCODE<sup className="text-[9px] ml-1 font-bold">®</sup></h2>
               <p className="text-purple-500 text-[8px] font-black tracking-[0.4em] leading-none">TALENTO ARGENTINO</p>
@@ -367,7 +367,7 @@ export default function Home() {
             </nav>
           </div>
 
-          <div className="pt-5 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 leading-none uppercase font-normal text-center md:text-left">
+          <div className="pt-4 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-3 leading-none uppercase font-normal text-center md:text-left">
             <div className="flex items-center gap-3 text-gray-700 leading-none"><Globe size={13} className="text-purple-500/50" /><p className="text-[9px] font-black tracking-[0.4em] leading-none">© 2026 CLASSCODE • ARGENTINA</p></div>
             <div className="flex items-center gap-3 text-gray-800 leading-none"><ShieldCheck size={13} /><span className="text-[8px] font-bold tracking-[0.2em] leading-none uppercase">Encrypted Infrastructure</span></div>
           </div>
