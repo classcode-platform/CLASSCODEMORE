@@ -307,7 +307,7 @@ export default function Dashboard() {
             <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-[#070709]/90 backdrop-blur-xl border-l border-white/10 z-[120] p-10 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto">
               <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-10 text-white/60 hover:text-white transition-colors cursor-pointer"><X size={28} /></button>
               
-              <button onClick={handleSwitchToClient} className="mb-10 w-full flex items-center justify-between bg-white/[0.04] backdrop-blur-md border border-white/10 p-4 rounded-xl group hover:bg-white/[0.08] transition-all cursor-pointer shadow-lg">
+              <button onClick={handleSwitchToClient} className="mb-10 w-full flex items-center justify-between p-2 group transition-all cursor-pointer">
                 <div className="flex items-center gap-4 text-left leading-none">
                   <div className="p-2.5 bg-purple-500/15 rounded-lg text-purple-300 border border-purple-500/30">
                     <RefreshCcw size={16} className="group-hover:rotate-180 transition-transform duration-700" />
@@ -338,7 +338,7 @@ export default function Dashboard() {
         </header>
         
         <div className="mb-10 text-left">
-          <button onClick={handleSwitchToClient} className="w-full flex items-center justify-between bg-white/[0.04] backdrop-blur-md border border-white/10 p-4 rounded-xl group hover:bg-white/[0.08] transition-all cursor-pointer shadow-lg">
+          <button onClick={handleSwitchToClient} className="w-full flex items-center justify-between p-2 group transition-all cursor-pointer">
             <div className="flex items-center gap-3 text-left leading-none">
               <div className="p-2.5 bg-purple-500/15 rounded-lg text-purple-300 border border-purple-500/30">
                 <RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
@@ -378,10 +378,10 @@ export default function Dashboard() {
             </div>
           )}
 
-          <div className="w-full bg-[#070709]/50 backdrop-blur-md border border-white/15 rounded-2xl p-6 md:p-8 shadow-2xl box-border overflow-hidden">
-            <div className="w-full mx-auto box-border">
+          <div className="w-full pb-6">
+            <div className="w-full mx-auto box-border space-y-6">
               
-              <label className="w-full h-[180px] md:h-[260px] bg-black/40 relative overflow-hidden group block rounded-xl border border-white/10 cursor-pointer shadow-inner">
+              <label className="w-full h-[180px] md:h-[260px] bg-black/40 relative group block rounded-xl border border-white/10 cursor-pointer overflow-hidden">
                 {profile.videoLink ? (
                   <video 
                     src={profile.videoLink} 
@@ -400,17 +400,17 @@ export default function Dashboard() {
                   </div>
                 )}
                 
-                <div className="absolute bottom-4 right-4 bg-white/[0.04] backdrop-blur-md hover:bg-white/[0.08] text-white px-4 py-2.5 rounded-xl text-[8px] font-black tracking-widest border border-white/15 transition-all flex items-center gap-2 shadow-xl z-20 cursor-pointer">
+                <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md hover:bg-black/80 text-white px-4 py-2 rounded-lg text-[8px] font-black tracking-widest border border-white/15 transition-all flex items-center gap-2 z-20 cursor-pointer">
                   <Upload size={14} className="text-purple-400" /> {uploadingStatus.video ? 'SUBIENDO...' : (profile.videoLink ? 'CAMBIAR' : 'SUBIR')}
                 </div>
                 
                 <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
               </label>
 
-              <div className="pb-4 relative -mt-10 md:-mt-16 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 z-20 box-border w-full">
-                <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left w-full md:w-auto min-w-0">
+              <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 w-full">
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left w-full md:w-auto min-w-0">
                   
-                  <div className="relative w-28 h-28 md:w-36 md:h-36 rounded-2xl border border-white/25 overflow-hidden bg-black/50 shadow-2xl flex-shrink-0 group">
+                  <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-xl border border-white/20 overflow-hidden bg-black/50 flex-shrink-0 group">
                     {profile.photo1 ? (
                       <img src={profile.photo1} className="w-full h-full object-cover" alt="" />
                     ) : (
@@ -422,17 +422,15 @@ export default function Dashboard() {
                     </label>
                   </div>
 
-                  <div className="space-y-2 pb-1 min-w-0 flex-1 w-full">
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                      <h1 className="text-lg md:text-2xl font-['Poppins'] font-normal tracking-wide text-white truncate max-w-full">{profile.name || 'NUEVO TALENTO'}</h1>
-                    </div>
+                  <div className="space-y-2 min-w-0 flex-1 w-full">
+                    <h1 className="text-lg md:text-2xl font-['Poppins'] font-normal tracking-wide text-white truncate max-w-full">{profile.name || 'NUEVO TALENTO'}</h1>
                     <div className="flex items-center justify-center md:justify-start gap-2">
                       {currentJobIcon}
                       <p className="text-white/80 text-[10px] md:text-xs tracking-[0.3em] font-bold truncate">{profile.job || 'ASIGNAR RUBRO'}</p>
                     </div>
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] text-white/80 font-bold tracking-widest pt-1">
                       {profile.location && <span className="flex items-center gap-1.5"><MapPin size={14} className="text-purple-400"/> {profile.location}</span>}
-                      <span className="flex items-center gap-2 px-3 py-1 bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-full shadow-inner">
+                      <span className="flex items-center gap-2">
                         <div className="flex items-center text-purple-400">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <span key={i} className={`text-xs ${i < Math.min(5, Math.max(1, Math.round(calculateTotalScore(profile) / 40))) ? 'opacity-100' : 'opacity-30'}`}>★</span>
@@ -444,11 +442,11 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 w-full md:w-auto justify-center pb-2 flex-shrink-0">
-                  <button onClick={handleViewPublicProfile} className="px-4 py-3.5 rounded-xl bg-white/[0.04] backdrop-blur-md hover:bg-white/[0.08] border border-white/15 transition-all text-white flex items-center gap-2 text-[9px] font-black tracking-widest cursor-pointer shadow-xl font-['Poppins']" title="Ver perfil público">
+                <div className="flex items-center gap-3 w-full md:w-auto justify-center flex-shrink-0">
+                  <button onClick={handleViewPublicProfile} className="px-4 py-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 transition-all text-white flex items-center gap-2 text-[9px] font-black tracking-widest cursor-pointer font-['Poppins']" title="Ver perfil público">
                     <Eye size={14} className="text-purple-400" /> <span className="hidden md:inline">VER PÚBLICO</span>
                   </button>
-                  <button onClick={() => setIsEditingProfile(true)} className="px-6 py-3.5 rounded-xl bg-white/[0.04] backdrop-blur-md hover:bg-white/[0.08] border border-white/15 text-white font-black text-[9px] tracking-widest transition-all shadow-xl flex items-center justify-center gap-2 cursor-pointer font-['Poppins']">
+                  <button onClick={() => setIsEditingProfile(true)} className="px-6 py-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 text-white font-black text-[9px] tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer font-['Poppins']">
                     <Edit3 size={14} className="text-purple-400"/> EDITAR PERFIL
                   </button>
                 </div>
@@ -460,12 +458,12 @@ export default function Dashboard() {
             
             <div className="lg:col-span-4 space-y-8 min-w-0 box-border">
               
-              <div className="bg-[#070709]/50 backdrop-blur-md border border-white/15 rounded-2xl p-6 space-y-6 shadow-2xl box-border">
+              <div className="space-y-4">
                 <div className="flex justify-between items-center border-l-2 border-purple-500 pl-4">
                   <h3 className="text-[10px] text-white/70 uppercase tracking-[0.4em] font-black">Estatus Academy</h3>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between bg-white/[0.04] backdrop-blur-md border border-white/15 px-4 py-3 rounded-xl box-border shadow-lg">
+                  <div className="flex items-center justify-between py-2 border-b border-white/10">
                     <div className="flex items-center gap-3 min-w-0">
                       <Zap size={14} className={isGenericoDone ? "text-purple-400 flex-shrink-0" : "text-white/30 flex-shrink-0"} />
                       <span className="text-[9px] font-black tracking-widest text-white truncate">NIVELACIÓN INGRESO</span>
@@ -478,7 +476,7 @@ export default function Dashboard() {
                   </div>
 
                   {profile.job && (
-                    <div className="flex items-center justify-between bg-white/[0.04] backdrop-blur-md border border-white/15 px-4 py-3 rounded-xl box-border shadow-lg">
+                    <div className="flex items-center justify-between py-2 border-b border-white/10">
                       <div className="flex items-center gap-3 min-w-0">
                         <Award size={14} className={isProfessionalTestDone ? "text-purple-400 flex-shrink-0" : "text-white/30 flex-shrink-0"} />
                         <span className="text-[9px] font-black tracking-widest text-white truncate">TEST PROFESIONAL</span>
@@ -491,12 +489,12 @@ export default function Dashboard() {
                     </div>
                   )}
                 </div>
-                <button onClick={() => navigate('/academy')} className="w-full py-3.5 bg-white/[0.04] backdrop-blur-md hover:bg-white/[0.08] border border-white/15 rounded-xl text-[9px] font-black tracking-widest text-white transition-all flex items-center justify-center gap-2 box-border cursor-pointer shadow-xl font-['Poppins']">
+                <button onClick={() => navigate('/academy')} className="w-full py-3 bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 rounded-xl text-[9px] font-black tracking-widest text-white transition-all flex items-center justify-center gap-2 box-border cursor-pointer font-['Poppins']">
                   <GraduationCap size={14} className="text-purple-400"/> IR A CLASSCODE ACADEMY
                 </button>
               </div>
 
-              <div className="bg-[#070709]/50 backdrop-blur-md border border-white/15 rounded-2xl p-6 space-y-6 shadow-2xl box-border">
+              <div className="space-y-4">
                 <div className="flex justify-between items-center border-l-2 border-purple-500 pl-4">
                   <h3 className="text-[10px] text-white/70 uppercase tracking-[0.4em] font-black flex items-center gap-2"><MessageSquare size={12}/> Mensajes</h3>
                   <span className="text-[9px] text-purple-400 font-black">{messages.length}</span>
@@ -505,9 +503,9 @@ export default function Dashboard() {
                   {messages.length === 0 ? (
                     <div className="text-center py-6 text-[8px] text-white/50 uppercase font-black tracking-widest">No hay chats activos</div>
                   ) : messages.map(chat => (
-                    <div key={chat.id} onClick={() => navigate(`/chat/${chat.id}`)} className="flex justify-between items-center p-3.5 bg-white/[0.04] backdrop-blur-md border border-white/15 hover:border-purple-400/50 rounded-xl transition-all cursor-pointer box-border shadow-lg">
+                    <div key={chat.id} onClick={() => navigate(`/chat/${chat.id}`)} className="flex justify-between items-center py-3 border-b border-white/10 hover:border-purple-400 transition-all cursor-pointer box-border">
                        <div className="flex items-center gap-3 min-w-0">
-                          {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-8 h-8 rounded-xl object-cover border border-white/15 flex-shrink-0 shadow-inner" alt="" /> : <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/15 text-white/60 flex items-center justify-center flex-shrink-0 shadow-inner"><User size={14}/></div>}
+                          {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-8 h-8 rounded-lg object-cover border border-white/15 flex-shrink-0" alt="" /> : <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/15 text-white/60 flex items-center justify-center flex-shrink-0"><User size={14}/></div>}
                           <div className="min-w-0">
                              <p className="text-[9px] font-black text-white uppercase tracking-wider truncate">{chat.clientName || "CLIENTE"}</p>
                              <p className="text-[7px] text-white/60 font-bold uppercase mt-0.5">Ver chat</p>
@@ -522,7 +520,7 @@ export default function Dashboard() {
             </div>
 
             <div className="lg:col-span-8 space-y-12 min-w-0 box-border">
-              <section className="bg-[#070709]/50 backdrop-blur-md border border-white/15 rounded-2xl p-6 md:p-8 space-y-8 shadow-2xl box-border">
+              <section className="space-y-6">
                 <div className="flex justify-between items-center border-l-2 border-purple-500 pl-4">
                   <h3 className="text-[10px] text-white/70 uppercase tracking-[0.4em] font-black">Portfolio — Galería de Fotos</h3>
                   <span className="text-[9px] text-purple-400 font-mono">{Array.from({ length: 10 }, (_, i) => profile[`photo${i + 1}`]).filter(Boolean).length}/10 FOTOS</span>
@@ -530,7 +528,7 @@ export default function Dashboard() {
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
-                    <div key={num} className="aspect-square rounded-xl overflow-hidden border border-white/15 bg-black/40 group relative shadow-xl flex items-center justify-center box-border">
+                    <div key={num} className="aspect-square rounded-xl overflow-hidden border border-white/15 bg-black/40 group relative flex items-center justify-center box-border">
                       {profile[`photo${num}`] ? (
                         <>
                           <img src={profile[`photo${num}`]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" alt="" />
@@ -538,7 +536,7 @@ export default function Dashboard() {
                             const updates = { [`photo${num}`]: '' };
                             setProfile(prev => ({ ...prev, ...updates }));
                             await persistProfile(updates);
-                          }} className="absolute top-2 right-2 p-2 bg-black/80 backdrop-blur-md rounded-xl opacity-0 group-hover:opacity-100 text-red-300 transition-all border border-white/20 cursor-pointer shadow-xl"><X size={12} /></button>
+                          }} className="absolute top-2 right-2 p-2 bg-black/80 rounded-lg opacity-0 group-hover:opacity-100 text-red-300 transition-all border border-white/20 cursor-pointer"><X size={12} /></button>
                         </>
                       ) : (
                         <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-white/[0.04] transition-all p-4 text-center">
@@ -555,7 +553,7 @@ export default function Dashboard() {
           </main>
         </div>
 
-        <footer className="w-full bg-[#070709]/60 backdrop-blur-md py-12 px-6 border-t border-white/10 text-center relative z-10 box-border font-['Poppins'] mt-auto shadow-2xl">
+        <footer className="w-full bg-[#070709]/60 backdrop-blur-md py-12 px-6 border-t border-white/10 text-center relative z-10 box-border font-['Poppins'] mt-auto">
           <div className="max-w-[1400px] mx-auto box-border">
             <h2 className="text-white text-2xl md:text-3xl font-normal tracking-[0.05em] uppercase mb-3">CLASSCODE</h2>
             <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-white/60">© 2026 — TODOS LOS DERECHOS RESERVADOS</p>
@@ -567,7 +565,7 @@ export default function Dashboard() {
         {isEditingProfile && (
           <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/75 backdrop-blur-md p-4 box-border overflow-x-hidden uppercase">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#070709] backdrop-blur-2xl w-full max-w-lg p-6 md:p-8 rounded-3xl border border-white/15 relative shadow-2xl space-y-6 max-h-[90vh] flex flex-col box-border"
+              className="bg-[#070709] w-full max-w-lg p-6 md:p-8 rounded-2xl border border-white/15 relative space-y-6 max-h-[90vh] flex flex-col box-border"
             >
               <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
               
@@ -577,7 +575,7 @@ export default function Dashboard() {
                 <div className="space-y-2">
                   <label className="text-[8px] text-white/80 tracking-widest font-black">Nombre Completo / Artístico</label>
                   <input 
-                    className="w-full bg-white/[0.04] backdrop-blur-md border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white uppercase outline-none focus:border-purple-400 tracking-widest box-border shadow-inner" 
+                    className="w-full bg-white/[0.04] border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white uppercase outline-none focus:border-purple-400 tracking-widest box-border" 
                     value={profile.name || ''} 
                     onChange={e => setProfile(prev => ({ ...prev, name: e.target.value }))} 
                   />
@@ -587,7 +585,7 @@ export default function Dashboard() {
                   <div className="space-y-2">
                     <label className="text-[8px] text-white/80 tracking-widest font-black">Rubro Principal</label>
                     <select 
-                      className="w-full bg-[#0b0c10] border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white uppercase outline-none focus:border-purple-400 tracking-widest box-border cursor-pointer shadow-inner" 
+                      className="w-full bg-[#0b0c10] border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white uppercase outline-none focus:border-purple-400 tracking-widest box-border cursor-pointer" 
                       value={profile.job || ""} 
                       onChange={e => {
                         const selectedJob = e.target.value;
@@ -602,7 +600,7 @@ export default function Dashboard() {
                   <div className="space-y-2">
                     <label className="text-[8px] text-white/80 tracking-widest font-black">Provincia</label>
                     <select 
-                      className="w-full bg-[#0b0c10] border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white uppercase outline-none focus:border-purple-400 tracking-widest box-border cursor-pointer shadow-inner" 
+                      className="w-full bg-[#0b0c10] border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white uppercase outline-none focus:border-purple-400 tracking-widest box-border cursor-pointer" 
                       value={profile.location || ""} 
                       onChange={e => setProfile(prev => ({ ...prev, location: e.target.value }))}>
                       <option value="" className="bg-[#0b0c10] text-white">SELECCIONAR</option>
@@ -615,7 +613,7 @@ export default function Dashboard() {
                   <div className="space-y-2">
                     <label className="text-[8px] text-white/80 tracking-widest font-black">Especialidad</label>
                     <select 
-                      className="w-full bg-[#0b0c10] border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white uppercase outline-none focus:border-purple-400 tracking-widest box-border cursor-pointer shadow-inner" 
+                      className="w-full bg-[#0b0c10] border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white uppercase outline-none focus:border-purple-400 tracking-widest box-border cursor-pointer" 
                       value={profile.specialty || ""} 
                       onChange={e => setProfile(prev => ({ ...prev, specialty: e.target.value }))}>
                       <option value="" className="bg-[#0b0c10] text-white">SELECCIONAR ESPECIALIDAD</option>
@@ -627,7 +625,7 @@ export default function Dashboard() {
                 <div className="space-y-2">
                   <label className="text-[8px] text-white/80 tracking-widest font-black">Biografía / Presentación</label>
                   <textarea 
-                    className="w-full bg-white/[0.04] backdrop-blur-md border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white uppercase h-28 resize-none outline-none focus:border-purple-400 tracking-widest box-border shadow-inner" 
+                    className="w-full bg-white/[0.04] border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white uppercase h-28 resize-none outline-none focus:border-purple-400 tracking-widest box-border" 
                     value={profile.bio || ''} 
                     onChange={e => setProfile(prev => ({ ...prev, bio: e.target.value }))} 
                   />
@@ -635,10 +633,10 @@ export default function Dashboard() {
               </div>
 
               <div className="pt-4 flex justify-end gap-3 border-t border-white/10">
-                <button type="button" onClick={() => setIsEditingProfile(false)} className="px-5 py-3 bg-white/[0.04] backdrop-blur-md border border-white/15 rounded-xl text-[9px] font-black tracking-widest hover:bg-white/[0.08] transition-all cursor-pointer text-white shadow-lg">
+                <button type="button" onClick={() => setIsEditingProfile(false)} className="px-5 py-3 bg-white/[0.04] border border-white/15 rounded-xl text-[9px] font-black tracking-widest hover:bg-white/[0.08] transition-all cursor-pointer text-white">
                   Descartar
                 </button>
-                <button type="button" onClick={handleSaveProfileData} className="px-6 py-3 bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 text-white rounded-xl text-[9px] font-black tracking-widest transition-all cursor-pointer flex items-center gap-2 shadow-xl">
+                <button type="button" onClick={handleSaveProfileData} className="px-6 py-3 bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 text-white rounded-xl text-[9px] font-black tracking-widest transition-all cursor-pointer flex items-center gap-2">
                   Guardar
                 </button>
               </div>
