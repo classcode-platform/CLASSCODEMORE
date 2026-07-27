@@ -163,7 +163,7 @@ export default function EventOrganizer() {
                 navigate('/client-profile');
               }
             }} 
-            className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-bold font-['Poppins'] transition-colors"
+            className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-bold font-['Poppins'] transition-colors cursor-pointer"
           >
             <ArrowLeft size={14}/> {activeEventId ? 'VOLVER A LISTADO' : 'VOLVER'}
           </button>
@@ -172,7 +172,7 @@ export default function EventOrganizer() {
             <span className="text-base font-normal tracking-[0.05em] uppercase leading-none">CLASSCODE</span>
           </div>
 
-          <button onClick={() => setShowCreateModal(true)} className="px-5 py-2.5 rounded-xl bg-white text-black font-black text-[9px] tracking-widest hover:bg-gray-200 transition-all flex items-center gap-2 font-['Poppins']">
+          <button onClick={() => setShowCreateModal(true)} className="px-5 py-2.5 rounded-xl bg-white text-black font-black text-[9px] tracking-widest hover:bg-gray-200 transition-all flex items-center gap-2 font-['Poppins'] cursor-pointer">
             <Plus size={14} /> NUEVO
           </button>
         </div>
@@ -184,14 +184,14 @@ export default function EventOrganizer() {
         {!activeEventId ? (
           <>
             <div className="flex flex-col gap-1">
-              <h1 className="text-xl font-['Poppins'] font-normal tracking-wide text-white">ORGANIZADOR ({events.length})</h1>
+              <h1 className="text-xl font-['Poppins'] font-normal tracking-wide text-white">ORGANIZADOR</h1>
             </div>
 
             {events.length === 0 ? (
               <div className="py-24 text-center border border-white/5 rounded-3xl bg-[#0c0c0e] space-y-4">
                 <Calendar size={32} className="mx-auto text-white/20" />
                 <p className="text-[10px] text-gray-500 font-bold tracking-[0.3em]">No hay eventos registrados</p>
-                <button onClick={() => setShowCreateModal(true)} className="px-6 py-3 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest font-['Poppins']">
+                <button onClick={() => setShowCreateModal(true)} className="px-6 py-3 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest font-['Poppins'] cursor-pointer">
                   CREAR EVENTO
                 </button>
               </div>
@@ -219,7 +219,7 @@ export default function EventOrganizer() {
                       <div className="absolute top-3 right-3">
                         <button 
                           onClick={(e) => handleToggleStatus(ev, e)} 
-                          className={`text-[8px] tracking-widest font-black px-2.5 py-1 rounded-full border backdrop-blur-md transition-all ${
+                          className={`text-[8px] tracking-widest font-black px-2.5 py-1 rounded-full border backdrop-blur-md transition-all cursor-pointer ${
                             ev.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
                             ev.status === 'EN_CURSO' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
                             'bg-black/60 text-gray-300 border-white/10'
@@ -245,13 +245,13 @@ export default function EventOrganizer() {
                       <div className="pt-4 border-t border-white/5 flex items-center justify-between gap-2">
                         <button 
                           onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); setShowQrModal(true); }} 
-                          className="flex-1 py-3 px-4 rounded-xl bg-white/[0.03] hover:bg-white/10 border border-white/10 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins']"
+                          className="flex-1 py-3 px-4 rounded-xl bg-white/[0.03] hover:bg-white/10 border border-white/10 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] cursor-pointer"
                         >
                           <QrCode size={14}/> QR
                         </button>
                         <button 
                           onClick={(e) => handleDeleteEvent(ev.id, e)} 
-                          className="p-3 bg-white/[0.03] hover:bg-red-500/20 hover:text-red-400 border border-white/10 rounded-xl transition-all"
+                          className="p-3 bg-white/[0.03] hover:bg-red-500/20 hover:text-red-400 border border-white/10 rounded-xl transition-all cursor-pointer"
                         >
                           <Trash2 size={16}/>
                         </button>
@@ -292,7 +292,7 @@ export default function EventOrganizer() {
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                   <button 
                     onClick={() => handleToggleStatus(currentEvent)} 
-                    className={`flex-1 md:flex-none px-5 py-3 rounded-xl border text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] ${
+                    className={`flex-1 md:flex-none px-5 py-3 rounded-xl border text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] cursor-pointer ${
                       currentEvent.status === 'EN_CURSO' 
                         ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20' 
                         : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
@@ -315,21 +315,21 @@ export default function EventOrganizer() {
                         }
                       });
                     }} 
-                    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins']"
+                    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] cursor-pointer"
                   >
                     <Square size={14}/> APAGAR
                   </button>
 
                   <button 
                     onClick={() => copyGuestLink(currentEvent.id)} 
-                    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins']"
+                    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] cursor-pointer"
                   >
                     <Copy size={14}/> GUEST LINK
                   </button>
 
                   <button 
                     onClick={() => handleShareTV(currentEvent.id)} 
-                    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-white text-black hover:bg-gray-200 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins']"
+                    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-white text-black hover:bg-gray-200 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] cursor-pointer"
                   >
                     <ExternalLink size={14}/> PROYECTAR
                   </button>
@@ -378,14 +378,14 @@ export default function EventOrganizer() {
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               className="bg-[#0c0c0e] w-full max-w-lg p-10 rounded-[3rem] border border-white/10 relative shadow-2xl space-y-6"
             >
-              <button onClick={() => setShowCreateModal(false)} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors"><X size={22} /></button>
+              <button onClick={() => setShowCreateModal(false)} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors cursor-pointer"><X size={22} /></button>
               <h3 className="text-[11px] uppercase tracking-[0.4em] font-black text-center font-['Poppins']">Nuevo Evento</h3>
               
               <form onSubmit={handleCreateEvent} className="space-y-4 font-bold">
                 <div className="space-y-2">
                   <label className="text-[8px] tracking-[0.3em] text-gray-400">Categoría</label>
                   <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}
-                    className="w-full bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest"
+                    className="w-full bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest cursor-pointer"
                   >
                     {MACRO_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                   </select>
@@ -408,7 +408,7 @@ export default function EventOrganizer() {
                   className="w-full bg-white/[0.03] border border-white/10 rounded-3xl p-4 text-[10px] text-white uppercase h-24 resize-none outline-none focus:border-white tracking-widest" 
                 />
 
-                <button type="submit" disabled={loading} className="w-full py-4 rounded-2xl bg-white text-black font-black text-[10px] tracking-[0.4em] uppercase hover:bg-gray-200 transition-all font-['Poppins']">
+                <button type="submit" disabled={loading} className="w-full py-4 rounded-2xl bg-white text-black font-black text-[10px] tracking-[0.4em] uppercase hover:bg-gray-200 transition-all font-['Poppins'] cursor-pointer">
                   {loading ? 'GUARDANDO...' : 'CREAR'}
                 </button>
               </form>
@@ -424,7 +424,7 @@ export default function EventOrganizer() {
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               className="bg-[#0c0c0e] w-full max-w-sm p-8 rounded-[3rem] border border-white/10 relative shadow-2xl text-center space-y-6"
             >
-              <button onClick={() => setShowQrModal(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
+              <button onClick={() => setShowQrModal(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors cursor-pointer"><X size={20} /></button>
               
               <div className="space-y-2">
                 <span className="text-[8px] tracking-[0.3em] font-black text-gray-400">QR INVITADOS</span>
@@ -439,7 +439,7 @@ export default function EventOrganizer() {
                 />
               </div>
 
-              <button onClick={() => { copyGuestLink(selectedEvent.id); setShowQrModal(false); }} className="w-full py-3.5 rounded-xl bg-white text-black font-black text-[9px] tracking-widest uppercase hover:bg-gray-200 transition-all font-['Poppins']">
+              <button onClick={() => { copyGuestLink(selectedEvent.id); setShowQrModal(false); }} className="w-full py-3.5 rounded-xl bg-white text-black font-black text-[9px] tracking-widest uppercase hover:bg-gray-200 transition-all font-['Poppins'] cursor-pointer">
                 COPIAR LINK
               </button>
             </motion.div>
@@ -451,7 +451,7 @@ export default function EventOrganizer() {
       <AnimatePresence>
         {previewImage && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPreviewImage(null)} className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out">
-            <button className="absolute top-8 right-8 text-white/50 hover:text-white p-2"><X size={28}/></button>
+            <button className="absolute top-8 right-8 text-white/50 hover:text-white p-2 cursor-pointer"><X size={28}/></button>
             <motion.img initial={{ scale: 0.9 }} animate={{ scale: 1 }} src={previewImage} className="max-w-full max-h-[85vh] rounded-2xl border border-white/10 object-contain" onClick={(e) => e.stopPropagation()} />
           </motion.div>
         )}

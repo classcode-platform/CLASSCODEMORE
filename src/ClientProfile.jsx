@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Search, LogOut, User, Calendar, MapPin, 
   Trash2, Plus, Edit3, LayoutGrid, ImageIcon, X, ChevronRight, QrCode,
-  LayoutDashboard, GraduationCap, RefreshCcw, Menu, Award
+  RefreshCcw, Menu
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import EventOrganizer from './components/EventOrganizer';
@@ -90,7 +90,7 @@ export default function ClientProfile() {
 
       <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-black/60 backdrop-blur-xl border-b border-white/5 z-[100] px-8 py-6 flex justify-between items-center box-border">
         <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer text-white">CLASSCODE</div>
-        <button onClick={() => setIsMobileMenuOpen(true)} className="text-white"><Menu size={28} /></button>
+        <button onClick={() => setIsMobileMenuOpen(true)} className="text-white cursor-pointer"><Menu size={28} /></button>
       </header>
 
       <AnimatePresence>
@@ -98,7 +98,7 @@ export default function ClientProfile() {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileMenuOpen(false)} className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[110] md:hidden" />
             <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-[#050505] z-[120] p-12 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto">
-              <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-12 text-gray-500 hover:text-white transition-colors"><X size={32} /></button>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-12 text-gray-500 hover:text-white transition-colors cursor-pointer"><X size={32} /></button>
               
               <button onClick={handleSwitchToTalent} className="mb-12 w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-5 rounded-2xl group hover:bg-purple-500/10 transition-all box-border cursor-pointer">
                 <div className="flex items-center gap-4 text-left leading-none">
@@ -111,7 +111,7 @@ export default function ClientProfile() {
               </button>
 
               <nav className="flex-1 space-y-12">
-                <button onClick={() => { navigate('/client-profile'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-purple-500 uppercase cursor-pointer"><LayoutGrid size={22}/> ORGANIZADOR ({events.length})</button>
+                <button onClick={() => { navigate('/client-profile'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-purple-500 uppercase cursor-pointer"><LayoutGrid size={22}/> ORGANIZADOR</button>
                 <button onClick={() => { navigate('/home'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase cursor-pointer"><Search size={22}/> EXPLORAR</button>
               </nav>
 
@@ -142,7 +142,7 @@ export default function ClientProfile() {
         </div>
 
         <nav className="flex-1 space-y-8 text-left">
-          <button onClick={() => navigate('/client-profile')} className="flex items-center gap-4 text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><LayoutGrid size={18} className="text-purple-500"/> ORGANIZADOR ({events.length})</button>
+          <button onClick={() => navigate('/client-profile')} className="flex items-center gap-4 text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><LayoutGrid size={18} className="text-purple-500"/> ORGANIZADOR</button>
           <button onClick={() => navigate('/home')} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><Search size={18}/> EXPLORAR</button>
         </nav>
 
@@ -172,7 +172,7 @@ export default function ClientProfile() {
 
         <section className="space-y-6">
           <div className="flex justify-between items-center border-l-2 border-purple-500 pl-4">
-            <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black">Panel Experience ({events.length})</h3>
+            <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black">Panel Experience</h3>
           </div>
           
           {events.length === 0 ? (
