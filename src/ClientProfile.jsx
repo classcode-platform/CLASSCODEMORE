@@ -13,6 +13,29 @@ import EventOrganizer from './components/EventOrganizer';
 import LiveControlPanel from './components/LiveControlPanel';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const ARGENTINE_PROVINCES = [
+  {
+    name: "BUENOS AIRES",
+    localities: ["CAPITAL FEDERAL / CABA", "LA MATANZA (SAN JUSTO / VILLA LUZURIAGA)", "MORÓN", "RAMOS MEJÍA", "AVELLANEDA", "LANÚS", "LA PLATA", "MAR DEL PLATA", "TIGRE", "VICENTE LÓPEZ"]
+  },
+  {
+    name: "CÓRDOBA",
+    localities: ["CÓRDOBA CAPITAL", "VILLA CARLOS PAZ", "RÍO CUARTO", "VILLA MARÍA", "ALTA GRACIA"]
+  },
+  {
+    name: "SANTA FE",
+    localities: ["ROSARIO", "SANTA FE CAPITAL", "RAFAELA", "VENADO TUERTO"]
+  },
+  {
+    name: "MENDOZA",
+    localities: ["MENDOZA CAPITAL", "GUAYMALLÉN", "GODOY CRUZ", "SAN RAFAEL"]
+  },
+  {
+    name: "TUCUMÁN",
+    localities: ["SAN MIGUEL DE TUCUMÁN", "YERBA BUENA", "TAFÍ VIEJO"]
+  }
+];
+
 export default function ClientProfile() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -23,10 +46,9 @@ export default function ClientProfile() {
   const [events, setEvents] = useState([]);
   const [profile, setProfile] = useState({ name: '', location: '', interests: '', photoURL: '' });
   
-  // Estado temporal para el formulario de edición de perfil
-  const [editForm, setEditForm] = useState({ name: '', location: '', photoURL: '' });
+  const [editForm, setEditForm] = useState({ name: '', province: '', locality: '', photoURL: '' });
+  const [selectedProvinceObj, setSelectedProvinceObj] = useState(ARGENTINE_PROVINCES[0]);
 
-  // Estados para el manejo del LiveControlPanel modal
   const [showLivePanel, setShowLivePanel] = useState(false);
   const [selectedEventIndex, setSelectedEventIndex] = useState(0);
   const [previewImage, setPreviewImage] = useState(null);
@@ -40,7 +62,27 @@ export default function ClientProfile() {
           if (docSnap.exists()) {
             const data = docSnap.data();
             setProfile(prev => ({ ...prev, ...data }));
-            setEditForm({ name: data.name || '', location: data.location || '', photoURL: data.photoURL || '' });
+            
+            let prov = ARGENTINE_PROVINCES[0].name;
+            let loc = "";
+            if (data.location) {
+              const parts = data.location.split(" - ");
+              if (parts.length > 1) {
+                prov = parts[0];
+                loc = parts[1];
+              } else {
+                loc = data.location;
+              }
+            }
+            const foundProv = ARGENTINE_PROVINCES.find(p => p.name === prov) || ARGENTINE_PROVINCES[0];
+            setSelectedProvinceObj(foundProv);
+
+            setEditForm({ 
+              name: data.name || '', 
+              province: foundProv.name, 
+              locality: loc || foundProv.localities[0], 
+              photoURL: data.photoURL || '' 
+            });
           }
           setLoading(false);
         });
@@ -58,7 +100,17 @@ export default function ClientProfile() {
     return () => unsubscribe();
   }, [navigate]);
 
-  // Función para convertir la imagen seleccionada a Base64 para guardarla de forma inmediata y limpia
+  const handleProvinceChange = (e) => {
+    const provName = e.target.value;
+    const provObj = ARGENTINE_PROVINCES.find(p => p.name === provName) || ARGENTINE_PROVINCES[0];
+    setSelectedProvinceObj(provObj);
+    setEditForm(prev => ({
+      ...prev,
+      province: provObj.name,
+      locality: provObj.localities[0]
+    }));
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -74,9 +126,10 @@ export default function ClientProfile() {
     e.preventDefault();
     if (!auth.currentUser) return;
     try {
+      const formattedLocation = `${editForm.province} - ${editForm.locality}`;
       await updateDoc(doc(db, "users", auth.currentUser.uid), {
         name: editForm.name,
-        location: editForm.location,
+        location: formattedLocation,
         photoURL: editForm.photoURL
       });
       setIsEditingProfile(false);
@@ -230,6 +283,7 @@ export default function ClientProfile() {
                 <h2 className="text-[14px] md:text-[16px] font-['Poppins'] text-white truncate">{profile.name || 'ORGANIZADOR'}</h2>
                 <button onClick={() => setIsEditingProfile(true)} className="text-gray-500 hover:text-white transition-colors cursor-pointer flex-shrink-0"><Edit3 size={14} /></button>
               </div>
+              {profile.location && <p className="text-[9px] text-gray-400 font-bold mt-2 flex items-center gap-1"><MapPin size={10} className="text-purple-400"/> {profile.location}</p>}
             </div>
           </div>
           
@@ -317,7 +371,6 @@ export default function ClientProfile() {
 
       </main>
 
-      {/* Modal para Editar Perfil (Con Subida de Foto Directa) */}
       <AnimatePresence>
         {isEditingProfile && (
           <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[250] flex items-center justify-center p-4 uppercase">
@@ -341,13 +394,29 @@ export default function ClientProfile() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[8px] text-gray-400 tracking-widest font-black">Ubicación</label>
-                  <input 
-                    type="text" 
-                    value={editForm.location} 
-                    onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
-                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-500 transition-colors"
-                  />
+                  <label className="text-[8px] text-gray-400 tracking-widest font-black">Provincia</label>
+                  <select 
+                    value={editForm.province} 
+                    onChange={handleProvinceChange}
+                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-500 transition-colors cursor-pointer"
+                  >
+                    {ARGENTINE_PROVINCES.map((prov) => (
+                      <option key={prov.name} value={prov.name}>{prov.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[8px] text-gray-400 tracking-widest font-black">Localidad / Zona</label>
+                  <select 
+                    value={editForm.locality} 
+                    onChange={(e) => setEditForm({ ...editForm, locality: e.target.value })}
+                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-500 transition-colors cursor-pointer"
+                  >
+                    {selectedProvinceObj.localities.map((loc) => (
+                      <option key={loc} value={loc}>{loc}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-2">
