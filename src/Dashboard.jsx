@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from './firebase'; 
-import { collection, query, where, onSnapshot, doc, setDoc, deleteDoc, updateDoc, addDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, setDoc, getDoc, updateDoc, addDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -20,7 +20,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState([]);
   
-  // Estados para múltiples perfiles
   const [profiles, setProfiles] = useState([]);
   const [activeProfileId, setActiveProfileId] = useState(null);
 
@@ -80,20 +79,29 @@ export default function Dashboard() {
     return bonus + (currentProfile.academyBaseScore || 0);
   };
 
-  // Cargar perfiles múltiples del usuario autenticado
   useEffect(() => {
     let profUnsubscribe = () => {};
     let chatUnsubscribe = () => {};
 
-    const authUnsubscribe = onAuthStateChanged(auth, (user) => {
+    const authUnsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        const mainDocRef = doc(db, "professionals", user.uid);
         const qProfiles = query(collection(db, "professionals"), where("uid", "==", user.uid));
-        profUnsubscribe = onSnapshot(qProfiles, (snapshot) => {
-          const loadedProfiles = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+        
+        profUnsubscribe = onSnapshot(qProfiles, async (snapshot) => {
+          let loadedProfiles = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
           
+          const mainDocSnap = await getDoc(mainDocRef);
+          if (mainDocSnap.exists()) {
+            const mainData = { id: mainDocSnap.id, ...mainDocSnap.data() };
+            const existsInList = loadedProfiles.some(p => p.id === mainData.id);
+            if (!existsInList) {
+              loadedProfiles = [mainData, ...loadedProfiles];
+            }
+          }
+
           if (loadedProfiles.length > 0) {
             setProfiles(loadedProfiles);
-            // Si no hay perfil activo seleccionado o el activo ya no existe, seleccionamos el primero
             const activeExists = loadedProfiles.some(p => p.id === activeProfileId);
             const targetProfile = activeExists ? loadedProfiles.find(p => p.id === activeProfileId) : loadedProfiles[0];
             
@@ -111,15 +119,13 @@ export default function Dashboard() {
               ...photosData
             });
           } else {
-            // Si no tiene perfiles creados, inicializamos uno por defecto
             const defaultNewProfile = {
               uid: user.uid,
               name: user.displayName || 'NUEVO TALENTO',
               job: '', specialty: '', location: '', bio: '', videoLink: '', completedCourses: [], academyBaseScore: 0
             };
-            addDoc(collection(db, "professionals"), defaultNewProfile).then(docRef => {
-              setActiveProfileId(docRef.id);
-            });
+            await setDoc(mainDocRef, defaultNewProfile, { merge: true });
+            setActiveProfileId(user.uid);
           }
           setLoading(false);
         });
@@ -136,9 +142,8 @@ export default function Dashboard() {
       profUnsubscribe();
       chatUnsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, activeProfileId]);
 
-  // Cambiar de perfil activo en el estado local
   const handleSwitchProfile = (id) => {
     const selected = profiles.find(p => p.id === id);
     if (selected) {
@@ -154,7 +159,6 @@ export default function Dashboard() {
     }
   };
 
-  // Crear un nuevo perfil adicional
   const handleCreateNewProfile = async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -353,7 +357,6 @@ export default function Dashboard() {
         <div className="flex-1 p-4 md:p-8 mt-16 md:mt-0 w-full max-w-full box-border overflow-x-hidden">
           <div className="w-full max-w-[1400px] mx-auto box-border overflow-x-hidden space-y-8">
             
-            {/* SELECTOR DE PERFILES MÚLTIPLES */}
             <div className="w-full bg-[#050505] border border-white/5 rounded-2xl p-4 md:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 box-border">
               <div className="flex items-center gap-3 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
                 <span className="text-[9px] text-gray-500 font-black tracking-widest uppercase flex-shrink-0">TUS PERFILES:</span>
@@ -370,7 +373,7 @@ export default function Dashboard() {
                       }`}
                     >
                       <User size={12} />
-                      {p.job ? `${p.job}` : 'PERFIL NUEVO'}
+                      {p.job ? `${p.job}` : 'PERFIL PRINCIPAL'}
                     </button>
                   );
                 })}
