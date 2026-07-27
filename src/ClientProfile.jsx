@@ -122,9 +122,9 @@ export default function ClientProfile() {
           setEvents(fetchedEvents);
         });
 
-        // Sincronización Realtime del Chat (Colección: users/{uid}/chats)
+        // Sincronización Realtime del Chat Compartido con Talent
         const qMessages = query(
-          collection(db, `users/${user.uid}/chats`), 
+          collection(db, `chats/${user.uid}/messages`), 
           orderBy('createdAt', 'asc')
         );
 
@@ -136,7 +136,7 @@ export default function ClientProfile() {
           setMensajes(msgs);
           setCargandoChat(false);
         }, (error) => {
-          console.error("Error al sincronizar chat:", error);
+          console.error("Error al sincronizar chat compartido:", error);
           setCargandoChat(false);
         });
 
@@ -159,7 +159,7 @@ export default function ClientProfile() {
     if (!nuevoMensaje.trim() || !auth.currentUser) return;
 
     try {
-      await addDoc(collection(db, `users/${auth.currentUser.uid}/chats`), {
+      await addDoc(collection(db, `chats/${auth.currentUser.uid}/messages`), {
         text: nuevoMensaje.toUpperCase(),
         senderId: auth.currentUser.uid,
         createdAt: serverTimestamp()
