@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { db } from "../firebase";
 import { doc, getDoc, collection, onSnapshot, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Users, LayoutGrid, DollarSign, Plus, Trash2, Edit3, Image as ImageIcon, Check, X, Calendar, MapPin, Upload, Utensils } from 'lucide-react';
+import { ArrowLeft, Users, LayoutGrid, DollarSign, Plus, Trash2, Edit3, Image as ImageIcon, Check, X, Calendar, MapPin, Upload, Utensils, CheckSquare, Square, CheckCircle2, PhoneCall } from 'lucide-react';
 
 export default function EventDetail() {
   const { eventId } = useParams();
@@ -14,15 +14,17 @@ export default function EventDetail() {
   const [guests, setGuests] = useState([]);
   const [tables, setTables] = useState([]);
   const [budgetItems, setBudgetItems] = useState([]);
+  const [tasks, setTasks] = useState([]);
 
   const [layoutMode, setLayoutMode] = useState('tables');
 
   const [editingBudgetId, setEditingBudgetId] = useState(null);
   const [editBudgetValues, setEditBudgetValues] = useState({ concept: '', estimated: 0, actual: 0 });
 
-  const [newGuest, setNewGuest] = useState({ name: '', table: '', status: 'PENDIENTE' });
+  const [newGuest, setNewGuest] = useState({ name: '', table: '', status: 'PENDIENTE', phone: '', contacted: false, confirmed: false });
   const [newTable, setNewTable] = useState({ name: '', capacity: 10 });
-  const [newBudget, setNewBudget] = useState({ concept: '', estimated: '', actual: '' });
+  const [newBudget, setNewBudget] = useState({ concept: '', estimated: '', actual: '', hired: false });
+  const [newTaskText, setNewTaskText] = useState('');
   
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [coverUrl, setCoverUrl] = useState('');
@@ -66,10 +68,15 @@ export default function EventDetail() {
       setBudgetItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
+    const unsubTasks = onSnapshot(collection(db, "events_organizer", eventId, "tasks"), (snap) => {
+      setTasks(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+
     return () => {
       unsubGuests();
       unsubTables();
       unsubBudget();
+      unsubTasks();
     };
   }, [eventId]);
 
@@ -79,9 +86,25 @@ export default function EventDetail() {
     await addDoc(collection(db, "events_organizer", eventId, "guests"), {
       name: newGuest.name.trim().toUpperCase(),
       table: newGuest.table.trim().toUpperCase(),
-      status: newGuest.status
+      status: newGuest.status,
+      phone: newGuest.phone.trim(),
+      contacted: newGuest.contacted,
+      confirmed: newGuest.status === 'CONFIRMADO'
     });
-    setNewGuest({ name: '', table: tables[0]?.name || '', status: 'PENDIENTE' });
+    setNewGuest({ name: '', table: tables[0]?.name || '', status: 'PENDIENTE', phone: '', contacted: false, confirmed: false });
+  };
+
+  const handleToggleGuestField = async (guestId, field, currentValue) => {
+    try {
+      const docRef = doc(db, "events_organizer", eventId, "guests", guestId);
+      const updates = { [field]: !currentValue };
+      if (field === 'confirmed') {
+        updates.status = !currentValue ? 'CONFIRMADO' : 'PENDIENTE';
+      }
+      await updateDoc(docRef, updates);
+    } catch (error) {
+      console.error("Error al actualizar invitado:", error);
+    }
   };
 
   const handleAddTable = async (e) => {
@@ -101,9 +124,20 @@ export default function EventDetail() {
     await addDoc(collection(db, "events_organizer", eventId, "budget"), {
       concept: newBudget.concept.toUpperCase(),
       estimated: Number(newBudget.estimated) || 0,
-      actual: Number(newBudget.actual) || 0
+      actual: Number(newBudget.actual) || 0,
+      hired: false
     });
-    setNewBudget({ concept: '', estimated: '', actual: '' });
+    setNewBudget({ concept: '', estimated: '', actual: '', hired: false });
+  };
+
+  const handleToggleBudgetHired = async (id, currentHired) => {
+    try {
+      await updateDoc(doc(db, "events_organizer", eventId, "budget", id), {
+        hired: !currentHired
+      });
+    } catch (error) {
+      console.error("Error al actualizar contratación:", error);
+    }
   };
 
   const handleUpdateBudget = async (id) => {
@@ -116,6 +150,26 @@ export default function EventDetail() {
       setEditingBudgetId(null);
     } catch (error) {
       console.error("Error al actualizar presupuesto:", error);
+    }
+  };
+
+  const handleAddTask = async (e) => {
+    e.preventDefault();
+    if (!newTaskText.trim()) return;
+    await addDoc(collection(db, "events_organizer", eventId, "tasks"), {
+      text: newTaskText.trim().toUpperCase(),
+      completed: false
+    });
+    setNewTaskText('');
+  };
+
+  const handleToggleTask = async (id, currentCompleted) => {
+    try {
+      await updateDoc(doc(db, "events_organizer", eventId, "tasks", id), {
+        completed: !currentCompleted
+      });
+    } catch (error) {
+      console.error("Error al actualizar tarea:", error);
     }
   };
 
@@ -182,10 +236,12 @@ export default function EventDetail() {
 
   const totalEstimated = budgetItems.reduce((acc, item) => acc + (Number(item.estimated) || 0), 0);
   const totalActual = budgetItems.reduce((acc, item) => acc + (Number(item.actual) || 0), 0);
+  const totalHiredCost = budgetItems.reduce((acc, item) => acc + (item.hired ? (Number(item.actual) || Number(item.estimated) || 0) : 0), 0);
 
   const totalCapacity = tables.reduce((acc, t) => acc + (Number(t.capacity) || 0), 0);
   const totalOccupied = guests.length; 
   const globalOccupancyPercentage = totalCapacity > 0 ? Math.min(100, Math.round((totalOccupied / totalCapacity) * 100)) : 0;
+  const completedTasksCount = tasks.filter(t => t.completed).length;
 
   return (
     <div className="min-h-screen w-full bg-[#070709] text-white font-['Open_Sans'] flex flex-col items-center overflow-x-hidden uppercase antialiased relative text-left box-border m-0 p-0 selection:bg-white selection:text-black">
@@ -239,14 +295,14 @@ export default function EventDetail() {
               <h2 className="text-lg sm:text-2xl font-['Poppins'] font-normal text-white tracking-wide leading-tight">{event.title}</h2>
               <div className="flex flex-wrap items-center gap-3 text-[8px] text-white/80 font-bold">
                 
-                {/* FECHA EDITABLE AL CLICKEAR O CON BOTÓN SUTIL */}
+                {/* FECHA EDITABLE */}
                 <button onClick={() => setShowDateModal(true)} className="flex items-center gap-1.5 bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 px-2.5 py-1 rounded-lg transition-all cursor-pointer text-white/90">
                   <Calendar size={12} className="text-purple-300"/> 
                   <span>{event.date || 'AGREGAR FECHA'}</span>
                   <Edit3 size={10} className="text-white/40 ml-1"/>
                 </button>
                 
-                {/* UBICACIÓN EDITABLE AL CLICKEAR O CON BOTÓN SUTIL */}
+                {/* UBICACIÓN EDITABLE */}
                 <button onClick={() => setShowLocationModal(true)} className="flex items-center gap-1.5 bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 px-2.5 py-1 rounded-lg transition-all cursor-pointer text-white/90">
                   <MapPin size={12} className="text-purple-300"/> 
                   <span>{event.location || 'AGREGAR UBICACIÓN'}</span>
@@ -262,17 +318,20 @@ export default function EventDetail() {
         </div>
       </div>
 
-      {/* PESTAÑAS MÁS ESTILIZADAS Y FINAS */}
+      {/* PESTAÑAS AMPLIADAS (INCLUYENDO TAREAS/PENDIENTES) */}
       <div className="w-full max-w-[1000px] px-4 sm:px-8 mt-6 relative z-10">
-        <div className="grid grid-cols-3 gap-2 font-['Poppins']">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-['Poppins']">
           <button onClick={() => setActiveTab('tables')} className={`py-3 px-3 rounded-xl text-[8px] font-black tracking-widest transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${activeTab === 'tables' ? 'bg-white/15 border-white/30 text-white shadow-sm' : 'bg-white/[0.04] backdrop-blur-xl border-white/10 text-white/60 hover:text-white hover:bg-white/[0.08]'}`}>
             <LayoutGrid size={13}/> <span className="truncate">PLANO</span>
           </button>
           <button onClick={() => setActiveTab('guests')} className={`py-3 px-3 rounded-xl text-[8px] font-black tracking-widest transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${activeTab === 'guests' ? 'bg-white/15 border-white/30 text-white shadow-sm' : 'bg-white/[0.04] backdrop-blur-xl border-white/10 text-white/60 hover:text-white hover:bg-white/[0.08]'}`}>
-            <Users size={13}/> <span className="truncate">INVITADOS</span>
+            <Users size={13}/> <span className="truncate">INVITADOS ({guests.length})</span>
           </button>
           <button onClick={() => setActiveTab('budget')} className={`py-3 px-3 rounded-xl text-[8px] font-black tracking-widest transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${activeTab === 'budget' ? 'bg-white/15 border-white/30 text-white shadow-sm' : 'bg-white/[0.04] backdrop-blur-xl border-white/10 text-white/60 hover:text-white hover:bg-white/[0.08]'}`}>
             <DollarSign size={13}/> <span className="truncate">GASTOS</span>
+          </button>
+          <button onClick={() => setActiveTab('tasks')} className={`py-3 px-3 rounded-xl text-[8px] font-black tracking-widest transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${activeTab === 'tasks' ? 'bg-white/15 border-white/30 text-white shadow-sm' : 'bg-white/[0.04] backdrop-blur-xl border-white/10 text-white/60 hover:text-white hover:bg-white/[0.08]'}`}>
+            <CheckSquare size={13}/> <span className="truncate">PENDIENTES ({completedTasksCount}/{tasks.length})</span>
           </button>
         </div>
       </div>
@@ -507,11 +566,12 @@ export default function EventDetail() {
           </div>
         )}
 
-        {/* TAB 2: INVITADOS */}
+        {/* TAB 2: INVITADOS (CON TELÉFONO Y BOTONES DE ESTADO INTERACTIVOS) */}
         {activeTab === 'guests' && (
           <div className="space-y-5">
-            <form onSubmit={handleAddGuest} className="bg-white/[0.04] backdrop-blur-2xl border border-white/15 p-4 sm:p-5 rounded-2xl grid grid-cols-1 sm:grid-cols-4 gap-3 font-bold items-center shadow-md">
+            <form onSubmit={handleAddGuest} className="bg-white/[0.04] backdrop-blur-2xl border border-white/15 p-4 sm:p-5 rounded-2xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 font-bold items-center shadow-md">
               <input placeholder="NOMBRE Y APELLIDO" value={newGuest.name} onChange={e => setNewGuest({...newGuest, name: e.target.value})} className="w-full bg-white/[0.06] border border-white/15 rounded-xl px-3.5 py-3 text-[9px] text-white outline-none focus:border-white/40 tracking-widest uppercase placeholder:text-white/30" required />
+              <input placeholder="TELÉFONO / CONTACTO" value={newGuest.phone} onChange={e => setNewGuest({...newGuest, phone: e.target.value})} className="w-full bg-white/[0.06] border border-white/15 rounded-xl px-3.5 py-3 text-[9px] text-white outline-none focus:border-white/40 tracking-widest uppercase placeholder:text-white/30" />
               <select value={newGuest.table} onChange={e => setNewGuest({...newGuest, table: e.target.value})} className="w-full bg-[#121318] border border-white/15 rounded-xl px-3.5 py-3 text-[9px] text-white outline-none focus:border-white/40 tracking-widest uppercase cursor-pointer">
                 {tables.length === 0 ? <option value="">SIN SECTORES</option> : tables.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
               </select>
@@ -520,31 +580,65 @@ export default function EventDetail() {
                 <option value="CONFIRMADO">CONFIRMADO</option>
               </select>
               <button type="submit" className="w-full py-3 bg-white/[0.08] hover:bg-white/[0.15] border border-white/20 text-white rounded-xl text-[8px] font-black tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer font-['Poppins']">
-                <Plus size={13}/> AGREGAR
+                <Plus size={13}/> AÑADIR
               </button>
             </form>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {guests.map(g => (
-                <div key={g.id} className="bg-white/[0.04] backdrop-blur-2xl border border-white/15 p-4 rounded-xl flex justify-between items-center shadow-sm">
-                  <div className="space-y-0.5">
-                    <h4 className="font-['Poppins'] font-normal text-white text-[11px]">{g.name}</h4>
-                    <p className="text-[7px] text-white/60 font-bold tracking-widest">{g.table} — <span className={g.status === 'CONFIRMADO' ? 'text-white font-black' : 'text-amber-400'}>{g.status}</span></p>
-                  </div>
-                  <button onClick={() => handleDelete('guests', g.id)} className="p-2 bg-white/5 hover:bg-red-500/20 text-white/60 hover:text-red-300 border border-white/10 rounded-lg transition-all cursor-pointer">
-                    <Trash2 size={13}/>
-                  </button>
+              {guests.length === 0 ? (
+                <div className="col-span-full py-12 text-center text-white/40 tracking-widest text-[8px] font-black">
+                  NO HAY INVITADOS CARGADOS
                 </div>
-              ))}
+              ) : (
+                guests.map(g => (
+                  <div key={g.id} className="bg-white/[0.04] backdrop-blur-2xl border border-white/15 p-4 rounded-xl flex flex-col justify-between gap-3 shadow-sm">
+                    <div className="space-y-1">
+                      <h4 className="font-['Poppins'] font-normal text-white text-[11px]">{g.name}</h4>
+                      <p className="text-[7px] text-white/60 font-bold tracking-widest uppercase">{g.table || 'SIN MESA'}</p>
+                      {g.phone && (
+                        <p className="text-[7px] text-purple-300 font-bold flex items-center gap-1">
+                          <PhoneCall size={10} /> {g.phone}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-white/10 gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5">
+                        <button 
+                          onClick={() => handleToggleGuestField(g.id, 'contacted', g.contacted)}
+                          className={`px-2.5 py-1 rounded-lg text-[7px] font-black tracking-widest border transition-all cursor-pointer ${
+                            g.contacted ? 'bg-blue-500/30 text-blue-300 border-blue-400/50' : 'bg-white/10 text-white/60 border-white/20'
+                          }`}
+                        >
+                          {g.contacted ? 'CONTACTADO' : 'NO CONTACTADO'}
+                        </button>
+
+                        <button 
+                          onClick={() => handleToggleGuestField(g.id, 'confirmed', g.status === 'CONFIRMADO')}
+                          className={`px-2.5 py-1 rounded-lg text-[7px] font-black tracking-widest border transition-all cursor-pointer ${
+                            g.status === 'CONFIRMADO' ? 'bg-emerald-500/30 text-emerald-300 border-emerald-400/50' : 'bg-white/10 text-white/60 border-white/20'
+                          }`}
+                        >
+                          {g.status === 'CONFIRMADO' ? 'CONFIRMADO' : 'SIN CONFIRMAR'}
+                        </button>
+                      </div>
+
+                      <button onClick={() => handleDelete('guests', g.id)} className="p-2 bg-white/5 hover:bg-red-500/20 text-white/60 hover:text-red-300 border border-white/10 rounded-lg transition-all cursor-pointer">
+                        <Trash2 size={13}/>
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
 
-        {/* TAB 3: GASTOS */}
+        {/* TAB 3: GASTOS Y CONTRATACIONES */}
         {activeTab === 'budget' && (
           <div className="space-y-5">
             <form onSubmit={handleAddBudget} className="bg-white/[0.04] backdrop-blur-2xl border border-white/15 p-4 sm:p-5 rounded-2xl grid grid-cols-1 sm:grid-cols-4 gap-3 font-bold items-center shadow-md">
-              <input placeholder="CONCEPTO (EJ: CATERING)" value={newBudget.concept} onChange={e => setNewBudget({...newBudget, concept: e.target.value})} className="w-full bg-white/[0.06] border border-white/15 rounded-xl px-3.5 py-3 text-[9px] text-white outline-none focus:border-white/40 tracking-widest uppercase placeholder:text-white/30" required />
+              <input placeholder="CONCEPTO (EJ: CATERING, DJ)" value={newBudget.concept} onChange={e => setNewBudget({...newBudget, concept: e.target.value})} className="w-full bg-white/[0.06] border border-white/15 rounded-xl px-3.5 py-3 text-[9px] text-white outline-none focus:border-white/40 tracking-widest uppercase placeholder:text-white/30" required />
               <input type="number" placeholder="ESTIMADO ($)" value={newBudget.estimated} onChange={e => setNewBudget({...newBudget, estimated: e.target.value})} className="w-full bg-white/[0.06] border border-white/15 rounded-xl px-3.5 py-3 text-[9px] text-white outline-none focus:border-white/40 tracking-widest uppercase placeholder:text-white/30" />
               <input type="number" placeholder="REAL ($)" value={newBudget.actual} onChange={e => setNewBudget({...newBudget, actual: e.target.value})} className="w-full bg-white/[0.06] border border-white/15 rounded-xl px-3.5 py-3 text-[9px] text-white outline-none focus:border-white/40 tracking-widest uppercase placeholder:text-white/30" />
               <button type="submit" className="w-full py-3 bg-white/[0.08] hover:bg-white/[0.15] border border-white/20 text-white rounded-xl text-[8px] font-black tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer font-['Poppins']">
@@ -553,19 +647,20 @@ export default function EventDetail() {
             </form>
 
             <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/15 rounded-2xl p-4 sm:p-6 overflow-x-auto shadow-lg space-y-4">
-              <table className="w-full text-left border-collapse min-w-[420px]">
+              <table className="w-full text-left border-collapse min-w-[500px]">
                 <thead>
                   <tr className="border-b border-white/10 text-[7px] text-white/50 tracking-[0.3em] font-black">
                     <th className="pb-3">CONCEPTO</th>
                     <th className="pb-3">ESTIMADO</th>
                     <th className="pb-3">REAL</th>
+                    <th className="pb-3">ESTADO</th>
                     <th className="pb-3 text-right">ACCIONES</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5 text-[9px] font-bold">
                   {budgetItems.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="py-10 text-center text-white/40 tracking-widest">SIN GASTOS REGISTRADOS</td>
+                      <td colSpan="5" className="py-10 text-center text-white/40 tracking-widest">SIN GASTOS REGISTRADOS</td>
                     </tr>
                   ) : (
                     budgetItems.map(b => {
@@ -580,12 +675,22 @@ export default function EventDetail() {
                           <td className="py-3.5 text-white/80">
                             {isEditing ? (
                               <input type="number" value={editBudgetValues.estimated} onChange={e => setEditBudgetValues({...editBudgetValues, estimated: e.target.value})} className="bg-white/10 border border-white/30 rounded-lg p-2 text-white outline-none w-20" />
-                            ) : `$${b.estimated}`}
+                            ) : `$${Number(b.estimated || 0).toLocaleString()}`}
                           </td>
                           <td className="py-3.5 text-white">
                             {isEditing ? (
                               <input type="number" value={editBudgetValues.actual} onChange={e => setEditBudgetValues({...editBudgetValues, actual: e.target.value})} className="bg-white/10 border border-white/30 rounded-lg p-2 text-white outline-none w-20" />
-                            ) : `$${b.actual}`}
+                            ) : `$${Number(b.actual || 0).toLocaleString()}`}
+                          </td>
+                          <td className="py-3.5">
+                            <button 
+                              onClick={() => handleToggleBudgetHired(b.id, b.hired)}
+                              className={`px-2.5 py-1 rounded-lg text-[7px] font-black tracking-widest border transition-all cursor-pointer flex items-center gap-1 w-fit ${
+                                b.hired ? 'bg-emerald-500/30 text-emerald-300 border-emerald-400/50' : 'bg-white/10 text-white/60 border-white/20'
+                              }`}
+                            >
+                              <CheckCircle2 size={11} /> {b.hired ? 'CONTRATADO' : 'PENDIENTE'}
+                            </button>
                           </td>
                           <td className="py-3.5 text-right flex items-center justify-end gap-1.5">
                             {isEditing ? (
@@ -609,11 +714,49 @@ export default function EventDetail() {
 
               {budgetItems.length > 0 && (
                 <div className="pt-3 border-t border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center text-[8px] font-black tracking-widest px-1 gap-2">
-                  <span className="text-white/60">TOTALES:</span>
                   <div className="flex gap-4">
-                    <span className="text-white/50">EST: <span className="text-white">${totalEstimated}</span></span>
-                    <span className="text-white/50">REAL: <span className="text-purple-300">${totalActual}</span></span>
+                    <span className="text-white/60">TOTAL CONTRATADO: <span className="text-emerald-300">${totalHiredCost.toLocaleString()}</span></span>
                   </div>
+                  <div className="flex gap-4">
+                    <span className="text-white/50">EST: <span className="text-white">${totalEstimated.toLocaleString()}</span></span>
+                    <span className="text-white/50">REAL: <span className="text-purple-300">${totalActual.toLocaleString()}</span></span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: TAREAS / PENDIENTES */}
+        {activeTab === 'tasks' && (
+          <div className="space-y-5">
+            <form onSubmit={handleAddTask} className="bg-white/[0.04] backdrop-blur-2xl border border-white/15 p-4 sm:p-5 rounded-2xl flex gap-3 font-bold items-center shadow-md">
+              <input placeholder="NUEVA TAREA O PENDIENTE..." value={newTaskText} onChange={e => setNewTaskText(e.target.value)} className="w-full bg-white/[0.06] border border-white/15 rounded-xl px-3.5 py-3 text-[9px] text-white outline-none focus:border-white/40 tracking-widest uppercase placeholder:text-white/30" required />
+              <button type="submit" className="px-6 py-3 bg-white/[0.08] hover:bg-white/[0.15] border border-white/20 text-white rounded-xl text-[8px] font-black tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer font-['Poppins'] shrink-0">
+                <Plus size={13}/> AGREGAR
+              </button>
+            </form>
+
+            <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/15 rounded-2xl p-5 space-y-3 shadow-lg">
+              {tasks.length === 0 ? (
+                <div className="py-12 text-center text-white/40 tracking-widest text-[8px] font-black">
+                  NO HAY TAREAS PENDIENTES
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
+                  {tasks.map(task => (
+                    <div key={task.id} className="flex items-center justify-between p-3.5 bg-white/[0.03] border border-white/10 rounded-xl hover:bg-white/[0.06] transition-all">
+                      <div onClick={() => handleToggleTask(task.id, task.completed)} className="flex items-center gap-3 cursor-pointer flex-1">
+                        {task.completed ? <CheckSquare size={16} className="text-purple-400 flex-shrink-0" /> : <Square size={16} className="text-white/40 flex-shrink-0" />}
+                        <span className={`text-[10px] tracking-wider uppercase ${task.completed ? 'line-through text-white/40' : 'text-white font-medium'}`}>
+                          {task.text}
+                        </span>
+                      </div>
+                      <button onClick={() => handleDelete('tasks', task.id)} className="text-white/40 hover:text-red-300 p-1.5 transition-colors cursor-pointer">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
