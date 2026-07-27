@@ -23,7 +23,7 @@ export default function Dashboard() {
     photo1: '', photo2: '', photo3: '', photo4: '', photo5: '', 
     photo6: '', photo7: '', photo8: '', photo9: '', photo10: '',
     academyPoints: 0, verified: false, score: 0,
-    completedCourses: [] 
+    completedCourses: [], isVisible: true
   });
 
   const [uploadingStatus, setUploadingStatus] = useState({
@@ -61,6 +61,7 @@ export default function Dashboard() {
   const isProfessionalTestDone = proCourseId && profile.completedCourses?.includes(proCourseId);
 
   const isProfileVisible = 
+  profile.isVisible !== false && 
   profile.name?.trim() && 
   profile.job?.trim() && 
   profile.specialty?.trim() && 
@@ -96,13 +97,15 @@ export default function Dashboard() {
               ...data, 
               ...photosData, 
               completedCourses: data.completedCourses || [],
-              academyBaseScore: data.score || 0 
+              academyBaseScore: data.score || 0,
+              isVisible: data.isVisible !== false 
             }));
           } else {
             setProfile(prev => ({
               ...prev,
               name: user.displayName || 'NUEVO TALENTO',
-              completedCourses: []
+              completedCourses: [],
+              isVisible: true
             }));
           }
           setLoading(false);
@@ -397,8 +400,8 @@ export default function Dashboard() {
       {/* MODAL EDIT PROFILE */}
       <AnimatePresence>
         {isEditingProfile && (
-          <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[150] flex items-center justify-center p-6 antialiased uppercase leading-none">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-[#050505] border border-white/10 rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-12 max-w-md w-full space-y-12 shadow-2xl text-center relative leading-none border-t-purple-500/20 uppercase">
+          <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[150] flex items-center justify-center p-6 antialiased uppercase leading-none overflow-y-auto">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-[#050505] border border-white/10 rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-12 max-w-md w-full space-y-12 shadow-2xl text-center relative leading-none border-t-purple-500/20 uppercase my-auto">
               <button onClick={() => setIsEditingProfile(false)} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full leading-none"><X size={24} /></button>
               <h3 className="text-[14px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/5 pb-6 text-left leading-none font-bold">Editar Identidad</h3>
               <div className="space-y-8 text-left leading-none">
@@ -437,7 +440,7 @@ export default function Dashboard() {
 
                 <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
                   <label className="text-[8px] text-gray-600 font-black tracking-[0.3em]">Perfil Público (Visible)</label>
-                  <input type="checkbox" checked={profile.isVisible || false} onChange={e => setProfile({...profile, isVisible: e.target.checked})} className="toggle toggle-primary" />
+                  <input type="checkbox" checked={profile.isVisible ?? true} onChange={e => setProfile({...profile, isVisible: e.target.checked})} className="toggle toggle-primary cursor-pointer" />
                 </div>
 
                 <div className="space-y-3 leading-none">
@@ -445,7 +448,7 @@ export default function Dashboard() {
                   <textarea className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-[11px] h-32 resize-none font-bold outline-none focus:border-purple-500 transition-all text-white font-['Open_Sans'] leading-relaxed shadow-inner" value={profile.bio} onChange={e => setProfile({...profile, bio: e.target.value})} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 pt-4 leading-none"><button onClick={() => setIsEditingProfile(false)} className="py-5 bg-white/5 text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all hover:bg-white/10 leading-none">DESCARTAR</button><button onClick={handleSaveProfileData} className="py-5 bg-purple-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-purple-900/40 hover:bg-purple-500 active:scale-95 transition-all leading-none">GUARDAR</button></div>
+              <div className="grid grid-cols-2 gap-4 pt-4 leading-none"><button onClick={() => setIsEditingProfile(false)} className="py-5 bg-white/5 text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all hover:bg-white/10 leading-none cursor-pointer">DESCARTAR</button><button onClick={handleSaveProfileData} className="py-5 bg-purple-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-purple-900/40 hover:bg-purple-500 active:scale-95 transition-all leading-none cursor-pointer">GUARDAR</button></div>
             </motion.div>
           </div>
         )}
