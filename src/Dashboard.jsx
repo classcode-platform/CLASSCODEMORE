@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from './firebase'; 
-import { doc, setDoc, collection, query, where, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, query, where, onSnapshot, updateDoc, arrayUnion } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, GraduationCap, Play, 
   Upload, X, Eye, Menu, Zap, CheckCircle2, 
-  LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, Share2,
+  LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, Share2, Plus,
   Camera as CameraIcon, Video as VideoIcon, User as UserIcon, Theater, Smartphone, PartyPopper, 
   Clapperboard, Sparkles, Shirt, Palette, Music, Utensils, CalendarDays, Users, Home as HomeIcon
 } from 'lucide-react'; 
@@ -20,6 +20,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState([]);
   
+  // Soporte para perfil principal y múltiples perfiles profesionales
+  const [profiles, setProfiles] = useState([]);
+  const [activeProfileIndex, setActiveProfileIndex] = useState(0);
+
   const [profile, setProfile] = useState({
     name: '', job: '', specialty: '', location: '', bio: '', videoLink: '', 
     ...Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`photo${i + 1}`, ''])),
@@ -55,21 +59,10 @@ export default function Dashboard() {
   };
   
   const RUBRO_ICONS = {
-    "FOTOGRAFÍA": CameraIcon,
-    "AUDIOVISUAL": VideoIcon,
-    "MODELO": UserIcon,
-    "ESCÉNICO": Theater,
-    "DIGITAL": Smartphone,
-    "SHOW": PartyPopper,
-    "PRODUCCIÓN / DIRECCIÓN": Clapperboard,
-    "MAKEUP / PELO": Sparkles,
-    "ESTILISMO / MODA": Shirt,
-    "DISEÑO / ARTE": Palette,
-    "DJ / SONIDO": Music,
-    "CATERING / BARRA": Utensils,
-    "PLANNER / EVENTOS": CalendarDays,
-    "TÉCNICA / ILUMINACIÓN": Zap,
-    "LOCACIONES": HomeIcon
+    "FOTOGRAFÍA": CameraIcon, "AUDIOVISUAL": VideoIcon, "MODELO": UserIcon, "ESCÉNICO": Theater,
+    "DIGITAL": Smartphone, "SHOW": PartyPopper, "PRODUCCIÓN / DIRECCIÓN": Clapperboard, "MAKEUP / PELO": Sparkles,
+    "ESTILISMO / MODA": Shirt, "DISEÑO / ARTE": Palette, "DJ / SONIDO": Music, "CATERING / BARRA": Utensils,
+    "PLANNER / EVENTOS": CalendarDays, "TÉCNICA / ILUMINACIÓN": Zap, "LOCACIONES": HomeIcon
   };
 
   const PROVINCIAS = ["Buenos Aires", "Capital Federal", "Córdoba", "Santa Fe", "Mendoza", "Tucumán", "Entre Ríos", "Salta", "Misiones", "Chaco", "Corrientes", "Río Negro", "Neuquén", "Chubut", "Formosa", "Jujuy", "San Luis", "San Juan", "La Rioja", "La Pampa", "Santiago del Estero", "Catamarca", "Santa Cruz", "Tierra del Fuego"];
@@ -96,22 +89,27 @@ export default function Dashboard() {
         profUnsubscribe = onSnapshot(doc(db, "professionals", user.uid), (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
+            const listProfiles = data.profiles && data.profiles.length > 0 ? data.profiles : [data];
+            setProfiles(listProfiles);
+            
+            const activeData = listProfiles[activeProfileIndex] || listProfiles[0];
             const photosData = {};
-            data.photos?.forEach((url, i) => { if(i < 10) photosData[`photo${i+1}`] = url; });
+            activeData.photos?.forEach((url, i) => { if(i < 10) photosData[`photo${i+1}`] = url; });
             
             setProfile(prev => ({ 
               ...prev, 
-              ...data, 
+              ...activeData, 
               ...photosData, 
               completedCourses: data.completedCourses || [],
               academyBaseScore: data.score || 0 
             }));
           } else {
-            setProfile(prev => ({
-              ...prev,
+            const initialProf = {
               name: user.displayName || 'NUEVO TALENTO',
-              completedCourses: []
-            }));
+              job: '', specialty: '', location: '', bio: '', videoLink: '', completedCourses: []
+            };
+            setProfiles([initialProf]);
+            setProfile(initialProf);
           }
           setLoading(false);
         });
@@ -127,7 +125,7 @@ export default function Dashboard() {
       profUnsubscribe();
       chatUnsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, activeProfileIndex]);
 
   const persistProfile = async (updates) => {
     const user = auth.currentUser;
@@ -136,10 +134,14 @@ export default function Dashboard() {
     const photoList = Array.from({ length: 10 }, (_, i) => newProfile[`photo${i + 1}`]).filter(Boolean);
     const finalScore = calculateTotalScore(newProfile);
 
+    const updatedProfiles = [...profiles];
+    updatedProfiles[activeProfileIndex] = { ...newProfile, photos: photoList };
+
     const dataToSave = {
       ...updates,
       photos: photoList,
       score: finalScore,
+      profiles: updatedProfiles,
       uid: user.uid
     };
 
@@ -152,6 +154,20 @@ export default function Dashboard() {
     await persistProfile(profile);
     setIsEditingProfile(false);
     setModal({ isOpen: true, type: 'success', title: "ÉXITO", message: "PERFIL ACTUALIZADO." });
+  };
+
+  const handleAddNewProfile = async () => {
+    const newBlankProfile = {
+      name: profile.name || 'NUEVO TALENTO',
+      job: '', specialty: '', location: profile.location || '', bio: '', videoLink: '',
+      ...Object.fromEntries(Array.from({ length: 10 }, () => ['', '']))
+    };
+    const updatedProfiles = [...profiles, newBlankProfile];
+    setProfiles(updatedProfiles);
+    setActiveProfileIndex(updatedProfiles.length - 1);
+    setProfile(newBlankProfile);
+    await persistProfile(newBlankProfile);
+    setModal({ isOpen: true, type: 'success', title: "NUEVO PERFIL", message: "SE CREÓ UN NUEVO PERFIL PROFESIONAL." });
   };
 
   const handleSwitchToClient = async () => {
@@ -248,7 +264,7 @@ export default function Dashboard() {
       <aside className="hidden md:flex w-72 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50 box-border">
         <header className="mb-12 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">CLASSCODE</div>
-          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent Dashboard</p>
+          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent</p>
         </header>
         
         <div className="mb-12 text-left">
@@ -280,6 +296,21 @@ export default function Dashboard() {
         <div className="flex-1 p-4 md:p-8 mt-16 md:mt-0 w-full max-w-full box-border overflow-x-hidden">
           <div className="w-full max-w-[1400px] mx-auto box-border overflow-x-hidden">
             
+            {/* SELECTOR DE PERFILES MULTIPLES */}
+            {profiles.length > 1 && (
+              <div className="flex items-center gap-3 mb-6 overflow-x-auto pb-2">
+                <span className="text-[8px] font-black tracking-widest text-gray-400">PERFILES ACTIVOS:</span>
+                {profiles.map((p, idx) => (
+                  <button 
+                    key={idx} 
+                    onClick={() => setActiveProfileIndex(idx)}
+                    className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-widest border transition-all uppercase ${activeProfileIndex === idx ? 'bg-purple-600 border-purple-500 text-white shadow-lg' : 'bg-white/[0.03] border-white/10 text-gray-400 hover:text-white'}`}>
+                    {p.job || `PERFIL ${idx + 1}`}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* SECCIÓN ESTILO FACEBOOK */}
             <div className="w-full bg-white/[0.02] border border-white/5 backdrop-blur-md rounded-2xl p-4 md:p-8 mb-8 shadow-2xl box-border overflow-hidden">
               <div className="w-full mx-auto box-border">
@@ -303,7 +334,7 @@ export default function Dashboard() {
                   )}
                   
                   <label className="absolute bottom-4 right-4 bg-black/80 hover:bg-black text-white px-3 py-2 rounded-xl text-[8px] font-black tracking-widest cursor-pointer border border-white/10 transition-all flex items-center gap-2 shadow-xl z-20">
-                    <Upload size={14} /> {profile.videoLink ? 'CAMBIAR' : 'SUBIR'}
+                    <Upload size={14} /> {uploadingStatus.video ? 'SUBIENDO...' : (profile.videoLink ? 'CAMBIAR' : 'SUBIR')}
                     <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
                   </label>
                 </div>
@@ -345,6 +376,9 @@ export default function Dashboard() {
 
                   {/* Botones de Acción */}
                   <div className="flex items-center gap-3 w-full md:w-auto justify-center pb-2 flex-shrink-0">
+                    <button onClick={handleAddNewProfile} className="px-4 py-4 rounded-2xl bg-white/[0.03] hover:bg-white/15 border border-white/10 transition-all text-white flex items-center gap-2 text-[9px] font-black tracking-widest" title="Crear otro perfil profesional">
+                      <Plus size={16} /> <span className="hidden md:inline">NUEVO PERFIL</span>
+                    </button>
                     <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-4 bg-white/[0.03] hover:bg-white/15 rounded-2xl border border-white/10 transition-all text-white" title="Ver Perfil Público">
                       <Eye size={18} />
                     </button>
