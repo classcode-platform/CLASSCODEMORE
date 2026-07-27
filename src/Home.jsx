@@ -205,20 +205,8 @@ export default function Home() {
               </div>
             </header>
 
-            {/* CONTENIDO PRINCIPAL SHOWCASE */}
-            <main className="max-w-7xl mx-auto px-6 md:px-12 py-12 w-full flex-grow">
-              <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-blue-400 text-[9px] font-bold tracking-[0.3em] uppercase">
-                  <Sparkles size={12} /> CLASSCODE VISUALS
-                </div>
-                <h1 className="text-4xl md:text-6xl font-normal font-['Poppins'] tracking-[0.05em] uppercase text-white">
-                  LIVE GALLERY
-                </h1>
-                <p className="text-gray-400 text-xs md:text-sm font-light leading-relaxed">
-                  Explorá una selección exclusiva de nuestras producciones, rodajes y el detrás de escena del talento argentino.
-                </p>
-              </div>
-
+            {/* CONTENIDO PRINCIPAL SHOWCASE (SIN TÍTULO GIGANTE) */}
+            <main className="max-w-7xl mx-auto px-6 md:px-12 py-10 w-full flex-grow">
               {/* GRILLA MASONRY DINÁMICA CON DIFERENTES PROPORCIONES */}
               <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
                 {showcaseItems.map((item) => (
@@ -278,11 +266,11 @@ export default function Home() {
                     >
                       <X size={18} />
                     </button>
-                    <div className="w-full flex-grow overflow-hidden flex items-center justify-center bg-black/50 p-2">
+                    <div className="w-full flex-grow overflow-hidden flex items-center justify-center bg-black/50 p-4">
                       <img 
                         src={selectedGalleryItem.url} 
                         alt={selectedGalleryItem.title}
-                        className="max-h-[70vh] w-auto object-contain rounded-xl"
+                        className="max-h-[70vh] w-auto object-contain rounded-2xl shadow-xl"
                       />
                     </div>
                     <div className="p-6 bg-[#0e0e11] border-t border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -320,7 +308,6 @@ export default function Home() {
       </header>
 
       <main className="flex-grow flex flex-col justify-center relative z-10 py-6 md:py-12">
-        {/* CONTENEDOR MAESTRO CON AIRE HORIZONTAL Y VERTICAL AMPLIADO */}
         <div className="max-w-4xl mx-auto px-6 md:px-10 flex flex-col items-center w-full gap-8 md:gap-10">
           
           {/* HEADER PRINCIPAL */}
@@ -451,7 +438,6 @@ export default function Home() {
                 <GraduationCap size={18} className="group-hover:scale-110 transition-transform" />
               </button>
 
-              {/* Botón Live Gallery conectado al showcase estático (sin Firestore rules issues) */}
               <button 
                 onClick={() => setShowLiveGallery(true)}
                 title="Live Gallery"
@@ -460,7 +446,6 @@ export default function Home() {
                 <PlayCircle size={18} className="group-hover:scale-110 transition-transform" />
               </button>
 
-              {/* Botón El maletín organizador ajustado al modo experience del ClientProfile */}
               <button 
                 onClick={() => navigate('/client-profile?mode=experience')}
                 title="El maletín organizador"
