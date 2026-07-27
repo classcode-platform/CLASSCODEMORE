@@ -80,83 +80,93 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    let profUnsubscribe = () => {};
-    let chatUnsubscribe = () => {};
+    let unsubs = [];
 
     const authUnsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const mainDocRef = doc(db, "professionals", user.uid);
-        const qProfiles = query(collection(db, "professionals"), where("uid", "==", user.uid));
         
-        profUnsubscribe = onSnapshot(qProfiles, async (snapshot) => {
-          let loadedProfiles = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+        // 1. Asegurar creación del documento principal si no existe
+        const mainSnap = await getDoc(mainDocRef);
+        if (!mainSnap.exists()) {
+          const defaultNewProfile = {
+            uid: user.uid,
+            name: user.displayName || 'NUEVO TALENTO',
+            job: '', specialty: '', location: '', bio: '', videoLink: '', completedCourses: [], academyBaseScore: 0
+          };
+          await setDoc(mainDocRef, defaultNewProfile, { merge: true });
+        }
+
+        // 2. Escuchar en tiempo real tanto el doc principal como los secundarios por query de uid
+        const unsubMain = onSnapshot(mainDocRef, (mainDoc) => {
+          const mainData = mainDoc.exists() ? { id: mainDoc.id, ...mainDoc.data() } : null;
           
-          // Forzar la incorporación del documento principal antiguo basado en el UID exacto del usuario
-          const mainDocSnap = await getDoc(mainDocRef);
-          if (mainDocSnap.exists()) {
-            const mainData = { id: mainDocSnap.id, ...mainDocSnap.data() };
-            if (!loadedProfiles.some(p => p.id === mainData.id)) {
-              loadedProfiles = [mainData, ...loadedProfiles];
-            }
-          }
+          const qProfiles = query(collection(db, "professionals"), where("uid", "==", user.uid));
+          const unsubQuery = onSnapshot(qProfiles, (snapshot) => {
+            let list = [];
+            if (mainData) list.push(mainData);
 
-          if (loadedProfiles.length > 0) {
-            setProfiles(loadedProfiles);
-            const activeExists = loadedProfiles.some(p => p.id === activeProfileId);
-            const targetProfile = activeExists ? loadedProfiles.find(p => p.id === activeProfileId) : loadedProfiles[0];
-            
-            if (!activeExists) {
-              setActiveProfileId(targetProfile.id);
-            }
-
-            const photosData = {};
-            for (let i = 1; i <= 10; i++) {
-              photosData[`photo${i}`] = (targetProfile.photos && targetProfile.photos[i - 1]) || targetProfile[`photo${i}`] || '';
-            }
-
-            setProfile({
-              ...targetProfile,
-              ...photosData
+            snapshot.docs.forEach(docSnap => {
+              // Evitar duplicar el principal si ya entró por la consulta
+              if (docSnap.id !== user.uid) {
+                list.push({ id: docSnap.id, ...docSnap.data() });
+              }
             });
-          } else {
-            const defaultNewProfile = {
-              uid: user.uid,
-              name: user.displayName || 'NUEVO TALENTO',
-              job: '', specialty: '', location: '', bio: '', videoLink: '', completedCourses: [], academyBaseScore: 0
-            };
-            await setDoc(mainDocRef, defaultNewProfile, { merge: true });
-            setActiveProfileId(user.uid);
-          }
-          setLoading(false);
+
+            setProfiles(list);
+
+            // Mantener perfil activo coherente
+            setActiveProfileId(prevId => {
+              if (prevId && list.some(p => p.id === prevId)) {
+                return prevId;
+              }
+              return list[0]?.id || user.uid;
+            });
+
+            setLoading(false);
+          });
+
+          unsubs.push(unsubQuery);
         });
+
+        unsubs.push(unsubMain);
 
         const qChats = query(collection(db, "chats"), where("participants", "array-contains", user.uid));
-        chatUnsubscribe = onSnapshot(qChats, (snap) => {
+        const unsubChats = onSnapshot(qChats, (snap) => {
             setMessages(snap.docs.map(chatDoc => ({ id: chatDoc.id, ...chatDoc.data() })));
         });
-      } else { navigate('/'); }
+        unsubs.push(unsubChats);
+
+      } else { 
+        navigate('/'); 
+      }
     });
 
     return () => {
       authUnsubscribe();
-      profUnsubscribe();
-      chatUnsubscribe();
+      unsubs.forEach(unsub => unsub());
     };
-  }, [navigate, activeProfileId]);
+  }, [navigate]);
+
+  // Sincronizar el estado local `profile` cuando cambia el `activeProfileId` o la lista de perfiles
+  useEffect(() => {
+    if (activeProfileId && profiles.length > 0) {
+      const targetProfile = profiles.find(p => p.id === activeProfileId) || profiles[0];
+      if (targetProfile) {
+        const photosData = {};
+        for (let i = 1; i <= 10; i++) {
+          photosData[`photo${i}`] = (targetProfile.photos && targetProfile.photos[i - 1]) || targetProfile[`photo${i}`] || '';
+        }
+        setProfile({
+          ...targetProfile,
+          ...photosData
+        });
+      }
+    }
+  }, [activeProfileId, profiles]);
 
   const handleSwitchProfile = (id) => {
-    const selected = profiles.find(p => p.id === id);
-    if (selected) {
-      setActiveProfileId(selected.id);
-      const photosData = {};
-      for (let i = 1; i <= 10; i++) {
-        photosData[`photo${i}`] = (selected.photos && selected.photos[i - 1]) || selected[`photo${i}`] || '';
-      }
-      setProfile({
-        ...selected,
-        ...photosData
-      });
-    }
+    setActiveProfileId(id);
   };
 
   const handleCreateNewProfile = async () => {
