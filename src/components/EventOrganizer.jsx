@@ -22,7 +22,7 @@ export default function EventOrganizer() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   
-  // Estado para manejar el evento activo seleccionado para el Panel de Control
+  // Estado para alternar entre la grilla y el panel de control del evento
   const [activeEventId, setActiveEventId] = useState(null);
   const [photos, setPhotos] = useState([]);
   const [previewImage, setPreviewImage] = useState(null);
@@ -151,9 +151,15 @@ export default function EventOrganizer() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] antialiased flex flex-col relative uppercase selection:bg-white selection:text-black text-left">
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-['Open_Sans'] antialiased flex flex-col relative uppercase selection:bg-white selection:text-black text-left overflow-hidden">
       
-      <nav className="p-6 md:p-10 w-full sticky top-0 z-50 bg-[#070709]/90 backdrop-blur-xl border-b border-white/5">
+      {/* LUCES DINÁMICAS DE FONDO */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <motion.div animate={{ x: [-60, 60, -60], y: [-40, 40, -40], scale: [1, 1.3, 1] }} transition={{ duration: 18, repeat: Infinity, ease: "linear" }} className="absolute top-[-10%] left-[-10%] w-[350px] md:w-[700px] h-[350px] md:h-[700px] bg-purple-600/15 rounded-full blur-[120px] md:blur-[180px]" />
+        <motion.div animate={{ x: [60, -60, 60], y: [40, -40, 40], scale: [1.3, 1, 1.3] }} transition={{ duration: 22, repeat: Infinity, ease: "linear" }} className="absolute bottom-[-10%] right-[-10%] w-[300px] md:w-[650px] h-[300px] md:h-[650px] bg-indigo-600/15 rounded-full blur-[110px] md:blur-[160px]" />
+      </div>
+
+      <nav className="p-6 md:p-10 w-full sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-2xl border-b border-white/5">
         <div className="max-w-[1440px] mx-auto flex justify-between items-center w-full">
           <button 
             onClick={() => {
@@ -172,15 +178,15 @@ export default function EventOrganizer() {
             <span className="text-base font-normal tracking-[0.05em] uppercase leading-none">CLASSCODE</span>
           </div>
 
-          <button onClick={() => setShowCreateModal(true)} className="px-5 py-2.5 rounded-xl bg-white text-black font-black text-[9px] tracking-widest hover:bg-gray-200 transition-all flex items-center gap-2 font-['Poppins'] cursor-pointer">
+          <button onClick={() => setShowCreateModal(true)} className="px-5 py-2.5 rounded-xl bg-white text-black font-black text-[9px] tracking-widest hover:bg-gray-200 transition-all flex items-center gap-2 font-['Poppins'] cursor-pointer shadow-lg">
             <Plus size={14} /> NUEVO
           </button>
         </div>
       </nav>
 
-      <main className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 flex-1 w-full space-y-10">
+      <main className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 flex-1 w-full space-y-10 relative z-10">
         
-        {/* SI NO HAY EVENTO SELECCIONADO: MOSTRAR GRILLA DE EVENTOS */}
+        {/* VISTA 1: GRILLA DE EVENTOS */}
         {!activeEventId ? (
           <>
             <div className="flex flex-col gap-1">
@@ -188,10 +194,10 @@ export default function EventOrganizer() {
             </div>
 
             {events.length === 0 ? (
-              <div className="py-24 text-center border border-white/5 rounded-3xl bg-[#0c0c0e] space-y-4">
+              <div className="py-24 text-center border border-white/15 rounded-3xl bg-[#0e0e10] space-y-4 shadow-[0_0_30px_rgba(0,0,0,0.3)]">
                 <Calendar size={32} className="mx-auto text-white/20" />
                 <p className="text-[10px] text-gray-500 font-bold tracking-[0.3em]">No hay eventos registrados</p>
-                <button onClick={() => setShowCreateModal(true)} className="px-6 py-3 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest font-['Poppins'] cursor-pointer">
+                <button onClick={() => setShowCreateModal(true)} className="px-6 py-3 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest font-['Poppins'] cursor-pointer shadow-lg hover:bg-gray-200 transition-all">
                   CREAR EVENTO
                 </button>
               </div>
@@ -203,9 +209,9 @@ export default function EventOrganizer() {
                     initial={{ opacity: 0, y: 10 }} 
                     animate={{ opacity: 1, y: 0 }}
                     onClick={() => setActiveEventId(ev.id)}
-                    className="bg-[#0c0c0e] border border-white/10 hover:border-white/30 rounded-3xl overflow-hidden flex flex-col justify-between shadow-xl cursor-pointer transition-all group"
+                    className="bg-[#0e0e10] border border-white/15 hover:border-white/40 rounded-3xl overflow-hidden flex flex-col justify-between shadow-xl cursor-pointer transition-all group backdrop-blur-md"
                   >
-                    <div className="relative w-full h-40 bg-black/40 overflow-hidden border-b border-white/5 flex items-center justify-center">
+                    <div className="relative w-full h-40 bg-black/40 overflow-hidden border-b border-white/10 flex items-center justify-center">
                       {ev.coverImage ? (
                         <img src={ev.coverImage} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" />
                       ) : (
@@ -242,16 +248,16 @@ export default function EventOrganizer() {
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t border-white/5 flex items-center justify-between gap-2">
+                      <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-2">
                         <button 
                           onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); setShowQrModal(true); }} 
-                          className="flex-1 py-3 px-4 rounded-xl bg-white/[0.03] hover:bg-white/10 border border-white/10 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] cursor-pointer"
+                          className="flex-1 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] cursor-pointer"
                         >
                           <QrCode size={14}/> QR
                         </button>
                         <button 
                           onClick={(e) => handleDeleteEvent(ev.id, e)} 
-                          className="p-3 bg-white/[0.03] hover:bg-red-500/20 hover:text-red-400 border border-white/10 rounded-xl transition-all cursor-pointer"
+                          className="p-3 bg-white/5 hover:bg-red-500/20 hover:text-red-400 border border-white/15 rounded-xl transition-all cursor-pointer"
                         >
                           <Trash2 size={16}/>
                         </button>
@@ -263,11 +269,10 @@ export default function EventOrganizer() {
             )}
           </>
         ) : (
-          /* SI HAY UN EVENTO SELECCIONADO: MOSTRAR LIVE CONTROL PANEL INTEGRADO */
+          /* VISTA 2: PANEL DE CONTROL EN VIVO DEL EVENTO */
           currentEvent && (
             <div className="space-y-10">
-              {/* Banner de Estado y Controles */}
-              <div className="bg-[#0c0c0e] border border-white/10 p-6 md:p-8 rounded-[2.5rem] shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+              <div className="bg-[#0e0e10] border border-white/15 p-6 md:p-8 rounded-[2.5rem] shadow-[0_0_40px_rgba(0,0,0,0.4)] flex flex-col md:flex-row justify-between items-start md:items-center gap-6 backdrop-blur-md">
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <span className="text-[8px] tracking-[0.3em] font-black px-3 py-1 bg-white/5 border border-white/10 rounded-full text-gray-300">
@@ -295,11 +300,21 @@ export default function EventOrganizer() {
                     className={`flex-1 md:flex-none px-5 py-3 rounded-xl border text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] cursor-pointer ${
                       currentEvent.status === 'EN_CURSO' 
                         ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20' 
-                        : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                        : 'bg-white/5 border-white/15 text-white hover:bg-white/10'
                     }`}
                   >
                     {currentEvent.status === 'EN_CURSO' ? <Pause size={14}/> : <Play size={14}/>}
                     {currentEvent.status === 'EN_CURSO' ? 'PAUSAR' : 'INICIAR'}
+                  </button>
+
+                  <button 
+                    onClick={() => {
+                      setSelectedEvent(currentEvent);
+                      setShowQrModal(true);
+                    }} 
+                    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] cursor-pointer"
+                  >
+                    <QrCode size={14}/> QR
                   </button>
 
                   <button 
@@ -322,14 +337,14 @@ export default function EventOrganizer() {
 
                   <button 
                     onClick={() => copyGuestLink(currentEvent.id)} 
-                    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] cursor-pointer"
+                    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] cursor-pointer"
                   >
                     <Copy size={14}/> GUEST LINK
                   </button>
 
                   <button 
                     onClick={() => handleShareTV(currentEvent.id)} 
-                    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-white text-black hover:bg-gray-200 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] cursor-pointer"
+                    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-white text-black hover:bg-gray-200 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] cursor-pointer shadow-lg"
                   >
                     <ExternalLink size={14}/> PROYECTAR
                   </button>
@@ -341,7 +356,7 @@ export default function EventOrganizer() {
                 <h3 className="text-[10px] text-gray-400 tracking-[0.4em] font-bold">CONTENIDO SUBIDO ({photos.length})</h3>
 
                 {photos.length === 0 ? (
-                  <div className="py-24 text-center border border-white/5 rounded-3xl bg-[#0c0c0e] space-y-4">
+                  <div className="py-24 text-center border border-white/15 rounded-3xl bg-[#0e0e10] space-y-4 shadow-[0_0_30px_rgba(0,0,0,0.3)]">
                     <ImageIcon size={32} className="mx-auto text-white/20" />
                     <p className="text-[9px] text-gray-500 tracking-[0.3em] font-bold">No hay fotos recibidas todavía</p>
                   </div>
@@ -351,7 +366,7 @@ export default function EventOrganizer() {
                       <div 
                         key={photo.id} 
                         onClick={() => setPreviewImage(photo.url || photo.imageURL)}
-                        className="relative aspect-square bg-[#0c0c0e] border border-white/10 hover:border-white/30 rounded-2xl overflow-hidden cursor-pointer group shadow-lg"
+                        className="relative aspect-square bg-[#0e0e10] border border-white/15 hover:border-white/40 rounded-2xl overflow-hidden cursor-pointer group shadow-lg backdrop-blur-md"
                       >
                         <img 
                           src={photo.url || photo.imageURL} 
@@ -374,41 +389,41 @@ export default function EventOrganizer() {
       {/* Modal Crear Evento */}
       <AnimatePresence>
         {showCreateModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-xl p-4">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0c0c0e] w-full max-w-lg p-10 rounded-[3rem] border border-white/10 relative shadow-2xl space-y-6"
+              className="bg-[#0e0e10] w-full max-w-lg p-10 rounded-[3rem] border border-white/15 relative shadow-[0_0_50px_rgba(255,255,255,0.15)] space-y-6"
             >
-              <button onClick={() => setShowCreateModal(false)} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors cursor-pointer"><X size={22} /></button>
+              <button onClick={() => setShowCreateModal(false)} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors cursor-pointer p-2 rounded-full bg-white/5"><X size={20} /></button>
               <h3 className="text-[11px] uppercase tracking-[0.4em] font-black text-center font-['Poppins']">Nuevo Evento</h3>
               
               <form onSubmit={handleCreateEvent} className="space-y-4 font-bold">
                 <div className="space-y-2">
                   <label className="text-[8px] tracking-[0.3em] text-gray-400">Categoría</label>
                   <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}
-                    className="w-full bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest cursor-pointer"
+                    className="w-full bg-[#0e0e10] border border-white/15 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest cursor-pointer"
                   >
                     {MACRO_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                   </select>
                 </div>
 
                 <input placeholder="TÍTULO" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest" required 
+                  className="w-full bg-white/5 border border-white/15 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest placeholder:text-gray-600" required 
                 />
                 
                 <div className="grid grid-cols-2 gap-4">
                   <input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})}
-                    className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white" required 
+                    className="bg-white/5 border border-white/15 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white" required 
                   />
                   <input placeholder="UBICACIÓN" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})}
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest" 
+                    className="w-full bg-white/5 border border-white/15 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest placeholder:text-gray-600" 
                   />
                 </div>
 
                 <textarea placeholder="NOTAS..." value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})}
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-3xl p-4 text-[10px] text-white uppercase h-24 resize-none outline-none focus:border-white tracking-widest" 
+                  className="w-full bg-white/5 border border-white/15 rounded-3xl p-4 text-[10px] text-white uppercase h-24 resize-none outline-none focus:border-white tracking-widest placeholder:text-gray-600" 
                 />
 
-                <button type="submit" disabled={loading} className="w-full py-4 rounded-2xl bg-white text-black font-black text-[10px] tracking-[0.4em] uppercase hover:bg-gray-200 transition-all font-['Poppins'] cursor-pointer">
+                <button type="submit" disabled={loading} className="w-full py-4 rounded-2xl bg-white text-black font-black text-[10px] tracking-[0.4em] uppercase hover:bg-gray-200 transition-all font-['Poppins'] cursor-pointer shadow-xl">
                   {loading ? 'GUARDANDO...' : 'CREAR'}
                 </button>
               </form>
@@ -417,14 +432,14 @@ export default function EventOrganizer() {
         )}
       </AnimatePresence>
 
-      {/* Modal QR */}
+      {/* Modal QR Unificado */}
       <AnimatePresence>
         {showQrModal && selectedEvent && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-xl p-4">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0c0c0e] w-full max-w-sm p-8 rounded-[3rem] border border-white/10 relative shadow-2xl text-center space-y-6"
+              className="bg-[#0e0e10] w-full max-w-sm p-8 rounded-[3rem] border border-white/15 relative shadow-[0_0_50px_rgba(255,255,255,0.15)] text-center space-y-6"
             >
-              <button onClick={() => setShowQrModal(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors cursor-pointer"><X size={20} /></button>
+              <button onClick={() => setShowQrModal(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors cursor-pointer p-2 rounded-full bg-white/5"><X size={18} /></button>
               
               <div className="space-y-2">
                 <span className="text-[8px] tracking-[0.3em] font-black text-gray-400">QR INVITADOS</span>
@@ -439,7 +454,7 @@ export default function EventOrganizer() {
                 />
               </div>
 
-              <button onClick={() => { copyGuestLink(selectedEvent.id); setShowQrModal(false); }} className="w-full py-3.5 rounded-xl bg-white text-black font-black text-[9px] tracking-widest uppercase hover:bg-gray-200 transition-all font-['Poppins'] cursor-pointer">
+              <button onClick={() => { copyGuestLink(selectedEvent.id); setShowQrModal(false); }} className="w-full py-3.5 rounded-xl bg-white text-black font-black text-[9px] tracking-widest uppercase hover:bg-gray-200 transition-all font-['Poppins'] cursor-pointer shadow-lg">
                 COPIAR LINK
               </button>
             </motion.div>
@@ -452,7 +467,7 @@ export default function EventOrganizer() {
         {previewImage && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPreviewImage(null)} className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out">
             <button className="absolute top-8 right-8 text-white/50 hover:text-white p-2 cursor-pointer"><X size={28}/></button>
-            <motion.img initial={{ scale: 0.9 }} animate={{ scale: 1 }} src={previewImage} className="max-w-full max-h-[85vh] rounded-2xl border border-white/10 object-contain" onClick={(e) => e.stopPropagation()} />
+            <motion.img initial={{ scale: 0.9 }} animate={{ scale: 1 }} src={previewImage} className="max-w-full max-h-[85vh] rounded-2xl border border-white/15 object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
           </motion.div>
         )}
       </AnimatePresence>
