@@ -11,6 +11,7 @@ import Dashboard from './Dashboard';
 import ProfileP from './ProfileP';     
 import ClientProfile from './ClientProfile'; 
 import EventOrganizer from './components/EventOrganizer';
+import LiveControlPanel from './components/LiveControlPanel';
 import EventDetail from './components/EventDetail';
 import Academy from './Academy';       
 import Terms from './Terms';           
@@ -51,6 +52,7 @@ function AppContent() {
         {/* --- RUTAS DE ORGANIZADOR --- */}
         <Route path="/organizer" element={<ProtectedRoute><EventOrganizer /></ProtectedRoute>} /> 
         <Route path="/organizer/:eventId" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} /> 
+        <Route path="/live-control" element={<ProtectedRoute><LiveControlPanel /></ProtectedRoute>} />
 
         <Route path="/academy" element={<ProtectedRoute><Academy /></ProtectedRoute>} />      
         <Route path="/academy-test/:category" element={<ProtectedRoute><AcademyTest /></ProtectedRoute>} /> 
