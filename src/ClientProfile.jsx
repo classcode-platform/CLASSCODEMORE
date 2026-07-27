@@ -60,7 +60,7 @@ export default function ClientProfile() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
   
-  // Estado formulario rápido de evento (para reemplazar el modal anterior que no te gustaba y usar input tipo fecha)
+  // Estado formulario rápido de evento
   const [newEventForm, setNewEventForm] = useState({ title: '', category: 'EVENTO', date: '', location: '' });
 
   const [loading, setLoading] = useState(true);
@@ -124,7 +124,7 @@ export default function ClientProfile() {
           setEvents(fetchedEvents);
         });
 
-        // Sincronización Realtime del Chat Compartido alineada a las reglas de Firestore (/chats/{chatId}/messages)
+        // Sincronización Realtime del Chat Compartido
         const chatId = user.uid;
         const qMessages = query(
           collection(db, `chats/${chatId}/messages`), 
@@ -219,7 +219,7 @@ export default function ClientProfile() {
         userId: auth.currentUser.uid,
         title: newEventForm.title.toUpperCase(),
         category: newEventForm.category.toUpperCase(),
-        date: newEventForm.date, // Formato YYYY-MM-DD del input type="date"
+        date: newEventForm.date,
         location: newEventForm.location.toUpperCase(),
         status: 'PLANIFICACION',
         createdAt: serverTimestamp()
@@ -322,7 +322,7 @@ export default function ClientProfile() {
       </div>
 
       {/* HEADER MOBILE GLASS */}
-      <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-white/[0.03] backdrop-blur-md border-b border-white/10 z-[100] px-8 py-5 flex justify-between items-center shadow-xl">
+      <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-[#070709]/60 backdrop-blur-md border-b border-white/10 z-[100] px-8 py-5 flex justify-between items-center shadow-xl">
         <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer text-white">
           CLASSCODE
         </div>
@@ -336,7 +336,7 @@ export default function ClientProfile() {
         {isMobileMenuOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileMenuOpen(false)} className="fixed inset-0 bg-black/70 backdrop-blur-md z-[110] md:hidden" />
-            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-[#0b0c10]/85 backdrop-blur-xl border-l border-white/10 z-[120] p-10 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto">
+            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-[#070709]/90 backdrop-blur-xl border-l border-white/10 z-[120] p-10 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto">
               <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-10 text-white/60 hover:text-white transition-colors cursor-pointer">
                 <X size={28} />
               </button>
@@ -371,7 +371,7 @@ export default function ClientProfile() {
       </AnimatePresence>
 
       {/* SIDEBAR DESKTOP GLASS */}
-      <aside className="hidden md:flex w-72 bg-white/[0.025] backdrop-blur-md border-r border-white/10 flex-col p-8 fixed h-full z-50 box-border shadow-2xl">
+      <aside className="hidden md:flex w-72 bg-[#070709]/40 backdrop-blur-md border-r border-white/10 flex-col p-8 fixed h-full z-50 box-border shadow-2xl">
         <header className="mb-10 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">
             CLASSCODE
@@ -413,7 +413,7 @@ export default function ClientProfile() {
       <main className="flex-1 md:ml-72 p-6 md:p-12 mt-16 md:mt-0 relative z-10 w-full max-w-[1400px] mx-auto space-y-8 box-border">
         
         {/* HEADER DE PERFIL EN GLASS REAL */}
-        <header className="flex justify-between items-center bg-white/[0.03] backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-2xl box-border">
+        <header className="flex justify-between items-center bg-[#070709]/50 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-2xl box-border">
           <div className="flex items-center gap-5">
             <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl border border-white/20 overflow-hidden bg-white/5 flex items-center justify-center flex-shrink-0 shadow-inner">
               {profile.photoURL ? (
@@ -451,7 +451,7 @@ export default function ClientProfile() {
           </div>
           
           {events.length === 0 ? (
-            <div className="py-20 text-center border border-white/15 rounded-2xl bg-white/[0.025] backdrop-blur-md space-y-4 shadow-2xl">
+            <div className="py-20 text-center border border-white/15 rounded-2xl bg-[#070709]/40 backdrop-blur-md space-y-4 shadow-2xl">
               <Calendar size={36} className="mx-auto text-white/40" />
               <p className="text-[9px] text-white/70 tracking-[0.3em] font-black uppercase">No hay eventos registrados</p>
               <button onClick={() => setIsCreatingEvent(true)} className="px-6 py-3.5 bg-white/[0.04] backdrop-blur-md border border-white/15 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-white/[0.08] transition-all font-['Poppins'] cursor-pointer shadow-xl">
@@ -461,7 +461,7 @@ export default function ClientProfile() {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.map((ev, index) => (
-                <div key={ev.id} onClick={() => navigate(`/organizer/${ev.id}`)} className="bg-white/[0.03] backdrop-blur-md border border-white/15 hover:border-purple-400/50 hover:bg-white/[0.06] rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl cursor-pointer transition-all duration-300 group box-border">
+                <div key={ev.id} onClick={() => navigate(`/organizer/${ev.id}`)} className="bg-[#070709]/50 backdrop-blur-md border border-white/15 hover:border-purple-400/50 hover:bg-[#070709]/70 rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl cursor-pointer transition-all duration-300 group box-border">
                   <div className="relative w-full h-36 bg-black/40 overflow-hidden border-b border-white/10 flex items-center justify-center">
                     {ev.coverImage ? (
                       <img src={ev.coverImage} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" />
@@ -515,7 +515,7 @@ export default function ClientProfile() {
             <h3 className="text-[10px] text-white/70 uppercase tracking-[0.4em] font-black">mensajería directa</h3>
           </div>
 
-          <div className="bg-white/[0.03] backdrop-blur-md border border-white/15 rounded-2xl p-6 flex flex-col h-[480px] shadow-2xl box-border">
+          <div className="bg-[#070709]/50 backdrop-blur-md border border-white/15 rounded-2xl p-6 flex flex-col h-[480px] shadow-2xl box-border">
             <div className="flex items-center gap-3 pb-4 border-b border-white/10">
               <MessageSquare className="w-5 h-5 text-purple-400" />
               <h3 className="text-[11px] font-['Poppins'] font-bold text-white tracking-widest uppercase">Chat de Soporte y Gestión</h3>
@@ -570,9 +570,9 @@ export default function ClientProfile() {
       {/* MODAL EDITAR PERFIL */}
       <AnimatePresence>
         {isEditingProfile && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[250] flex items-center justify-center p-4 uppercase">
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-[250] flex items-center justify-center p-4 uppercase">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0b0c10]/90 backdrop-blur-xl w-full max-w-lg p-6 md:p-8 rounded-2xl border border-white/15 relative shadow-2xl space-y-6"
+              className="bg-[#070709] backdrop-blur-2xl w-full max-w-lg p-6 md:p-8 rounded-3xl border border-white/15 relative shadow-2xl space-y-6"
             >
               <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
               
@@ -586,18 +586,18 @@ export default function ClientProfile() {
 
                 <div className="space-y-2">
                   <label className="text-[8px] text-white/80 tracking-widest font-black">Provincia</label>
-                  <select value={editForm.province} onChange={handleProvinceChange} className="w-full bg-[#121318] border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner">
+                  <select value={editForm.province} onChange={handleProvinceChange} className="w-full bg-[#0b0c10] border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner">
                     {ARGENTINE_PROVINCES.map((prov) => (
-                      <option key={prov.name} value={prov.name} className="bg-[#121318] text-white">{prov.name}</option>
+                      <option key={prov.name} value={prov.name} className="bg-[#0b0c10] text-white">{prov.name}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[8px] text-white/80 tracking-widest font-black">Localidad / Zona</label>
-                  <select value={editForm.locality} onChange={(e) => setEditForm({ ...editForm, locality: e.target.value })} className="w-full bg-[#121318] border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner">
+                  <select value={editForm.locality} onChange={(e) => setEditForm({ ...editForm, locality: e.target.value })} className="w-full bg-[#0b0c10] border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner">
                     {selectedProvinceObj.localities.map((loc) => (
-                      <option key={loc} value={loc} className="bg-[#121318] text-white">{loc}</option>
+                      <option key={loc} value={loc} className="bg-[#0b0c10] text-white">{loc}</option>
                     ))}
                   </select>
                 </div>
@@ -635,9 +635,9 @@ export default function ClientProfile() {
       {/* MODAL CREAR EVENTO CON INPUT TIPO FECHA NATIVO */}
       <AnimatePresence>
         {isCreatingEvent && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[250] flex items-center justify-center p-4 uppercase">
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-[250] flex items-center justify-center p-4 uppercase">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0b0c10]/90 backdrop-blur-xl w-full max-w-lg p-6 md:p-8 rounded-2xl border border-white/15 relative shadow-2xl space-y-6"
+              className="bg-[#070709] backdrop-blur-2xl w-full max-w-lg p-6 md:p-8 rounded-3xl border border-white/15 relative shadow-2xl space-y-6"
             >
               <button onClick={() => setIsCreatingEvent(false)} className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
               
@@ -706,9 +706,9 @@ export default function ClientProfile() {
       {/* LIVE CONTROL PANEL EN GLASS */}
       <AnimatePresence>
         {showLivePanel && (
-          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 md:p-8 overflow-y-auto">
+          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/75 backdrop-blur-md p-4 md:p-8 overflow-y-auto">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0b0c10]/90 backdrop-blur-xl w-full max-w-4xl p-6 md:p-8 rounded-2xl border border-white/15 relative shadow-2xl space-y-6 uppercase"
+              className="bg-[#070709] backdrop-blur-2xl w-full max-w-4xl p-6 md:p-8 rounded-3xl border border-white/15 relative shadow-2xl space-y-6 uppercase"
             >
               <button onClick={() => setShowLivePanel(false)} className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
 
