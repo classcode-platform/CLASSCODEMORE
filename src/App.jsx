@@ -10,6 +10,7 @@ import Results from './Results';
 import Dashboard from './Dashboard';   
 import ProfileP from './ProfileP';     
 import ClientProfile from './ClientProfile'; 
+import EventOrganizer from './components/EventOrganizer';
 import Academy from './Academy';       
 import Terms from './Terms';           
 import Privacy from './Privacy'; 
@@ -45,6 +46,10 @@ function AppContent() {
         {/* --- RUTAS PROTEGIDAS --- */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/client-profile" element={<ProtectedRoute><ClientProfile /></ProtectedRoute>} /> 
+        
+        {/* --- RUTA DE ORGANIZADOR --- */}
+        <Route path="/organizer" element={<ProtectedRoute><EventOrganizer /></ProtectedRoute>} /> 
+
         <Route path="/academy" element={<ProtectedRoute><Academy /></ProtectedRoute>} />      
         <Route path="/academy-test/:category" element={<ProtectedRoute><AcademyTest /></ProtectedRoute>} /> 
         <Route path="/academy-test/Generico" element={<ProtectedRoute><AcademyTest /></ProtectedRoute>} />
