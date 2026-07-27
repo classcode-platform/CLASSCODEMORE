@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from './firebase'; 
-import { doc, setDoc, collection, query, where, onSnapshot, updateDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, setDoc, deleteDoc, updateDoc, addDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, GraduationCap, Play, 
   Upload, X, Eye, Menu, Zap, 
-  LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, Plus,
+  LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, 
   Camera as CameraIcon, Video as VideoIcon, User as UserIcon, Theater, Smartphone, PartyPopper, 
-  Clapperboard, Sparkles, Shirt, Palette, Music, Utensils, CalendarDays, Home as HomeIcon
+  Clapperboard, Sparkles, Shirt, Palette, Music, Utensils, CalendarDays, Home as HomeIcon, Plus
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,8 +20,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState([]);
   
+  // Estados para múltiples perfiles
   const [profiles, setProfiles] = useState([]);
-  const [activeProfileIndex, setActiveProfileIndex] = useState(0);
+  const [activeProfileId, setActiveProfileId] = useState(null);
 
   const [profile, setProfile] = useState({
     name: '', job: '', specialty: '', location: '', bio: '', videoLink: '', 
@@ -79,52 +80,52 @@ export default function Dashboard() {
     return bonus + (currentProfile.academyBaseScore || 0);
   };
 
-  const loadProfileDataIntoState = (profilesList, index) => {
-    const target = profilesList[index] || profilesList[0];
-    if (!target) return;
-
-    const photosData = {};
-    for (let i = 1; i <= 10; i++) {
-      photosData[`photo${i}`] = (target.photos && target.photos[i - 1]) || target[`photo${i}`] || '';
-    }
-
-    setProfile({
-      name: target.name || '',
-      job: target.job || '',
-      specialty: target.specialty || '',
-      location: target.location || '',
-      bio: target.bio || '',
-      videoLink: target.videoLink || '',
-      completedCourses: target.completedCourses || [],
-      academyBaseScore: target.academyBaseScore || 0,
-      ...photosData
-    });
-  };
-
+  // Cargar perfiles múltiples del usuario autenticado
   useEffect(() => {
     let profUnsubscribe = () => {};
     let chatUnsubscribe = () => {};
 
     const authUnsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        profUnsubscribe = onSnapshot(doc(db, "professionals", user.uid), (docSnap) => {
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            let listProfiles = data.profiles && data.profiles.length > 0 ? data.profiles : [data];
-            setProfiles(listProfiles);
-            loadProfileDataIntoState(listProfiles, activeProfileIndex);
+        const qProfiles = query(collection(db, "professionals"), where("uid", "==", user.uid));
+        profUnsubscribe = onSnapshot(qProfiles, (snapshot) => {
+          const loadedProfiles = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+          
+          if (loadedProfiles.length > 0) {
+            setProfiles(loadedProfiles);
+            // Si no hay perfil activo seleccionado o el activo ya no existe, seleccionamos el primero
+            const activeExists = loadedProfiles.some(p => p.id === activeProfileId);
+            const targetProfile = activeExists ? loadedProfiles.find(p => p.id === activeProfileId) : loadedProfiles[0];
+            
+            if (!activeExists) {
+              setActiveProfileId(targetProfile.id);
+            }
+
+            const photosData = {};
+            for (let i = 1; i <= 10; i++) {
+              photosData[`photo${i}`] = (targetProfile.photos && targetProfile.photos[i - 1]) || targetProfile[`photo${i}`] || '';
+            }
+
+            setProfile({
+              ...targetProfile,
+              ...photosData
+            });
           } else {
-            const initialProf = {
+            // Si no tiene perfiles creados, inicializamos uno por defecto
+            const defaultNewProfile = {
+              uid: user.uid,
               name: user.displayName || 'NUEVO TALENTO',
               job: '', specialty: '', location: '', bio: '', videoLink: '', completedCourses: [], academyBaseScore: 0
             };
-            setProfiles([initialProf]);
-            setProfile(initialProf);
+            addDoc(collection(db, "professionals"), defaultNewProfile).then(docRef => {
+              setActiveProfileId(docRef.id);
+            });
           }
           setLoading(false);
         });
-        const q = query(collection(db, "chats"), where("participants", "array-contains", user.uid));
-        chatUnsubscribe = onSnapshot(q, (snap) => {
+
+        const qChats = query(collection(db, "chats"), where("participants", "array-contains", user.uid));
+        chatUnsubscribe = onSnapshot(qChats, (snap) => {
             setMessages(snap.docs.map(chatDoc => ({ id: chatDoc.id, ...chatDoc.data() })));
         });
       } else { navigate('/'); }
@@ -137,40 +138,62 @@ export default function Dashboard() {
     };
   }, [navigate]);
 
-  useEffect(() => {
-    if (profiles.length > 0) {
-      loadProfileDataIntoState(profiles, activeProfileIndex);
+  // Cambiar de perfil activo en el estado local
+  const handleSwitchProfile = (id) => {
+    const selected = profiles.find(p => p.id === id);
+    if (selected) {
+      setActiveProfileId(selected.id);
+      const photosData = {};
+      for (let i = 1; i <= 10; i++) {
+        photosData[`photo${i}`] = (selected.photos && selected.photos[i - 1]) || selected[`photo${i}`] || '';
+      }
+      setProfile({
+        ...selected,
+        ...photosData
+      });
     }
-  }, [activeProfileIndex, profiles]);
+  };
+
+  // Crear un nuevo perfil adicional
+  const handleCreateNewProfile = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const newEmptyProfile = {
+      uid: user.uid,
+      name: user.displayName || 'NUEVO TALENTO',
+      job: '', specialty: '', location: '', bio: '', videoLink: '', completedCourses: [], academyBaseScore: 0,
+      score: 15
+    };
+
+    try {
+      const docRef = await addDoc(collection(db, "professionals"), newEmptyProfile);
+      setActiveProfileId(docRef.id);
+      setModal({ isOpen: true, type: 'success', title: "NUEVO PERFIL", message: "Se ha creado un nuevo perfil independiente." });
+    } catch (e) {
+      console.error("Error al crear perfil:", e);
+    }
+  };
 
   const persistProfile = async (updatedFields) => {
     const user = auth.currentUser;
-    if (!user) return;
+    if (!user || !activeProfileId) return;
     
     const mergedCurrentProfile = { ...profile, ...updatedFields };
     const photoList = Array.from({ length: 10 }, (_, i) => mergedCurrentProfile[`photo${i + 1}`]).filter(Boolean);
     const finalScore = calculateTotalScore(mergedCurrentProfile);
 
-    const updatedProfiles = [...profiles];
-    updatedProfiles[activeProfileIndex] = { 
-      ...mergedCurrentProfile, 
-      photos: photoList,
-      score: finalScore
-    };
-
-    setProfiles(updatedProfiles);
     setProfile(mergedCurrentProfile);
 
     const dataToSave = {
       ...mergedCurrentProfile,
       photos: photoList,
       score: finalScore,
-      profiles: updatedProfiles,
       uid: user.uid
     };
 
     try {
-      await setDoc(doc(db, "professionals", user.uid), dataToSave, { merge: true });
+      await setDoc(doc(db, "professionals", activeProfileId), dataToSave, { merge: true });
     } catch (e) { console.error("Error al persistir:", e); }
   };
 
@@ -178,41 +201,6 @@ export default function Dashboard() {
     await persistProfile(profile);
     setIsEditingProfile(false);
     setModal({ isOpen: true, type: 'success', title: "ÉXITO", message: "PERFIL ACTUALIZADO." });
-  };
-
-  const handleAddNewProfile = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const newBlankProfile = {
-      name: profile.name || 'NUEVO TALENTO',
-      job: '', specialty: '', location: profile.location || '', bio: '', videoLink: '',
-      photos: [],
-      completedCourses: [],
-      academyBaseScore: 0
-    };
-    
-    for (let i = 1; i <= 10; i++) newBlankProfile[`photo${i}`] = '';
-
-    const updatedProfiles = [...profiles, newBlankProfile];
-    const newIndex = updatedProfiles.length - 1;
-
-    setProfiles(updatedProfiles);
-    setActiveProfileIndex(newIndex);
-    setProfile(newBlankProfile);
-
-    const dataToSave = {
-      ...newBlankProfile,
-      profiles: updatedProfiles,
-      uid: user.uid
-    };
-
-    try {
-      await setDoc(doc(db, "professionals", user.uid), dataToSave, { merge: true });
-      setModal({ isOpen: true, type: 'success', title: "NUEVO PERFIL", message: "SE CREÓ UN NUEVO PERFIL PROFESIONAL." });
-    } catch (e) {
-      console.error("Error al crear perfil:", e);
-    }
   };
 
   const handleSwitchToClient = async () => {
@@ -278,11 +266,10 @@ export default function Dashboard() {
   };
 
   const handleViewPublicProfile = () => {
-    const user = auth.currentUser;
-    if (user) {
-      navigate(`/profile/${user.uid}`);
+    if (activeProfileId) {
+      navigate(`/profile/${activeProfileId}`);
     } else {
-      setModal({ isOpen: true, type: 'warning', title: 'ACCESO DENEGADO', message: 'No hay un usuario activo para mostrar el perfil público.' });
+      setModal({ isOpen: true, type: 'warning', title: 'ACCESO DENEGADO', message: 'No hay un perfil seleccionado para mostrar.' });
     }
   };
 
@@ -366,19 +353,35 @@ export default function Dashboard() {
         <div className="flex-1 p-4 md:p-8 mt-16 md:mt-0 w-full max-w-full box-border overflow-x-hidden">
           <div className="w-full max-w-[1400px] mx-auto box-border overflow-x-hidden space-y-8">
             
-            {profiles.length > 0 && (
-              <div className="flex items-center gap-3 overflow-x-auto pb-2">
-                <span className="text-[8px] font-black tracking-widest text-gray-400">PERFILES ACTIVOS:</span>
-                {profiles.map((p, idx) => (
-                  <button 
-                    key={idx} 
-                    onClick={() => setActiveProfileIndex(idx)}
-                    className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-widest border transition-all uppercase cursor-pointer ${activeProfileIndex === idx ? 'bg-purple-600 border-purple-500 text-white shadow-lg' : 'bg-white/[0.03] border-white/10 text-gray-400 hover:text-white'}`}>
-                    {p.job || `PERFIL ${idx + 1}`}
-                  </button>
-                ))}
+            {/* SELECTOR DE PERFILES MÚLTIPLES */}
+            <div className="w-full bg-[#050505] border border-white/5 rounded-2xl p-4 md:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 box-border">
+              <div className="flex items-center gap-3 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
+                <span className="text-[9px] text-gray-500 font-black tracking-widest uppercase flex-shrink-0">TUS PERFILES:</span>
+                {profiles.map((p) => {
+                  const isActive = p.id === activeProfileId;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => handleSwitchProfile(p.id)}
+                      className={`px-4 py-2.5 rounded-xl text-[9px] font-black tracking-wider transition-all flex items-center gap-2 flex-shrink-0 cursor-pointer ${
+                        isActive 
+                          ? 'bg-purple-600 text-white shadow-lg border border-purple-400/30' 
+                          : 'bg-white/[0.03] text-gray-400 hover:bg-white/10 border border-white/5'
+                      }`}
+                    >
+                      <User size={12} />
+                      {p.job ? `${p.job}` : 'PERFIL NUEVO'}
+                    </button>
+                  );
+                })}
               </div>
-            )}
+              <button 
+                onClick={handleCreateNewProfile}
+                className="w-full md:w-auto px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all flex-shrink-0 cursor-pointer"
+              >
+                <Plus size={14} className="text-purple-400" /> CREAR OTRO PERFIL
+              </button>
+            </div>
 
             <div className="w-full bg-white/[0.02] border border-white/5 backdrop-blur-md rounded-2xl p-4 md:p-8 shadow-2xl box-border overflow-hidden">
               <div className="w-full mx-auto box-border">
@@ -440,9 +443,6 @@ export default function Dashboard() {
                   </div>
 
                   <div className="flex items-center gap-3 w-full md:w-auto justify-center pb-2 flex-shrink-0">
-                    <button onClick={handleAddNewProfile} className="px-4 py-4 rounded-2xl bg-white/[0.03] hover:bg-white/15 border border-white/10 transition-all text-white flex items-center gap-2 text-[9px] font-black tracking-widest cursor-pointer" title="Crear otro perfil profesional">
-                      <Plus size={16} /> <span className="hidden md:inline">NUEVO PERFIL</span>
-                    </button>
                     <button onClick={() => setIsEditingProfile(true)} className="px-6 py-4 rounded-2xl bg-purple-600 text-white font-black text-[10px] tracking-[0.3em] hover:bg-purple-500 transition-all shadow-xl flex items-center justify-center gap-2 cursor-pointer">
                       <Edit3 size={14}/> EDITAR PERFIL
                     </button>
@@ -616,7 +616,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              <div className="index space-y-1">
+              <div className="space-y-1">
                 <label className="text-[7px] text-gray-500 tracking-widest">Biografía / Presentación</label>
                 <textarea 
                   className="w-full bg-white/[0.03] border border-white/10 rounded-3xl p-4 text-[10px] text-white uppercase h-28 resize-none outline-none focus:border-purple-500 tracking-widest box-border" 
