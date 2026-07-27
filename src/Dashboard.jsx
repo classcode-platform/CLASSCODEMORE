@@ -316,11 +316,11 @@ export default function Dashboard() {
                 </div>
               </button>
               <nav className="flex-1 space-y-12">
-                <button onClick={() => { navigate('/dashboard'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-purple-500 uppercase"><LayoutDashboard size={22}/> DASHBOARD</button>
-                <button onClick={() => { navigate('/academy'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase"><GraduationCap size={22}/> ACADEMY</button>
-                <button onClick={() => { handleViewPublicProfile(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase"><Eye size={22}/> PERFIL PÚBLICO</button>
+                <button onClick={() => { navigate('/dashboard'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-purple-500 uppercase cursor-pointer"><LayoutDashboard size={22}/> DASHBOARD</button>
+                <button onClick={() => { navigate('/academy'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase cursor-pointer"><GraduationCap size={22}/> ACADEMY</button>
+                <button onClick={() => { handleViewPublicProfile(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase cursor-pointer"><Eye size={22}/> PERFIL PÚBLICO</button>
               </nav>
-              <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-700 text-[10px] font-black tracking-widest uppercase mt-8"><LogOut size={20}/> SALIR</button>
+              <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-700 text-[10px] font-black tracking-widest uppercase mt-8 cursor-pointer"><LogOut size={20}/> SALIR</button>
             </motion.div>
           </>
         )}
@@ -329,11 +329,11 @@ export default function Dashboard() {
       <aside className="hidden md:flex w-72 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50 box-border">
         <header className="mb-12 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">CLASSCODE</div>
-          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent Dashboard</p>
+          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent</p>
         </header>
         
         <div className="mb-12 text-left">
-          <button onClick={handleSwitchToClient} className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-4 rounded-2xl group hover:bg-purple-500/10 transition-all leading-none box-border">
+          <button onClick={handleSwitchToClient} className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-4 rounded-2xl group hover:bg-purple-500/10 transition-all leading-none box-border cursor-pointer">
             <div className="flex items-center gap-3 text-left leading-none">
               <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
                 <RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
@@ -347,11 +347,11 @@ export default function Dashboard() {
         </div>
 
         <nav className="flex-1 space-y-8 text-left">
-          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-4 text-white text-[10px] font-black tracking-widest leading-none transition-all"><LayoutDashboard size={18} className="text-purple-500"/> DASHBOARD</button>
-          <button onClick={() => navigate('/academy')} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all"><GraduationCap size={18}/> ACADEMY</button>
-          <button onClick={handleViewPublicProfile} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all"><Eye size={18}/> PERFIL PÚBLICO</button>
+          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-4 text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><LayoutDashboard size={18} className="text-purple-500"/> DASHBOARD</button>
+          <button onClick={() => navigate('/academy')} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><GraduationCap size={18}/> ACADEMY</button>
+          <button onClick={handleViewPublicProfile} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><Eye size={18}/> PERFIL PÚBLICO</button>
         </nav>
-        <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-700 hover:text-red-500 text-[10px] font-black tracking-widest transition-all mt-auto pt-8 border-t border-white/5 leading-none"><LogOut size={18}/> CERRAR SESIÓN</button>
+        <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-700 hover:text-red-500 text-[10px] font-black tracking-widest transition-all mt-auto pt-8 border-t border-white/5 leading-none cursor-pointer"><LogOut size={18}/> CERRAR SESIÓN</button>
       </aside>
 
       <div className="flex-1 md:ml-72 flex flex-col min-h-screen relative z-10 w-full max-w-full box-border overflow-x-hidden">
@@ -366,7 +366,7 @@ export default function Dashboard() {
                   <button 
                     key={idx} 
                     onClick={() => setActiveProfileIndex(idx)}
-                    className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-widest border transition-all uppercase ${activeProfileIndex === idx ? 'bg-purple-600 border-purple-500 text-white shadow-lg' : 'bg-white/[0.03] border-white/10 text-gray-400 hover:text-white'}`}>
+                    className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-widest border transition-all uppercase cursor-pointer ${activeProfileIndex === idx ? 'bg-purple-600 border-purple-500 text-white shadow-lg' : 'bg-white/[0.03] border-white/10 text-gray-400 hover:text-white'}`}>
                     {p.job || `PERFIL ${idx + 1}`}
                   </button>
                 ))}
