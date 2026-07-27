@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Search, LogOut, User, Calendar, MapPin, 
   Trash2, Plus, Edit3, LayoutGrid, ImageIcon, X, ChevronRight, QrCode,
-  RefreshCcw, Menu
+  RefreshCcw, Menu, Save
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import EventOrganizer from './components/EventOrganizer';
@@ -23,6 +23,9 @@ export default function ClientProfile() {
   const [events, setEvents] = useState([]);
   const [profile, setProfile] = useState({ name: '', location: '', interests: '', photoURL: '' });
   
+  // Estado temporal para el formulario de edición de perfil
+  const [editForm, setEditForm] = useState({ name: '', location: '', photoURL: '' });
+
   // Estados para el manejo del LiveControlPanel modal
   const [showLivePanel, setShowLivePanel] = useState(false);
   const [selectedEventIndex, setSelectedEventIndex] = useState(0);
@@ -35,7 +38,9 @@ export default function ClientProfile() {
       if (user) {
         onSnapshot(doc(db, "users", user.uid), (docSnap) => {
           if (docSnap.exists()) {
-            setProfile(prev => ({ ...prev, ...docSnap.data() }));
+            const data = docSnap.data();
+            setProfile(prev => ({ ...prev, ...data }));
+            setEditForm({ name: data.name || '', location: data.location || '', photoURL: data.photoURL || '' });
           }
           setLoading(false);
         });
@@ -52,6 +57,23 @@ export default function ClientProfile() {
     });
     return () => unsubscribe();
   }, [navigate]);
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    if (!auth.currentUser) return;
+    try {
+      await updateDoc(doc(db, "users", auth.currentUser.uid), {
+        name: editForm.name,
+        location: editForm.location,
+        photoURL: editForm.photoURL
+      });
+      setIsEditingProfile(false);
+      setModal({ isOpen: true, title: "PERFIL ACTUALIZADO", message: "TUS DATOS SE HAN GUARDADO CORRECTAMENTE.", type: "success" });
+    } catch (error) {
+      console.error("Error al actualizar perfil:", error);
+      setModal({ isOpen: true, title: "ERROR", message: "NO SE PUDO ACTUALIZAR EL PERFIL.", type: "warning" });
+    }
+  };
 
   const confirmDelete = (id, e) => {
     if (e) e.stopPropagation();
@@ -262,7 +284,6 @@ export default function ClientProfile() {
                     </div>
 
                     <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
-                      {/* Al hacer clic en el botón QR, abrimos el LiveControlPanel pasando el índice del evento */}
                       <button 
                         onClick={(e) => { e.stopPropagation(); setSelectedEventIndex(index); setShowLivePanel(true); }} 
                         className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.03] hover:bg-white/10 border border-white/10 text-[8px] font-black tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer"
@@ -285,6 +306,70 @@ export default function ClientProfile() {
 
       </main>
 
+      {/* Modal para Editar Perfil */}
+      <AnimatePresence>
+        {isEditingProfile && (
+          <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[250] flex items-center justify-center p-4 uppercase">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-[#0c0c0e] w-full max-w-lg p-6 md:p-8 rounded-[2.5rem] border border-white/10 relative shadow-2xl space-y-6"
+            >
+              <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
+              
+              <h3 className="text-[11px] font-['Poppins'] text-white tracking-[0.3em] font-black border-b border-white/5 pb-4">Editar Perfil</h3>
+
+              <form onSubmit={handleSaveProfile} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[8px] text-gray-400 tracking-widest font-black">Nombre / Organizador</label>
+                  <input 
+                    type="text" 
+                    value={editForm.name} 
+                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-500 transition-colors"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[8px] text-gray-400 tracking-widest font-black">Ubicación</label>
+                  <input 
+                    type="text" 
+                    value={editForm.location} 
+                    onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-500 transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[8px] text-gray-400 tracking-widest font-black">URL de Foto de Perfil</label>
+                  <input 
+                    type="url" 
+                    value={editForm.photoURL} 
+                    onChange={(e) => setEditForm({ ...editForm, photoURL: e.target.value })}
+                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-500 transition-colors"
+                  />
+                </div>
+
+                <div className="pt-4 flex justify-end gap-3">
+                  <button 
+                    type="button" 
+                    onClick={() => setIsEditingProfile(false)} 
+                    className="px-5 py-3 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black tracking-widest hover:bg-white/10 transition-all cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="px-6 py-3 bg-purple-600 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-purple-500 transition-all cursor-pointer flex items-center gap-2"
+                  >
+                    <Save size={14} /> Guardar Cambios
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {isCreatingEvent && (
           <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[250] flex items-center justify-center p-4 uppercase">
@@ -295,7 +380,6 @@ export default function ClientProfile() {
         )}
       </AnimatePresence>
 
-      {/* Modal que despliega el LiveControlPanel con todas las props que requiere */}
       <AnimatePresence>
         {showLivePanel && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 md:p-8 overflow-y-auto">
@@ -328,7 +412,6 @@ export default function ClientProfile() {
         )}
       </AnimatePresence>
 
-      {/* Modal de previsualización de imagen */}
       <AnimatePresence>
         {previewImage && (
           <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4" onClick={() => setPreviewImage(null)}>
