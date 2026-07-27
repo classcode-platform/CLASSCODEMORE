@@ -16,23 +16,104 @@ import { motion, AnimatePresence } from 'framer-motion';
 const ARGENTINE_PROVINCES = [
   {
     name: "BUENOS AIRES",
-    localities: ["CAPITAL FEDERAL / CABA", "LA MATANZA (SAN JUSTO / VILLA LUZURIAGA)", "MORÓN", "RAMOS MEJÍA", "AVELLANEDA", "LANÚS", "LA PLATA", "MAR DEL PLATA", "TIGRE", "VICENTE LÓPEZ"]
+    localities: [
+      "CAPITAL FEDERAL / CABA",
+      "ZONA OESTE",
+      "ZONA NORTE",
+      "ZONA SUR",
+      "LA PLATA",
+      "MAR DEL PLATA",
+      "BAHÍA BLANCA",
+      "INTERIOR DE BUENOS AIRES"
+    ]
+  },
+  {
+    name: "CATAMARCA",
+    localities: ["CATAMARCA CAPITAL", "INTERIOR DE CATAMARCA"]
+  },
+  {
+    name: "CHACO",
+    localities: ["RESISTENCIA", "SAENZ PEÑA", "INTERIOR DE CHACO"]
+  },
+  {
+    name: "CHUBUT",
+    localities: ["COMODORO RIVADAVIA", "TRELEW", "PUERTO MADRYN", "RAWSON"]
   },
   {
     name: "CÓRDOBA",
-    localities: ["CÓRDOBA CAPITAL", "VILLA CARLOS PAZ", "RÍO CUARTO", "VILLA MARÍA", "ALTA GRACIA"]
+    localities: ["CÓRDOBA CAPITAL", "VILLA CARLOS PAZ", "RÍO CUARTO", "VILLA MARÍA", "ALTA GRACIA", "INTERIOR DE CÓRDOBA"]
   },
   {
-    name: "SANTA FE",
-    localities: ["ROSARIO", "SANTA FE CAPITAL", "RAFAELA", "VENADO TUERTO"]
+    name: "CORRIENTES",
+    localities: ["CORRIENTES CAPITAL", "GOYA", "LIBRES", "INTERIOR DE CORRIENTES"]
+  },
+  {
+    name: "ENTRE RÍOS",
+    localities: ["PARANÁ", "CONCORDIA", "GUALEGUAYCHÚ", "INTERIOR DE ENTRE RÍOS"]
+  },
+  {
+    name: "FORMOSA",
+    localities: ["FORMOSA CAPITAL", "INTERIOR DE FORMOSA"]
+  },
+  {
+    name: "JUJUY",
+    localities: ["SAN SALVADOR DE JUJUY", "SAN PEDRO", "INTERIOR DE JUJUY"]
+  },
+  {
+    name: "LA PAMPA",
+    localities: ["SANTA ROSA", "GENERAL PICO", "INTERIOR DE LA PAMPA"]
+  },
+  {
+    name: "LA RIOJA",
+    localities: ["LA RIOJA CAPITAL", "CHILECITO", "INTERIOR DE LA RIOJA"]
   },
   {
     name: "MENDOZA",
-    localities: ["MENDOZA CAPITAL", "GUAYMALLÉN", "GODOY CRUZ", "SAN RAFAEL"]
+    localities: ["MENDOZA CAPITAL", "GUAYMALLÉN", "GODOY CRUZ", "SAN RAFAEL", "INTERIOR DE MENDOZA"]
+  },
+  {
+    name: "MISIONES",
+    localities: ["POSADAS", "OBERÁ", "EL ALDOR", "PUERTO IGUAZÚ"]
+  },
+  {
+    name: "NEUQUÉN",
+    localities: ["NEUQUÉN CAPITAL", "SAN MARTÍN DE LOS ANDES", "BARILOCHE / ZONA", "INTERIOR DE NEUQUÉN"]
+  },
+  {
+    name: "RÍO NEGRO",
+    localities: ["VIEDMA", "GENERAL ROCA", "CIPOLLETTI", "BARILOCHE"]
+  },
+  {
+    name: "SALTA",
+    localities: ["SALTA CAPITAL", "ORÁN", "TARTAGAL", "INTERIOR DE SALTA"]
+  },
+  {
+    name: "SAN JUAN",
+    localities: ["SAN JUAN CAPITAL", "RIVADAVIA", "RAWSON", "INTERIOR DE SAN JUAN"]
+  },
+  {
+    name: "SAN LUIS",
+    localities: ["SAN LUIS CAPITAL", "VILLA MERCEDES", "INTERIOR DE SAN LUIS"]
+  },
+  {
+    name: "SANTA CRUZ",
+    localities: ["RÍO GALLEGOS", "CALETA OLIVIA", "EL CALAFATE"]
+  },
+  {
+    name: "SANTA FE",
+    localities: ["ROSARIO", "SANTA FE CAPITAL", "RAFAELA", "VENADO TUERTO", "INTERIOR DE SANTA FE"]
+  },
+  {
+    name: "SANTIAGO DEL ESTERO",
+    localities: ["SANTIAGO CAPITAL", "LA BANDA", "INTERIOR DE SANTIAGO"]
+  },
+  {
+    name: "TIERRA DEL FUEGO",
+    localities: ["USHUAIA", "RÍO GRANDE"]
   },
   {
     name: "TUCUMÁN",
-    localities: ["SAN MIGUEL DE TUCUMÁN", "YERBA BUENA", "TAFÍ VIEJO"]
+    localities: ["SAN MIGUEL DE TUCUMÁN", "YERBA BUENA", "TAFÍ VIEJO", "INTERIOR DE TUCUMÁN"]
   }
 ];
 
