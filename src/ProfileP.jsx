@@ -154,17 +154,24 @@ export default function ProfileP() {
         </div>
       </nav>
 
-      {/* SECCIÓN ESTILO FACEBOOK LIMPIA Y SIN DESbordes */}
+      {/* SECCIÓN ESTILO FACEBOOK LIMPIA Y SIN CONTROLES */}
       <div className="w-full bg-[#070709] border-b border-white/5">
         <div className="max-w-[1200px] mx-auto">
-          {/* Banner / Showreel Container ajustado sin desbordar */}
-          <div className="w-full h-[260px] md:h-[400px] bg-black relative overflow-hidden">
+          {/* Banner / Showreel Container más angosto y finito */}
+          <div className="w-full h-[180px] md:h-[260px] bg-black relative overflow-hidden">
             {user.videoLink ? (
-              <video src={user.videoLink} controls className="w-full h-full object-cover" />
+              <video 
+                src={user.videoLink} 
+                autoPlay 
+                loop 
+                muted 
+                playsInline 
+                className="w-full h-full object-cover pointer-events-none opacity-90" 
+              />
             ) : (
               <div className="w-full h-full bg-[#070709] flex flex-col items-center justify-center p-6 text-center border border-white/5">
-                <Play size={36} className="text-white/20 mb-3" strokeWidth={1}/>
-                <span className="text-[9px] tracking-[0.4em] text-gray-500 font-black">SIN SHOWREEL DISPONIBLE</span>
+                <Play size={28} className="text-white/20 mb-2" strokeWidth={1}/>
+                <span className="text-[8px] tracking-[0.4em] text-gray-500 font-black">SIN SHOWREEL DISPONIBLE</span>
               </div>
             )}
           </div>
