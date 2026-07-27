@@ -247,7 +247,6 @@ export default function Dashboard() {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', UPLOAD_PRESET);
-    formData.append('resource_type', 'video');
     try {
       const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, { method: 'POST', body: formData });
       const data = await response.json();
@@ -256,7 +255,11 @@ export default function Dashboard() {
         setProfile(prev => ({ ...prev, ...updates }));
         await persistProfile(updates);
       }
-    } finally { setUploadingStatus(prev => ({ ...prev, video: false })); }
+    } catch (err) {
+      console.error("Error al subir video:", err);
+    } finally { 
+      setUploadingStatus(prev => ({ ...prev, video: false })); 
+    }
   };
 
   if (loading) return <div className="min-h-screen w-full bg-[#0a0a0a] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-['Poppins'] overflow-x-hidden box-border">CARGANDO DASHBOARD...</div>;
@@ -365,7 +368,9 @@ export default function Dashboard() {
                   ) : (
                     <div className="w-full h-full bg-[#070709] flex flex-col items-center justify-center p-6 text-center border border-white/5 box-border">
                       <Play size={28} className="text-white/20 mb-2" strokeWidth={1}/>
-                      <span className="text-[8px] tracking-[0.4em] text-gray-500 font-black">SIN SHOWREEL CARGADO</span>
+                      <span className="text-[8px] tracking-[0.4em] text-gray-500 font-black">
+                        {uploadingStatus.video ? 'SUBIENDO VIDEO...' : 'SIN SHOWREEL CARGADO'}
+                      </span>
                     </div>
                   )}
                   
@@ -616,4 +621,3 @@ export default function Dashboard() {
     </div>
   );
 }
-```[cite: 4]
