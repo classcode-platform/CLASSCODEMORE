@@ -216,56 +216,41 @@ export default function ClientProfile() {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-[#111322] flex items-center justify-center text-white/90 tracking-[0.4em] text-[10px] uppercase font-['Poppins']">
+    <div className="min-h-screen bg-[#070709] flex items-center justify-center text-white/70 tracking-[0.4em] text-[10px] uppercase font-['Poppins']">
       Sincronizando experiencia...
     </div>
   );
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#0e101d] via-[#14172b] to-[#1a1d36] text-white font-['Open_Sans'] flex flex-col md:flex-row overflow-x-hidden uppercase antialiased relative text-left box-border m-0 p-0">
+    <div className="min-h-screen w-full bg-[#070709] text-white font-['Open_Sans'] flex flex-col md:flex-row overflow-x-hidden uppercase antialiased relative text-left box-border m-0 p-0">
       
-      {/* CAPA DE LUCES DINÁMICAS (AMBIENT GLASS LIGHTS) */}
+      {/* LUCES DINÁMICAS SUTILES DE FONDO (AMBIENT ORBS) */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        {/* Luz Violeta / Púrpura */}
         <motion.div 
           animate={{ 
-            x: [-120, 120, -120], 
-            y: [-80, 80, -80], 
-            scale: [1, 1.3, 1],
-            opacity: [0.35, 0.55, 0.35]
+            x: [-60, 60, -60], 
+            y: [-40, 40, -40], 
+            scale: [1, 1.15, 1],
+            opacity: [0.15, 0.25, 0.15]
           }} 
-          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }} 
-          className="absolute -top-20 -left-20 w-[650px] h-[650px] bg-purple-600/30 rounded-full blur-[140px]" 
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }} 
+          className="absolute -top-10 -left-10 w-[500px] h-[500px] bg-purple-900/30 rounded-full blur-[120px]" 
         />
-
-        {/* Luz Cian / Azul Neón */}
         <motion.div 
           animate={{ 
-            x: [100, -100, 100], 
-            y: [80, -80, 80], 
-            scale: [1.2, 0.9, 1.2],
-            opacity: [0.3, 0.5, 0.3]
+            x: [50, -50, 50], 
+            y: [40, -40, 40], 
+            scale: [1.1, 0.95, 1.1],
+            opacity: [0.12, 0.22, 0.12]
           }} 
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }} 
-          className="absolute top-1/3 -right-20 w-[600px] h-[600px] bg-cyan-500/25 rounded-full blur-[150px]" 
-        />
-
-        {/* Luz Rosa Magnético / Fucsia */}
-        <motion.div 
-          animate={{ 
-            x: [-80, 80, -80], 
-            y: [100, -50, 100], 
-            scale: [0.9, 1.25, 0.9],
-            opacity: [0.25, 0.45, 0.25]
-          }} 
-          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }} 
-          className="absolute -bottom-20 left-1/4 w-[700px] h-[700px] bg-pink-600/20 rounded-full blur-[160px]" 
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }} 
+          className="absolute top-1/2 -right-10 w-[450px] h-[450px] bg-cyan-950/40 rounded-full blur-[130px]" 
         />
       </div>
 
       {/* HEADER MOBILE GLASS */}
-      <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-white/[0.08] backdrop-blur-2xl border-b border-white/20 z-[100] px-8 py-5 flex justify-between items-center shadow-[0_8px_32px_0_rgba(0,0,0,0.2)]">
-        <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer text-white drop-shadow-sm">
+      <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-white/[0.03] backdrop-blur-xl border-b border-white/10 z-[100] px-8 py-5 flex justify-between items-center shadow-lg">
+        <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer text-white">
           CLASSCODE
         </div>
         <button onClick={() => setIsMobileMenuOpen(true)} className="text-white hover:text-purple-300 transition-colors cursor-pointer">
@@ -282,28 +267,28 @@ export default function ClientProfile() {
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }} 
               onClick={() => setIsMobileMenuOpen(false)} 
-              className="fixed inset-0 bg-slate-950/60 backdrop-blur-xl z-[110] md:hidden" 
+              className="fixed inset-0 bg-black/70 backdrop-blur-md z-[110] md:hidden" 
             />
             <motion.div 
               initial={{ x: '100%' }} 
               animate={{ x: 0 }} 
               exit={{ x: '100%' }} 
-              className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-white/[0.12] backdrop-blur-3xl border-l border-white/20 z-[120] p-10 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto"
+              className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-[#0b0c10]/90 backdrop-blur-2xl border-l border-white/10 z-[120] p-10 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto"
             >
-              <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-10 text-white/70 hover:text-white transition-colors cursor-pointer">
+              <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-10 text-white/60 hover:text-white transition-colors cursor-pointer">
                 <X size={28} />
               </button>
               
               <button 
                 onClick={handleSwitchToTalent} 
-                className="mb-10 w-full flex items-center justify-between bg-white/[0.08] backdrop-blur-xl border border-white/20 hover:border-purple-300/40 p-4 rounded-2xl group hover:bg-white/[0.15] transition-all cursor-pointer shadow-lg"
+                className="mb-10 w-full flex items-center justify-between bg-white/[0.04] border border-white/10 hover:border-purple-400/30 p-4 rounded-xl group hover:bg-white/[0.08] transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-4 text-left leading-none">
-                  <div className="p-3 bg-purple-500/20 rounded-xl text-purple-300 border border-purple-400/30">
-                    <RefreshCcw size={18} className="group-hover:rotate-180 transition-transform duration-700" />
+                  <div className="p-2.5 bg-purple-500/10 rounded-lg text-purple-300 border border-purple-500/20">
+                    <RefreshCcw size={16} className="group-hover:rotate-180 transition-transform duration-700" />
                   </div>
                   <div>
-                    <p className="text-[7px] font-black text-purple-200 tracking-[0.2em]">SWITCH MOOD</p>
+                    <p className="text-[7px] font-black text-purple-300/80 tracking-[0.2em]">SWITCH MOOD</p>
                     <p className="text-[11px] font-black text-white tracking-widest uppercase leading-none mt-1">MODO TALENT</p>
                   </div>
                 </div>
@@ -313,12 +298,12 @@ export default function ClientProfile() {
                 <button onClick={() => { navigate('/client-profile'); setIsMobileMenuOpen(false); }} className="flex items-center gap-5 text-[12px] font-black tracking-widest text-purple-300 uppercase cursor-pointer">
                   <LayoutGrid size={20}/> ORGANIZADOR
                 </button>
-                <button onClick={() => { navigate('/home'); setIsMobileMenuOpen(false); }} className="flex items-center gap-5 text-[12px] font-black tracking-widest text-white/80 hover:text-white uppercase cursor-pointer">
+                <button onClick={() => { navigate('/home'); setIsMobileMenuOpen(false); }} className="flex items-center gap-5 text-[12px] font-black tracking-widest text-white/70 hover:text-white uppercase cursor-pointer">
                   <Search size={20}/> EXPLORAR
                 </button>
               </nav>
 
-              <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-5 text-white/70 hover:text-red-300 text-[10px] font-black tracking-widest uppercase mt-8 cursor-pointer">
+              <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-5 text-white/50 hover:text-red-300 text-[10px] font-black tracking-widest uppercase mt-8 cursor-pointer">
                 <LogOut size={18}/> SALIR
               </button>
             </motion.div>
@@ -327,12 +312,12 @@ export default function ClientProfile() {
       </AnimatePresence>
 
       {/* SIDEBAR DESKTOP GLASS */}
-      <aside className="hidden md:flex w-72 bg-white/[0.06] backdrop-blur-3xl border-r border-white/20 flex-col p-8 fixed h-full z-50 box-border shadow-[8px_0_32px_0_rgba(0,0,0,0.25)]">
+      <aside className="hidden md:flex w-72 bg-white/[0.02] backdrop-blur-2xl border-r border-white/10 flex-col p-8 fixed h-full z-50 box-border shadow-2xl">
         <header className="mb-10 text-left leading-none">
-          <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white drop-shadow">
+          <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">
             CLASSCODE
           </div>
-          <p className="text-purple-300 text-[10px] font-bold tracking-[0.3em] mt-2.5 leading-none uppercase flex items-center gap-1.5">
+          <p className="text-purple-300/80 text-[10px] font-bold tracking-[0.3em] mt-2.5 leading-none uppercase flex items-center gap-1.5">
             <Sparkles size={11} className="text-purple-400" /> Experience
           </p>
         </header>
@@ -340,30 +325,30 @@ export default function ClientProfile() {
         <div className="mb-10 text-left">
           <button 
             onClick={handleSwitchToTalent} 
-            className="w-full flex items-center justify-between bg-white/[0.08] backdrop-blur-xl border border-white/20 hover:border-purple-300/50 p-4 rounded-2xl group hover:bg-white/[0.15] transition-all cursor-pointer shadow-lg"
+            className="w-full flex items-center justify-between bg-white/[0.04] border border-white/10 hover:border-purple-400/30 p-4 rounded-xl group hover:bg-white/[0.08] transition-all cursor-pointer"
           >
             <div className="flex items-center gap-3 text-left leading-none">
-              <div className="p-2.5 bg-purple-500/20 rounded-xl text-purple-300 border border-purple-400/30">
+              <div className="p-2.5 bg-purple-500/10 rounded-lg text-purple-300 border border-purple-500/20">
                 <RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
               </div>
               <div>
-                <p className="text-[6px] font-black text-purple-200 tracking-[0.2em] leading-none">SWITCH MOOD</p>
+                <p className="text-[6px] font-black text-purple-300/80 tracking-[0.2em] leading-none">SWITCH MOOD</p>
                 <p className="text-[9px] font-black text-white tracking-widest uppercase mt-1 leading-none">MODO TALENT</p>
               </div>
             </div>
           </button>
         </div>
 
-        <nav className="flex-1 space-y-6 text-left">
-          <button onClick={() => navigate('/client-profile')} className="flex items-center gap-4 text-purple-300 bg-white/[0.1] border border-white/20 py-3.5 px-4 rounded-xl text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer shadow-md w-full">
+        <nav className="flex-1 space-y-4 text-left">
+          <button onClick={() => navigate('/client-profile')} className="flex items-center gap-4 text-purple-300 bg-white/[0.06] border border-white/10 py-3.5 px-4 rounded-xl text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer w-full">
             <LayoutGrid size={16} className="text-purple-300"/> ORGANIZADOR
           </button>
-          <button onClick={() => navigate('/home')} className="flex items-center gap-4 text-white/80 hover:text-white hover:bg-white/[0.06] py-3.5 px-4 rounded-xl text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer w-full">
+          <button onClick={() => navigate('/home')} className="flex items-center gap-4 text-white/70 hover:text-white hover:bg-white/[0.04] py-3.5 px-4 rounded-xl text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer w-full">
             <Search size={16}/> EXPLORAR
           </button>
         </nav>
 
-        <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-white/60 hover:text-red-300 text-[10px] font-black tracking-widest transition-all mt-auto pt-6 border-t border-white/15 leading-none cursor-pointer">
+        <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-white/50 hover:text-red-300 text-[10px] font-black tracking-widest transition-all mt-auto pt-6 border-t border-white/10 leading-none cursor-pointer">
           <LogOut size={16}/> CERRAR SESIÓN
         </button>
       </aside>
@@ -371,28 +356,28 @@ export default function ClientProfile() {
       {/* CONTENIDO PRINCIPAL */}
       <main className="flex-1 md:ml-72 p-6 md:p-12 mt-16 md:mt-0 relative z-10 w-full max-w-[1400px] mx-auto space-y-8 box-border">
         
-        {/* HEADER DE PERFIL EN GLASS LUMINOSO */}
-        <header className="flex justify-between items-center bg-white/[0.08] backdrop-blur-3xl border border-white/20 p-6 rounded-[2rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.2)] box-border">
+        {/* HEADER DE PERFIL EN GLASS SUTIL */}
+        <header className="flex justify-between items-center bg-white/[0.03] backdrop-blur-2xl border border-white/10 p-6 rounded-2xl shadow-xl box-border">
           <div className="flex items-center gap-5">
-            <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl border border-white/30 overflow-hidden bg-white/10 flex items-center justify-center flex-shrink-0 shadow-inner">
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl border border-white/15 overflow-hidden bg-white/5 flex items-center justify-center flex-shrink-0">
               {profile.photoURL ? (
                 <img src={profile.photoURL} className="w-full h-full object-cover" alt="Profile" />
               ) : (
-                <User size={24} className="text-white/70"/>
+                <User size={24} className="text-white/60"/>
               )}
             </div>
             <div className="text-left leading-none min-w-0">
               <div className="flex items-center gap-3">
-                <h2 className="text-[14px] md:text-[16px] font-['Poppins'] text-white truncate drop-shadow-sm">
+                <h2 className="text-[14px] md:text-[16px] font-['Poppins'] text-white truncate">
                   {profile.name || 'ORGANIZADOR'}
                 </h2>
-                <button onClick={() => setIsEditingProfile(true)} className="text-purple-200 hover:text-white transition-colors cursor-pointer flex-shrink-0 p-1">
+                <button onClick={() => setIsEditingProfile(true)} className="text-white/60 hover:text-white transition-colors cursor-pointer flex-shrink-0 p-1">
                   <Edit3 size={14} />
                 </button>
               </div>
               {profile.location && (
-                <p className="text-[9px] text-purple-200/90 font-bold mt-2 flex items-center gap-1.5">
-                  <MapPin size={11} className="text-cyan-300"/> {profile.location}
+                <p className="text-[9px] text-white/60 font-bold mt-2 flex items-center gap-1.5">
+                  <MapPin size={11} className="text-purple-400"/> {profile.location}
                 </p>
               )}
             </div>
@@ -400,7 +385,7 @@ export default function ClientProfile() {
           
           <button 
             onClick={() => setIsCreatingEvent(true)} 
-            className="px-5 py-3.5 bg-gradient-to-r from-purple-500/80 to-indigo-600/80 backdrop-blur-xl border border-purple-300/40 text-white rounded-xl text-[9px] font-black flex items-center gap-2 hover:from-purple-500 hover:to-indigo-500 transition-all tracking-widest font-['Poppins'] cursor-pointer shadow-[0_4px_20px_rgba(168,85,247,0.35)] flex-shrink-0"
+            className="px-5 py-3 bg-purple-600/80 backdrop-blur-md border border-purple-400/30 text-white rounded-xl text-[9px] font-black flex items-center gap-2 hover:bg-purple-600 transition-all tracking-widest font-['Poppins'] cursor-pointer shadow-lg flex-shrink-0"
           >
             <Plus size={14}/> NUEVO EVENTO
           </button>
@@ -408,17 +393,17 @@ export default function ClientProfile() {
 
         {/* GRILLA DE EVENTOS */}
         <section className="space-y-6">
-          <div className="flex justify-between items-center border-l-2 border-cyan-400 pl-4">
-            <h3 className="text-[10px] text-purple-200/90 uppercase tracking-[0.4em] font-black">mis proyectos</h3>
+          <div className="flex justify-between items-center border-l-2 border-purple-500 pl-4">
+            <h3 className="text-[10px] text-white/70 uppercase tracking-[0.4em] font-black">mis proyectos</h3>
           </div>
           
           {events.length === 0 ? (
-            <div className="py-20 text-center border border-white/20 rounded-[2.5rem] bg-white/[0.06] backdrop-blur-3xl space-y-4 shadow-[0_8px_32px_0_rgba(0,0,0,0.2)]">
-              <Calendar size={36} className="mx-auto text-purple-300/40" />
-              <p className="text-[9px] text-purple-200/80 tracking-[0.3em] font-black uppercase">No hay eventos registrados</p>
+            <div className="py-20 text-center border border-white/10 rounded-2xl bg-white/[0.02] backdrop-blur-2xl space-y-4 shadow-xl">
+              <Calendar size={36} className="mx-auto text-white/30" />
+              <p className="text-[9px] text-white/60 tracking-[0.3em] font-black uppercase">No hay eventos registrados</p>
               <button 
                 onClick={() => setIsCreatingEvent(true)} 
-                className="px-6 py-3.5 bg-purple-600/80 backdrop-blur-xl border border-purple-300/40 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-purple-500 transition-all font-['Poppins'] cursor-pointer shadow-lg"
+                className="px-6 py-3.5 bg-purple-600/80 backdrop-blur-md border border-purple-400/30 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-purple-600 transition-all font-['Poppins'] cursor-pointer shadow-lg"
               >
                 CREAR PRIMER EVENTO
               </button>
@@ -429,26 +414,26 @@ export default function ClientProfile() {
                 <div 
                   key={ev.id} 
                   onClick={() => navigate(`/organizer/${ev.id}`)} 
-                  className="bg-white/[0.07] backdrop-blur-2xl border border-white/20 hover:border-purple-300/50 hover:bg-white/[0.12] rounded-[2rem] overflow-hidden flex flex-col justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.2)] cursor-pointer transition-all duration-300 group box-border hover:shadow-[0_8px_32px_0_rgba(168,85,247,0.2)]"
+                  className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 hover:border-white/25 hover:bg-white/[0.06] rounded-2xl overflow-hidden flex flex-col justify-between shadow-xl cursor-pointer transition-all duration-300 group box-border"
                 >
-                  <div className="relative w-full h-36 bg-black/20 overflow-hidden border-b border-white/15 flex items-center justify-center">
+                  <div className="relative w-full h-36 bg-black/40 overflow-hidden border-b border-white/10 flex items-center justify-center">
                     {ev.coverImage ? (
-                      <img src={ev.coverImage} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" />
+                      <img src={ev.coverImage} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" />
                     ) : (
                       <ImageIcon size={28} className="text-white/30" />
                     )}
                     <div className="absolute top-3 left-3">
-                      <span className="text-[7px] tracking-[0.3em] font-black px-3 py-1 bg-white/20 backdrop-blur-xl border border-white/30 rounded-full text-white uppercase shadow-md">
+                      <span className="text-[7px] tracking-[0.3em] font-black px-3 py-1 bg-black/40 backdrop-blur-md border border-white/15 rounded-full text-white uppercase">
                         {ev.category || 'EVENTO'}
                       </span>
                     </div>
                     <div className="absolute top-3 right-3">
                       <button 
                         onClick={(e) => handleToggleStatus(ev, e)} 
-                        className={`text-[7px] tracking-widest font-black px-3 py-1 rounded-full border backdrop-blur-xl transition-all uppercase shadow-md ${
-                          ev.status === 'FINALIZADO' ? 'bg-emerald-500/30 text-emerald-200 border-emerald-400/40' :
-                          ev.status === 'EN_CURSO' ? 'bg-amber-500/30 text-amber-200 border-amber-400/40' :
-                          'bg-white/20 text-white border-white/30'
+                        className={`text-[7px] tracking-widest font-black px-3 py-1 rounded-full border backdrop-blur-md transition-all uppercase ${
+                          ev.status === 'FINALIZADO' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
+                          ev.status === 'EN_CURSO' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
+                          'bg-white/10 text-white border-white/20'
                         }`}
                       >
                         {ev.status}
@@ -457,25 +442,25 @@ export default function ClientProfile() {
                   </div>
 
                   <div className="p-6 space-y-4">
-                    <h4 className="text-sm font-['Poppins'] text-white group-hover:text-purple-200 flex items-center justify-between transition-colors drop-shadow-sm">
+                    <h4 className="text-sm font-['Poppins'] text-white group-hover:text-purple-300 flex items-center justify-between transition-colors">
                       {ev.title}
-                      <ChevronRight size={16} className="text-white/50 group-hover:translate-x-1 transition-transform" />
+                      <ChevronRight size={16} className="text-white/40 group-hover:translate-x-1 transition-transform" />
                     </h4>
-                    <div className="space-y-1.5 text-[9px] text-purple-100/90 font-bold uppercase">
-                      {ev.date && <p className="flex items-center gap-2"><Calendar size={12} className="text-cyan-300"/> {ev.date}</p>}
-                      {ev.location && <p className="flex items-center gap-2"><MapPin size={12} className="text-cyan-300"/> {ev.location}</p>}
+                    <div className="space-y-1.5 text-[9px] text-white/60 font-bold uppercase">
+                      {ev.date && <p className="flex items-center gap-2"><Calendar size={12} className="text-purple-400"/> {ev.date}</p>}
+                      {ev.location && <p className="flex items-center gap-2"><MapPin size={12} className="text-purple-400"/> {ev.location}</p>}
                     </div>
 
-                    <div className="pt-4 border-t border-white/15 flex items-center justify-between gap-3">
+                    <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3">
                       <button 
                         onClick={(e) => { e.stopPropagation(); setSelectedEventIndex(index); setShowLivePanel(true); }} 
-                        className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.1] backdrop-blur-xl hover:bg-purple-500/30 border border-white/20 text-[8px] font-black tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md text-white"
+                        className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.04] backdrop-blur-md hover:bg-white/[0.08] border border-white/10 text-[8px] font-black tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer text-white"
                       >
-                        <QrCode size={13} className="text-cyan-300"/> LIVE CONTROL
+                        <QrCode size={13} className="text-purple-400"/> LIVE CONTROL
                       </button>
                       <button 
                         onClick={(e) => confirmDelete(ev.id, e)} 
-                        className="p-2.5 bg-white/[0.08] backdrop-blur-xl hover:bg-red-500/30 hover:text-red-200 border border-white/20 rounded-xl transition-all text-white/70 cursor-pointer shadow-md"
+                        className="p-2.5 bg-white/[0.04] backdrop-blur-md hover:bg-red-500/20 hover:text-red-300 border border-white/10 rounded-xl transition-all text-white/60 cursor-pointer"
                       >
                         <Trash2 size={14}/>
                       </button>
@@ -489,65 +474,65 @@ export default function ClientProfile() {
 
       </main>
 
-      {/* MODAL EDITAR PERFIL - LUMINOSO */}
+      {/* MODAL EDITAR PERFIL */}
       <AnimatePresence>
         {isEditingProfile && (
-          <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xl z-[250] flex items-center justify-center p-4 uppercase">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[250] flex items-center justify-center p-4 uppercase">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white/[0.12] backdrop-blur-3xl w-full max-w-lg p-6 md:p-8 rounded-[2.5rem] border border-white/25 relative shadow-[0_16px_48px_0_rgba(0,0,0,0.3)] space-y-6"
+              className="bg-[#0b0c10]/95 backdrop-blur-2xl w-full max-w-lg p-6 md:p-8 rounded-2xl border border-white/15 relative shadow-2xl space-y-6"
             >
-              <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
+              <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
               
-              <h3 className="text-[11px] font-['Poppins'] text-white tracking-[0.3em] font-black border-b border-white/15 pb-4">Editar Perfil</h3>
+              <h3 className="text-[11px] font-['Poppins'] text-white tracking-[0.3em] font-black border-b border-white/10 pb-4">Editar Perfil</h3>
 
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[8px] text-purple-200 tracking-widest font-black">Nombre / Organizador</label>
+                  <label className="text-[8px] text-white/60 tracking-widest font-black">Nombre / Organizador</label>
                   <input 
                     type="text" 
                     value={editForm.name} 
                     onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                    className="w-full bg-white/[0.08] backdrop-blur-xl border border-white/20 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-300 transition-colors shadow-inner"
+                    className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[8px] text-purple-200 tracking-widest font-black">Provincia</label>
+                  <label className="text-[8px] text-white/60 tracking-widest font-black">Provincia</label>
                   <select 
                     value={editForm.province} 
                     onChange={handleProvinceChange}
-                    className="w-full bg-[#181a2e] backdrop-blur-xl border border-white/20 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-300 transition-colors cursor-pointer shadow-inner"
+                    className="w-full bg-[#121318] border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer"
                   >
                     {ARGENTINE_PROVINCES.map((prov) => (
-                      <option key={prov.name} value={prov.name} className="bg-[#14172b] text-white">{prov.name}</option>
+                      <option key={prov.name} value={prov.name} className="bg-[#121318] text-white">{prov.name}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[8px] text-purple-200 tracking-widest font-black">Localidad / Zona</label>
+                  <label className="text-[8px] text-white/60 tracking-widest font-black">Localidad / Zona</label>
                   <select 
                     value={editForm.locality} 
                     onChange={(e) => setEditForm({ ...editForm, locality: e.target.value })}
-                    className="w-full bg-[#181a2e] backdrop-blur-xl border border-white/20 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-300 transition-colors cursor-pointer shadow-inner"
+                    className="w-full bg-[#121318] border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer"
                   >
                     {selectedProvinceObj.localities.map((loc) => (
-                      <option key={loc} value={loc} className="bg-[#14172b] text-white">{loc}</option>
+                      <option key={loc} value={loc} className="bg-[#121318] text-white">{loc}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[8px] text-purple-200 tracking-widest font-black">Subir Foto de Perfil</label>
+                  <label className="text-[8px] text-white/60 tracking-widest font-black">Subir Foto de Perfil</label>
                   <div className="flex items-center gap-4">
-                    <label className="flex-1 flex items-center justify-center gap-2 bg-white/[0.08] backdrop-blur-xl border border-dashed border-white/30 hover:border-purple-300 rounded-xl px-4 py-3 text-[9px] text-purple-100 cursor-pointer transition-colors shadow-inner">
-                      <Upload size={14} className="text-cyan-300" />
+                    <label className="flex-1 flex items-center justify-center gap-2 bg-white/[0.04] border border-dashed border-white/20 hover:border-purple-400 rounded-xl px-4 py-3 text-[9px] text-white/70 cursor-pointer transition-colors">
+                      <Upload size={14} className="text-purple-400" />
                       <span>{editForm.photoURL ? "Cambiar imagen..." : "Seleccionar archivo..."}</span>
                       <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                     </label>
                     {editForm.photoURL && (
-                      <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/20 flex-shrink-0 bg-black/20 shadow-inner">
+                      <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/15 flex-shrink-0 bg-black/40">
                         <img src={editForm.photoURL} alt="Preview" className="w-full h-full object-cover" />
                       </div>
                     )}
@@ -558,13 +543,13 @@ export default function ClientProfile() {
                   <button 
                     type="button" 
                     onClick={() => setIsEditingProfile(false)} 
-                    className="px-5 py-3 bg-white/[0.08] backdrop-blur-xl border border-white/20 rounded-xl text-[9px] font-black tracking-widest hover:bg-white/20 transition-all cursor-pointer shadow-md text-white"
+                    className="px-5 py-3 bg-white/[0.04] border border-white/10 rounded-xl text-[9px] font-black tracking-widest hover:bg-white/[0.08] transition-all cursor-pointer text-white"
                   >
                     Cancelar
                   </button>
                   <button 
                     type="submit" 
-                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 border border-purple-300/40 text-white rounded-xl text-[9px] font-black tracking-widest hover:opacity-90 transition-all cursor-pointer flex items-center gap-2 shadow-lg"
+                    className="px-6 py-3 bg-purple-600 border border-purple-400/30 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-purple-500 transition-all cursor-pointer flex items-center gap-2 shadow-lg"
                   >
                     <Save size={14} /> Guardar Cambios
                   </button>
@@ -578,7 +563,7 @@ export default function ClientProfile() {
       {/* MODAL CREAR EVENTO */}
       <AnimatePresence>
         {isCreatingEvent && (
-          <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xl z-[250] flex items-center justify-center p-4 uppercase">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[250] flex items-center justify-center p-4 uppercase">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
               <EventOrganizer onClose={() => setIsCreatingEvent(false)} />
             </motion.div>
@@ -589,11 +574,11 @@ export default function ClientProfile() {
       {/* LIVE CONTROL PANEL EN GLASS */}
       <AnimatePresence>
         {showLivePanel && (
-          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-950/60 backdrop-blur-xl p-4 md:p-8 overflow-y-auto">
+          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 md:p-8 overflow-y-auto">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white/[0.12] backdrop-blur-3xl w-full max-w-4xl p-6 md:p-8 rounded-[2.5rem] border border-white/25 relative shadow-[0_16px_48px_0_rgba(0,0,0,0.3)] space-y-6 uppercase"
+              className="bg-[#0b0c10]/95 backdrop-blur-2xl w-full max-w-4xl p-6 md:p-8 rounded-2xl border border-white/15 relative shadow-2xl space-y-6 uppercase"
             >
-              <button onClick={() => setShowLivePanel(false)} className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
+              <button onClick={() => setShowLivePanel(false)} className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
 
               <div className="max-h-[80vh] overflow-y-auto pr-2">
                 <LiveControlPanel 
@@ -622,10 +607,10 @@ export default function ClientProfile() {
       {/* PREVIEW DE IMAGEN */}
       <AnimatePresence>
         {previewImage && (
-          <div className="fixed inset-0 z-[400] flex items-center justify-center bg-slate-950/70 backdrop-blur-2xl p-4" onClick={() => setPreviewImage(null)}>
+          <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/80 backdrop-blur-lg p-4" onClick={() => setPreviewImage(null)}>
             <div className="relative max-w-3xl max-h-[90vh]">
-              <img src={previewImage} alt="Preview" className="max-w-full max-h-[85vh] object-contain rounded-2xl border border-white/30 shadow-2xl" />
-              <button onClick={() => setPreviewImage(null)} className="absolute -top-4 -right-4 p-2 bg-slate-900/90 backdrop-blur-xl text-white rounded-full border border-white/30 shadow-lg"><X size={18}/></button>
+              <img src={previewImage} alt="Preview" className="max-w-full max-h-[85vh] object-contain rounded-xl border border-white/20 shadow-2xl" />
+              <button onClick={() => setPreviewImage(null)} className="absolute -top-4 -right-4 p-2 bg-black/90 text-white rounded-full border border-white/20 shadow-lg"><X size={18}/></button>
             </div>
           </div>
         )}
