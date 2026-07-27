@@ -19,7 +19,6 @@ export default function Home() {
   const [location, setLocation] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [email, setEmail] = useState('');
-  const [currentVideo, setCurrentVideo] = useState(0);
 
   // Estados desplegables custom
   const [isCatOpen, setIsCatOpen] = useState(false);
@@ -31,21 +30,7 @@ export default function Home() {
   const catRef = useRef(null);
   const locRef = useRef(null);
 
-  // Orden exacto de los videos solicitado
-  const cloudinaryVideos = [
-    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784946617/Video_C1_4_woqohu.mp4",
-    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784946596/Copia_de_Video_C1_r2ysay.mp4",
-    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784958578/Copia_de_Copia_de_Copia_de_Video_C1_tj3kdn.mp4",
-    "https://res.cloudinary.com/dsyfitywd/video/upload/v1784953979/Copia_de_Copia_de_Video_C1_4_pyxhsz.mp4"
-  ];
-
-  useEffect(() => {
-    const videoInterval = setInterval(() => {
-      setCurrentVideo((prev) => (prev + 1) % cloudinaryVideos.length);
-    }, 5000);
-    return () => clearInterval(videoInterval);
-  }, [cloudinaryVideos.length]);
-
+  const singleBannerVideo = "https://res.cloudinary.com/dsyfitywd/video/upload/v1785118161/Copia_de_Video_C1_Banner_para_Twitch_1200_x_280_px_4_x7weiy.mp4";
   const categories = [
     { name: 'Fotografía', count: '+ profesionales', icon: Camera, gradient: 'from-cyan-400 to-blue-500' },
     { name: 'Audiovisual', count: '+ profesionales', icon: Video, gradient: 'from-blue-400 to-indigo-600' },
@@ -142,51 +127,52 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] font-['Open_Sans'] flex flex-col relative overflow-hidden antialiased text-white">
+    <div className="min-h-screen bg-[#0a0a0a] font-['Open_Sans'] flex flex-col relative overflow-hidden antialiased text-white justify-between">
       {/* LUCES DINÁMICAS DE FONDO */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div animate={{ x: [-50, 50, -50], y: [-30, 30, -30], scale: [1, 1.2, 1] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="absolute top-0 left-0 w-[250px] md:w-[600px] h-[250px] md:h-[600px] bg-purple-600/10 rounded-full blur-[100px] md:blur-[150px]" />
         <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-0 w-[200px] md:w-[500px] h-[200px] md:h-[500px] bg-indigo-600/10 rounded-full blur-[90px] md:blur-[130px]" />
       </div>
 
-      <header className="px-4 py-3 md:p-8 flex justify-end items-center max-w-7xl mx-auto w-full relative z-[60]">
+      <header className="px-4 py-3 md:px-6 md:py-4 flex justify-end items-center max-w-4xl mx-auto w-full relative z-[60]">
         <div className="flex items-center gap-6">
           <button onClick={handleAccount} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-white transition-all flex items-center gap-2 font-bold"><User size={12}/> MI CUENTA</button>
           <button onClick={handleLogout} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-red-400 transition-all flex items-center gap-2 font-bold"><LogOut size={12}/> SALIR</button>
         </div>
       </header>
 
-      <main className="flex-grow flex flex-col justify-center relative z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4 md:py-8 flex flex-col items-center w-full">
+      <main className="flex-grow flex flex-col justify-center relative z-10 py-6 md:py-12">
+        {/* CONTENEDOR MAESTRO CON AIRE HORIZONTAL Y VERTICAL AMPLIADO */}
+        <div className="max-w-4xl mx-auto px-6 md:px-10 flex flex-col items-center w-full gap-8 md:gap-10">
           
-          {/* HEADER PRINCIPAL CON LOGO PROTAGONISTA AMPLIADO Y DESCRIPTOR */}
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-4 md:mb-6 text-center">
-            <h1 className="text-5xl md:text-8xl text-white mb-2 md:mb-3 uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">
+          {/* HEADER PRINCIPAL: CLASSCODE GIGANTE EN MÓVIL, MODERADO EN WEB */}
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+            <h1 className="text-5xl md:text-5xl text-white mb-2.5 uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">
               CLASSCODE
             </h1>
-            <p className="text-purple-400 text-[9px] md:text-xs font-black tracking-[0.4em] uppercase max-w-lg mx-auto">
+            <p className="text-purple-400 text-[9px] md:text-[10px] font-black tracking-[0.4em] uppercase max-w-lg mx-auto">
               TALENTO CREATIVO ARGENTINO
             </p>
           </motion.div>
 
-          {/* BUSCADOR */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="w-full bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-3 flex flex-col md:flex-row items-center gap-2 shadow-[0_0_40px_rgba(0,0,0,0.3)] relative z-50 mb-6 md:mb-8">
+          {/* BUSCADOR COMPACTO */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="w-full bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[1.8rem] p-2 flex flex-col md:flex-row items-center gap-2 shadow-[0_0_30px_rgba(0,0,0,0.3)] relative z-50">
             
-            <div className="flex-1 flex items-center px-4 md:px-6 py-3 md:py-4 w-full border-b md:border-b-0 md:border-r border-white/10">
-              <Search className="text-purple-400 w-5 h-5 mr-4 shrink-0" />
-              <input type="text" placeholder="BUSCAR PROFESIONALES..." className="bg-transparent border-none outline-none text-white w-full font-normal uppercase text-[11px] placeholder:text-gray-500 tracking-widest" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <div className="flex-1 flex items-center px-3 md:px-4 py-2.5 w-full border-b md:border-b-0 md:border-r border-white/10">
+              <Search className="text-purple-400 w-4 h-4 mr-3 shrink-0" />
+              <input type="text" placeholder="BUSCAR PROFESIONALES..." className="bg-transparent border-none outline-none text-white w-full font-normal uppercase text-[10px] placeholder:text-gray-500 tracking-widest" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
 
             <div ref={catRef} className="flex-1 w-full border-b md:border-b-0 md:border-r border-white/10 relative">
               <button 
                 type="button"
                 onClick={() => { setIsCatOpen(!isCatOpen); setIsLocOpen(false); }}
-                className="w-full flex items-center justify-between px-4 md:px-6 py-3 md:py-4 text-left uppercase text-[11px] tracking-widest text-gray-300 hover:text-white transition-all"
+                className="w-full flex items-center justify-between px-3 md:px-4 py-2.5 text-left uppercase text-[10px] tracking-widest text-gray-300 hover:text-white transition-all"
               >
                 <span className={selectedCategory ? "text-purple-300 font-bold" : "text-gray-400"}>
                   {selectedCategory || "CATEGORÍAS"}
                 </span>
-                <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-300 ${isCatOpen ? 'rotate-180 text-purple-400' : ''}`} />
+                <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-300 ${isCatOpen ? 'rotate-180 text-purple-400' : ''}`} />
               </button>
 
               <AnimatePresence>
@@ -195,11 +181,11 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 right-0 mt-2 bg-[#0d0d0d] border border-white/20 rounded-2xl shadow-2xl max-h-72 overflow-y-auto z-[100] p-2 space-y-1"
+                    className="absolute top-full left-0 right-0 mt-2 bg-[#0d0d0d] border border-white/20 rounded-2xl shadow-2xl max-h-64 overflow-y-auto z-[100] p-2 space-y-1"
                   >
                     <div 
                       onClick={() => { setSelectedCategory(''); setIsCatOpen(false); }}
-                      className="px-4 py-3 text-[10px] uppercase tracking-widest text-gray-400 hover:bg-white/5 hover:text-white rounded-xl cursor-pointer transition-all flex items-center justify-between"
+                      className="px-3 py-2.5 text-[10px] uppercase tracking-widest text-gray-400 hover:bg-white/5 hover:text-white rounded-xl cursor-pointer transition-all flex items-center justify-between"
                     >
                       TODAS LAS CATEGORÍAS
                       {!selectedCategory && <Check size={14} className="text-purple-400" />}
@@ -210,11 +196,11 @@ export default function Home() {
                         <div 
                           key={c.name}
                           onClick={() => { setSelectedCategory(c.name); setIsCatOpen(false); }}
-                          className={`px-3 py-2.5 text-[10px] uppercase tracking-widest rounded-xl cursor-pointer transition-all flex items-center justify-between gap-3 ${selectedCategory === c.name ? 'bg-purple-600/20 text-white font-bold border border-purple-500/30' : 'text-gray-300 hover:bg-white/5'}`}
+                          className={`px-3 py-2 text-[10px] uppercase tracking-widest rounded-xl cursor-pointer transition-all flex items-center justify-between gap-3 ${selectedCategory === c.name ? 'bg-purple-600/20 text-white font-bold border border-purple-500/30' : 'text-gray-300 hover:bg-white/5'}`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`lg:hidden w-7 h-7 rounded-lg bg-gradient-to-br ${c.gradient} flex items-center justify-center shrink-0 shadow-sm`}>
-                              <IconComponent className="text-white w-3.5 h-3.5" />
+                            <div className={`lg:hidden w-6 h-6 rounded-lg bg-gradient-to-br ${c.gradient} flex items-center justify-center shrink-0 shadow-sm`}>
+                              <IconComponent className="text-white w-3 h-3" />
                             </div>
                             <span>{c.name}</span>
                           </div>
@@ -231,15 +217,15 @@ export default function Home() {
               <button 
                 type="button"
                 onClick={() => { setIsLocOpen(!isLocOpen); setIsCatOpen(false); }}
-                className="w-full flex items-center justify-between px-4 md:px-6 py-3 md:py-4 text-left uppercase text-[11px] tracking-widest text-gray-300 hover:text-white transition-all"
+                className="w-full flex items-center justify-between px-3 md:px-4 py-2.5 text-left uppercase text-[10px] tracking-widest text-gray-300 hover:text-white transition-all"
               >
-                <div className="flex items-center gap-3">
-                  <MapPin className="text-purple-400 w-5 h-5 shrink-0" />
+                <div className="flex items-center gap-2.5">
+                  <MapPin className="text-purple-400 w-4 h-4 shrink-0" />
                   <span className={location ? "text-purple-300 font-bold" : "text-gray-400"}>
                     {location || "UBICACIÓN"}
                   </span>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-300 ${isLocOpen ? 'rotate-180 text-purple-400' : ''}`} />
+                <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-300 ${isLocOpen ? 'rotate-180 text-purple-400' : ''}`} />
               </button>
 
               <AnimatePresence>
@@ -248,20 +234,20 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 right-0 mt-2 bg-[#0d0d0d] border border-white/20 rounded-2xl shadow-2xl max-h-60 overflow-y-auto z-[100] p-2"
+                    className="absolute top-full left-0 right-0 mt-2 bg-[#0d0d0d] border border-white/20 rounded-2xl shadow-2xl max-h-56 overflow-y-auto z-[100] p-2"
                   >
                     <div 
                       onClick={() => { setLocation(''); setIsLocOpen(false); }}
-                      className="px-4 py-3 text-[10px] uppercase tracking-widest text-gray-400 hover:bg-white/5 hover:text-white rounded-xl cursor-pointer transition-all flex items-center justify-between"
+                      className="px-3 py-2.5 text-[10px] uppercase tracking-widest text-gray-400 hover:bg-white/5 hover:text-white rounded-xl cursor-pointer transition-all flex items-center justify-between"
                     >
                       TODAS LAS UBICACIONES
                       {!location && <Check size={14} className="text-purple-400" />}
                     </div>
-                    {locationsList.map((prov) => (
+                    {locationsList.locList || locationsList.map((prov) => (
                       <div 
                         key={prov}
                         onClick={() => { setLocation(prov); setIsLocOpen(false); }}
-                        className={`px-4 py-2.5 text-[10px] uppercase tracking-widest rounded-xl cursor-pointer transition-all flex items-center justify-between ${location === prov ? 'bg-purple-600/20 text-white font-bold border border-purple-500/30' : 'text-gray-300 hover:bg-white/5'}`}
+                        className={`px-3 py-2 text-[10px] uppercase tracking-widest rounded-xl cursor-pointer transition-all flex items-center justify-between ${location === prov ? 'bg-purple-600/20 text-white font-bold border border-purple-500/30' : 'text-gray-300 hover:bg-white/5'}`}
                       >
                         {prov}
                         {location === prov && <Check size={14} className="text-purple-400" />}
@@ -272,104 +258,93 @@ export default function Home() {
               </AnimatePresence>
             </div>
 
-            <button type="button" onClick={handleSearch} className="w-full md:w-auto px-10 py-4 rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] hover:bg-gray-200 transition-all shadow-xl mt-1 md:mt-0">BUSCAR</button>
+            <button type="button" onClick={handleSearch} className="w-full md:w-auto px-8 py-3 rounded-xl bg-white text-black font-black uppercase tracking-[0.2em] text-[9px] hover:bg-gray-200 transition-all shadow-xl">BUSCAR</button>
           </motion.div>
 
-          {/* CONTENEDOR CENTRAL: VIDEO + BOTONES AL COSTADO (EN ESCRITORIO) / ABAJO (EN MÓVIL) */}
-          <div className="w-full max-w-3xl flex flex-col md:flex-row items-center justify-center gap-4 mb-4">
+          {/* CONTENEDOR CENTRAL: BANNER ULTRA ESTRECHO/FLAQUITO RESPETANDO LA PROPORCIÓN REAL 1200x280 (aprox aspect-[4.28/1]) + BOTONES */}
+          <div className="w-full flex flex-col md:flex-row items-center justify-center gap-3">
             
-            {/* 3 BOTONES: VERTICALES A LA IZQUIERDA EN ESCRITORIO, HORIZONTALES ABAJO EN MÓVIL */}
-            <div className="flex flex-row md:flex-col items-center justify-center gap-4 order-2 md:order-1">
+            <div className="flex flex-row md:flex-col items-center justify-center gap-3 order-2 md:order-1">
               <button 
                 onClick={() => navigate('/academy')}
                 title="Academy"
-                className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-purple-500/50 flex items-center justify-center text-purple-400 transition-all shadow-lg group"
+                className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-purple-500/50 flex items-center justify-center text-purple-400 transition-all shadow-lg group"
               >
-                <GraduationCap size={20} className="group-hover:scale-110 transition-transform" />
+                <GraduationCap size={18} className="group-hover:scale-110 transition-transform" />
               </button>
 
               <button 
                 onClick={() => navigate('/results')}
                 title="Live Gallery"
-                className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-blue-500/50 flex items-center justify-center text-blue-400 transition-all shadow-lg group"
+                className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-blue-500/50 flex items-center justify-center text-blue-400 transition-all shadow-lg group"
               >
-                <PlayCircle size={20} className="group-hover:scale-110 transition-transform" />
+                <PlayCircle size={18} className="group-hover:scale-110 transition-transform" />
               </button>
 
               <button 
                 onClick={handleAccount}
                 title="Organizador"
-                className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-indigo-500/50 flex items-center justify-center text-indigo-400 transition-all shadow-lg group"
+                className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-indigo-500/50 flex items-center justify-center text-indigo-400 transition-all shadow-lg group"
               >
-                <Briefcase size={20} className="group-hover:scale-110 transition-transform" />
+                <Briefcase size={18} className="group-hover:scale-110 transition-transform" />
               </button>
             </div>
 
-            {/* DISPLAY FLOW AUTOMÁTICO */}
-            <div className="w-full max-w-xl aspect-video rounded-3xl overflow-hidden relative bg-white/5 border border-white/10 shadow-2xl order-1 md:order-2">
-              <AnimatePresence mode="wait">
-                <motion.video 
-                  key={currentVideo}
-                  src={cloudinaryVideos[currentVideo]}
-                  autoPlay 
-                  muted 
-                  loop 
-                  playsInline 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.8 }}
-                  className="w-full h-full object-cover"
-                />
-              </AnimatePresence>
+            <div className="w-full aspect-[4.28/1] rounded-2xl overflow-hidden relative bg-transparent shadow-2xl order-1 md:order-2 flex items-center justify-center border border-white/10">
+              <video 
+                src={singleBannerVideo}
+                autoPlay 
+                muted 
+                loop 
+                playsInline 
+                className="w-full h-full object-cover absolute inset-0 rounded-2xl"
+              />
             </div>
 
           </div>
 
-        </div>
-
-        {/* GRILLA DE CATEGORÍAS (DESKTOP) */}
-        <div className="hidden lg:block max-w-6xl mx-auto px-6 pb-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          {/* GRILLA DE CATEGORÍAS: OCULTA EN MÓVIL (hidden md:grid), VISIBLE EN TABLET/WEB */}
+          <div className="w-full hidden md:grid grid-cols-2 md:grid-cols-4 gap-3">
             {categories.map((cat) => (
-              <motion.div key={cat.name} onClick={() => handleCategoryClick(cat.name)} whileHover={{ scale: 1.03, backgroundColor: 'rgba(255,255,255,0.08)' }} className="bg-white/5 backdrop-blur-md p-5 rounded-[1.5rem] flex items-center gap-4 border border-white/5 hover:border-white/20 transition-all cursor-pointer group shadow-lg">
-                <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center shadow-[0_0_15px_rgba(0,0,0,0.4)]`}><cat.icon className="text-white w-4 h-4" /></div>
-                <div>
-                  <h3 className="text-white font-bold text-[10px] uppercase tracking-[0.1em] leading-tight">{cat.name}</h3>
-                  <p className="text-[7px] text-gray-500 uppercase tracking-widest mt-1 font-bold">{cat.count}</p>
+              <motion.div key={cat.name} onClick={() => handleCategoryClick(cat.name)} whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.08)' }} className="bg-white/5 backdrop-blur-md p-3 rounded-2xl flex items-center gap-3 border border-white/5 hover:border-white/20 transition-all cursor-pointer group shadow-lg">
+                <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center shadow-[0_0_10px_rgba(0,0,0,0.4)] shrink-0`}><cat.icon className="text-white w-3.5 h-3.5" /></div>
+                <div className="min-w-0">
+                  <h3 className="text-white font-bold text-[9px] uppercase tracking-[0.08em] leading-tight truncate">{cat.name}</h3>
+                  <p className="text-[6.5px] text-gray-500 uppercase tracking-widest mt-0.5 font-bold">{cat.count}</p>
                 </div>
               </motion.div>
             ))}
           </div>
+
         </div>
 
       </main>
 
       {/* FOOTER */}
-      <footer className="relative bg-[#0a0a0a] border-t border-white/5 pt-8 pb-6 px-6 overflow-hidden uppercase font-normal">
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6 text-center md:text-left">
+      <footer className="relative bg-[#0a0a0a] border-t border-white/5 py-6 px-6 overflow-hidden uppercase font-normal">
+        <div className="max-w-4xl mx-auto relative z-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4 text-center md:text-left">
             <div className="hidden md:block space-y-1">
-              <h2 className="text-[20px] font-['Poppins'] tracking-[0.05em] text-white leading-none font-normal">CLASSCODE<sup className="text-[9px] ml-1 font-bold">®</sup></h2>
-              <p className="text-purple-500 text-[8px] font-black tracking-[0.4em] leading-none">TALENTO ARGENTINO</p>
+              <h2 className="text-[18px] font-['Poppins'] tracking-[0.05em] text-white leading-none font-normal">CLASSCODE<sup className="text-[8px] ml-1 font-bold">®</sup></h2>
+              <p className="text-purple-500 text-[7px] font-black tracking-[0.4em] leading-none">TALENTO ARGENTINO</p>
             </div>
 
-            <div className="flex gap-4">
-              <a href="https://www.instagram.com/classcodevisual/" target="_blank" rel="noreferrer" className="p-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-gray-400 hover:text-white transition-all"><Instagram size={16} /></a>
-              <a href="#" className="p-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-gray-400 hover:text-white transition-all"><Linkedin size={16} /></a>
-              <a href="#" className="p-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-gray-400 hover:text-white transition-all"><MessageCircle size={16} /></a>
+            <div className="flex gap-3">
+              <a href="https://www.instagram.com/classcodevisual/" target="_blank" rel="noreferrer" className="p-2 bg-white/[0.03] border border-white/10 rounded-xl text-gray-400 hover:text-white transition-all"><Instagram size={14} /></a>
+              <a href="#" className="p-2 bg-white/[0.03] border border-white/10 rounded-xl text-gray-400 hover:text-white transition-all"><Linkedin size={14} /></a>
+              <a href="#" className="p-2 bg-white/[0.03] border border-white/10 rounded-xl text-gray-400 hover:text-white transition-all"><MessageCircle size={14} /></a>
             </div>
 
-            <nav className="flex items-center gap-6 text-[10px] font-bold tracking-widest text-gray-500">
+            <nav className="flex items-center gap-5 text-[9px] font-bold tracking-widest text-gray-500">
               <button onClick={() => navigate('/results')} className="hover:text-purple-400 transition-all uppercase">MARKETPLACE</button>
               <button onClick={() => navigate('/academy')} className="hover:text-purple-400 transition-all uppercase">ACADEMY</button>
               <button onClick={() => navigate('/terms')} className="hover:text-purple-400 transition-all uppercase">TÉRMINOS</button>
             </nav>
           </div>
 
-          <div className="pt-4 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-3 leading-none uppercase font-normal text-center md:text-left">
-            <div className="flex items-center gap-3 text-gray-700 leading-none"><Globe size={13} className="text-purple-500/50" /><p className="text-[9px] font-black tracking-[0.4em] leading-none">© 2026 CLASSCODE • ARGENTINA</p></div>
-            <div className="flex items-center gap-3 text-gray-800 leading-none"><ShieldCheck size={13} /><span className="text-[8px] font-bold tracking-[0.2em] leading-none uppercase">Encrypted Infrastructure</span></div>
+          <div className="pt-3 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-2 leading-none uppercase font-normal text-center md:text-left">
+            <div className="flex items-center gap-2 text-gray-700 leading-none"><Globe size={12} className="text-purple-500/50" /><p className="text-[8px] font-black tracking-[0.4em] leading-none">© 2026 CLASSCODE • ARGENTINA</p></div>
+            <div className="flex items-center gap-2 text-gray-800 leading-none"><ShieldCheck size={12} /><span className="text-[7.5px] font-bold tracking-[0.2em] leading-none uppercase">Encrypted Infrastructure</span></div>
           </div>
         </div>
       </footer>
