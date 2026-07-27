@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db, auth } from './firebase'; 
 import { doc, setDoc, collection, query, where, onSnapshot, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -16,7 +16,6 @@ export default function Dashboard() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState([]);
-  const scrollRef = useRef();
   
   const [profile, setProfile] = useState({
     name: '', job: '', specialty: '', location: '', bio: '', videoLink: '', 
@@ -198,7 +197,7 @@ export default function Dashboard() {
         </header>
         
         <div className="mb-8 text-left">
-          <button onClick={handleSwitchToClient} className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-3.5 rounded-2xl group hover:bg-white/10 transition-all">
+          <button onClick={handleSwitchToClient} className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-3.5 rounded-2xl group hover:bg-white/15 transition-all">
             <div className="flex items-center gap-3 text-left">
               <div className="p-2 bg-white/10 rounded-xl text-white"><RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" /></div>
               <div>
@@ -238,26 +237,14 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* MAIN CONTAINER (ML-72 en desktop para compensar el sidebar) */}
-      <div className="flex-1 md:ml-72 flex flex-col w-full">
+      {/* MAIN CONTAINER CON MARGEN IZQUIERDO CONTROLADO Y BOX-BORDER */}
+      <div className="flex-1 md:ml-72 flex flex-col w-full min-w-0">
         
-        {/* TOPBAR INTERNO / NAVEGACIÓN SUPERIOR */}
-        <nav className="p-6 md:p-10 w-full sticky top-0 z-40 bg-[#070709]/90 backdrop-blur-xl border-b border-white/5 hidden md:block">
-          <div className="max-w-[1440px] mx-auto flex justify-between items-center w-full font-['Poppins']">
-            <span className="text-gray-500 text-[9px] tracking-[0.3em] font-bold">GESTIÓN DE TALENTO</span>
-            <div className="flex items-center gap-4">
-              <span className={`px-3 py-1 rounded-full border text-[8px] font-black tracking-widest ${isProfileVisible ? 'bg-white/10 border-white/20 text-white' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
-                {isProfileVisible ? 'ESTADO: PÚBLICO' : 'ESTADO: INCOMPLETO'}
-              </span>
-            </div>
-          </div>
-        </nav>
-
         {/* SECCIÓN ESTILO FACEBOOK LIMPIA (BANNER SHOWREEL + HEADER) */}
         <div className="w-full bg-[#070709] border-b border-white/5 mt-14 md:mt-0">
-          <div className="max-w-[1200px] mx-auto">
+          <div className="w-full max-w-[1200px] mx-auto">
             
-            {/* Banner / Showreel Container más angosto y finito (Exacto a ProfileP) */}
+            {/* Banner / Showreel Container controlado */}
             <div className="w-full h-[180px] md:h-[260px] bg-black relative overflow-hidden group">
               {profile.videoLink ? (
                 <video 
@@ -281,11 +268,11 @@ export default function Dashboard() {
               </label>
             </div>
 
-            {/* Perfil Header alineado */}
+            {/* Perfil Header alineado sin desbordes */}
             <div className="px-6 md:px-12 pb-8 relative -mt-14 md:-mt-20 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 z-20">
-              <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left">
+              <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left w-full md:w-auto">
                 
-                {/* Foto de Perfil con hover para cambiar */}
+                {/* Foto de Perfil */}
                 <div className="relative w-28 h-28 md:w-36 md:h-36 rounded-full border-4 border-[#070709] overflow-hidden bg-black shadow-2xl flex-shrink-0 group">
                   {profile.photo1 ? (
                     <img src={profile.photo1} className="w-full h-full object-cover" alt="" />
@@ -298,27 +285,27 @@ export default function Dashboard() {
                   </label>
                 </div>
 
-                <div className="space-y-2 pb-1">
+                <div className="space-y-2 pb-1 min-w-0 flex-1">
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                    <h1 className="text-2xl md:text-3xl font-['Poppins'] font-normal tracking-wide text-white">{profile.name || 'NUEVO TALENTO'}</h1>
-                    <span className="bg-white/10 text-white border border-white/20 px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1.5">
+                    <h1 className="text-xl md:text-2xl font-['Poppins'] font-normal tracking-wide text-white truncate max-w-full">{profile.name || 'NUEVO TALENTO'}</h1>
+                    <span className="bg-white/10 text-white border border-white/20 px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1.5 flex-shrink-0">
                       <CheckCircle2 size={12}/> TALENTO
                     </span>
                   </div>
-                  <p className="text-gray-400 text-[10px] md:text-xs tracking-[0.3em] font-bold">{profile.job || 'ASIGNAR RUBRO'}</p>
-                  <div className="flex items-center justify-center md:justify-start gap-4 text-[10px] text-gray-500 font-bold tracking-widest pt-1">
+                  <p className="text-gray-400 text-[10px] md:text-xs tracking-[0.3em] font-bold truncate">{profile.job || 'ASIGNAR RUBRO'}</p>
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] text-gray-500 font-bold tracking-widest pt-1">
                     {profile.location && <span className="flex items-center gap-1.5"><MapPin size={14} className="text-white"/> {profile.location}</span>}
                     <span className="flex items-center gap-1.5"><Award size={14} className="text-white"/> {calculateTotalScore(profile)} PTS</span>
                   </div>
                 </div>
               </div>
 
-              {/* Botones de Acción principales */}
-              <div className="flex items-center gap-3 w-full md:w-auto justify-center pb-2">
-                <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-4 bg-white/[0.03] hover:bg-white/10 rounded-2xl border border-white/10 transition-all text-white" title="Ver Perfil Público">
+              {/* Botones de Acción */}
+              <div className="flex items-center gap-3 w-full md:w-auto justify-center pb-2 flex-shrink-0">
+                <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-4 bg-white/[0.03] hover:bg-white/15 rounded-2xl border border-white/10 transition-all text-white" title="Ver Perfil Público">
                   <Eye size={18} />
                 </button>
-                <button onClick={() => setIsEditingProfile(true)} className="flex-1 md:flex-initial px-8 py-4 rounded-2xl bg-white text-black font-black text-[10px] tracking-[0.3em] hover:bg-gray-200 transition-all shadow-xl flex items-center justify-center gap-2">
+                <button onClick={() => setIsEditingProfile(true)} className="px-8 py-4 rounded-2xl bg-white text-black font-black text-[10px] tracking-[0.3em] hover:bg-gray-200 transition-all shadow-xl flex items-center justify-center gap-2">
                   <Edit3 size={14}/> EDITAR PERFIL
                 </button>
               </div>
@@ -326,48 +313,48 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* CONTENIDO PRINCIPAL (GRID DE DOS COLUMNAS IGUAL A PROFILE P) */}
-        <main className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 grid lg:grid-cols-12 gap-10 relative z-10 w-full">
+        {/* CONTENIDO PRINCIPAL (GRID DE DOS COLUMNAS RESPONSIVO Y SEGURO) */}
+        <main className="w-full max-w-[1200px] mx-auto px-6 md:px-12 py-12 grid lg:grid-cols-12 gap-10 relative z-10 box-border">
           
           {/* COLUMNA IZQUIERDA: CERTIFICACIONES Y MENSAJES */}
-          <div className="lg:col-span-4 space-y-8">
+          <div className="lg:col-span-4 space-y-8 min-w-0">
             
-            {/* ESTADO ACADÉMICO / CERTIFICACIONES */}
+            {/* ESTADO ACADÉMICO */}
             <div className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 space-y-6 shadow-xl">
               <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black border-l-2 border-white pl-4">Estatus Academy</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl">
-                  <div className="flex items-center gap-3">
-                    <Zap size={14} className={isGenericoDone ? "text-white" : "text-gray-600"} />
-                    <span className="text-[9px] font-black tracking-widest text-white">NIVELACIÓN INGRESO</span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Zap size={14} className={isGenericoDone ? "text-white flex-shrink-0" : "text-gray-600 flex-shrink-0"} />
+                    <span className="text-[9px] font-black tracking-widest text-white truncate">NIVELACIÓN INGRESO</span>
                   </div>
                   {!isGenericoDone ? (
-                    <button onClick={() => navigate('/academy-test/Generico')} className="text-[8px] font-black text-purple-400 hover:underline">RENDIR</button>
+                    <button onClick={() => navigate('/academy-test/Generico')} className="text-[8px] font-black text-purple-400 hover:underline flex-shrink-0 ml-2">RENDIR</button>
                   ) : (
-                    <span className="text-[8px] font-black text-green-400">APROBADO</span>
+                    <span className="text-[8px] font-black text-green-400 flex-shrink-0 ml-2">APROBADO</span>
                   )}
                 </div>
 
                 {profile.job && (
                   <div className="flex items-center justify-between bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl">
-                    <div className="flex items-center gap-3">
-                      <Award size={14} className={isProfessionalTestDone ? "text-white" : "text-gray-600"} />
-                      <span className="text-[9px] font-black tracking-widest text-white">TEST PROFESIONAL</span>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Award size={14} className={isProfessionalTestDone ? "text-white flex-shrink-0" : "text-gray-600 flex-shrink-0"} />
+                      <span className="text-[9px] font-black tracking-widest text-white truncate">TEST PROFESIONAL</span>
                     </div>
                     {!isProfessionalTestDone ? (
-                      <button onClick={() => navigate(`/academy-test/${encodeURIComponent(profile.job)}`)} className="text-[8px] font-black text-purple-400 hover:underline">RENDIR</button>
+                      <button onClick={() => navigate(`/academy-test/${encodeURIComponent(profile.job)}`)} className="text-[8px] font-black text-purple-400 hover:underline flex-shrink-0 ml-2">RENDIR</button>
                     ) : (
-                      <span className="text-[8px] font-black text-green-400">APROBADO</span>
+                      <span className="text-[8px] font-black text-green-400 flex-shrink-0 ml-2">APROBADO</span>
                     )}
                   </div>
                 )}
               </div>
-              <button onClick={() => navigate('/academy')} className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[9px] font-black tracking-[0.3em] text-gray-300 transition-all flex items-center justify-center gap-2">
+              <button onClick={() => navigate('/academy')} className="w-full py-3 bg-white/5 hover:bg-white/15 border border-white/10 rounded-2xl text-[9px] font-black tracking-[0.3em] text-gray-300 transition-all flex items-center justify-center gap-2">
                 <GraduationCap size={14}/> IR A CLASSCODE ACADEMY
               </button>
             </div>
 
-            {/* BANDEJA DE MENSAJES DIRECTOS */}
+            {/* BANDEJA DE MENSAJES */}
             <div className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 space-y-6 shadow-xl">
               <div className="flex justify-between items-center border-l-2 border-white pl-4">
                 <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black flex items-center gap-2"><MessageSquare size={12}/> Mensajes</h3>
@@ -378,14 +365,14 @@ export default function Dashboard() {
                   <div className="text-center py-6 text-[8px] text-gray-600 uppercase font-black tracking-widest">No hay chats activos</div>
                 ) : messages.map(chat => (
                   <div key={chat.id} onClick={() => navigate(`/chat/${chat.id}`)} className="flex justify-between items-center p-3.5 bg-white/[0.03] border border-white/10 hover:border-white/30 rounded-2xl transition-all cursor-pointer">
-                     <div className="flex items-center gap-3">
-                        {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-8 h-8 rounded-full object-cover border border-white/10" alt="" /> : <div className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center"><User size={14}/></div>}
-                        <div>
-                           <p className="text-[9px] font-black text-white uppercase tracking-wider">{chat.clientName || "CLIENTE"}</p>
+                     <div className="flex items-center gap-3 min-w-0">
+                        {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-8 h-8 rounded-full object-cover border border-white/10 flex-shrink-0" alt="" /> : <div className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center flex-shrink-0"><User size={14}/></div>}
+                        <div className="min-w-0">
+                           <p className="text-[9px] font-black text-white uppercase tracking-wider truncate">{chat.clientName || "CLIENTE"}</p>
                            <p className="text-[7px] text-gray-400 font-bold uppercase mt-0.5">Ver chat</p>
                         </div>
                      </div>
-                     <ArrowRight size={12} className="text-gray-500" />
+                     <ArrowRight size={12} className="text-gray-500 flex-shrink-0 ml-2" />
                   </div>
                 ))}
               </div>
@@ -401,8 +388,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* COLUMNA DERECHA: PORTFOLIO DE FOTOS (10 SLOTS EDITABLES) */}
-          <div className="lg:col-span-8 space-y-12">
+          {/* COLUMNA DERECHA: PORTFOLIO DE FOTOS */}
+          <div className="lg:col-span-8 space-y-12 min-w-0">
             <section className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 md:p-8 space-y-8 shadow-xl">
               <div className="flex justify-between items-center border-l-2 border-white pl-4">
                 <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black">Portfolio — Galería de Fotos</h3>
