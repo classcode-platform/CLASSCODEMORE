@@ -140,7 +140,7 @@ export default function EventDetail() {
   return (
     <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] antialiased flex flex-col items-center uppercase selection:bg-white selection:text-black">
       
-      {/* TOPBAR LIMPIA SIN ACADEMY */}
+      {/* TOPBAR LIMPIA */}
       <nav className="w-full border-b border-white/5 bg-[#070709]/90 backdrop-blur-xl sticky top-0 z-50 px-6 py-6 flex justify-center">
         <div className="max-w-[1200px] w-full flex justify-between items-center font-['Poppins']">
           <button onClick={() => navigate('/organizer')} className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] tracking-[0.3em] font-bold transition-colors">
@@ -155,7 +155,7 @@ export default function EventDetail() {
         </div>
       </nav>
 
-      {/* PORTADA CON VISIBILIDAD OPTIMIZADA */}
+      {/* PORTADA */}
       <div className="w-full max-w-[1200px] px-6 mt-8">
         <div className="relative w-full min-h-[280px] bg-[#0c0c0e] border border-white/10 rounded-[2.5rem] overflow-hidden group shadow-2xl flex flex-col justify-end">
           {event.coverImage ? (
@@ -170,7 +170,6 @@ export default function EventDetail() {
 
           <div className="relative z-10 p-8 md:p-12 w-full flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div className="space-y-3 max-w-2xl">
-              <span className="inline-block text-[9px] font-black tracking-[0.3em] text-gray-300 bg-black/40 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">PANEL DE CONTROL</span>
               <h1 className="text-2xl md:text-4xl font-['Poppins'] font-normal text-white leading-tight">{event.title}</h1>
               <div className="flex flex-wrap gap-4 text-[10px] text-gray-300 font-bold pt-1">
                 {event.date && <span className="flex items-center gap-1.5"><Calendar size={13}/> {event.date}</span>}
@@ -185,6 +184,7 @@ export default function EventDetail() {
         </div>
       </div>
 
+      {/* PESTAÑAS DE NAVEGACIÓN */}
       <div className="w-full max-w-[1200px] px-6 mt-8">
         <div className="flex gap-4 overflow-x-auto scrollbar-hide font-['Poppins'] justify-start md:justify-center">
           <button onClick={() => setActiveTab('guests')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg ${activeTab === 'guests' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
@@ -194,7 +194,7 @@ export default function EventDetail() {
             <LayoutGrid size={14}/> MESAS ({tables.length})
           </button>
           <button onClick={() => setActiveTab('budget')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg ${activeTab === 'budget' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
-            <DollarSign size={14}/> PRESUPUESTO (${totalActual} / EST. ${totalEstimated})
+            <DollarSign size={14}/> PRESUPUESTO (REAL: ${totalActual} / EST: ${totalEstimated})
           </button>
         </div>
       </div>
@@ -281,7 +281,7 @@ export default function EventDetail() {
               </button>
             </form>
 
-            <div className="bg-[#0c0c0e] border border-white/10 rounded-[2.5rem] p-6 overflow-x-auto shadow-xl">
+            <div className="bg-[#0c0c0e] border border-white/10 rounded-[2.5rem] p-6 overflow-x-auto shadow-xl space-y-4">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-white/10 text-[9px] text-gray-400 tracking-[0.3em] font-black">
@@ -292,43 +292,60 @@ export default function EventDetail() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5 text-[10px] font-bold">
-                  {budgetItems.map(b => {
-                    const isEditing = editingBudgetId === b.id;
-                    return (
-                      <tr key={b.id}>
-                        <td className="py-4 text-white">
-                          {isEditing ? (
-                            <input value={editBudgetValues.concept} onChange={e => setEditBudgetValues({...editBudgetValues, concept: e.target.value})} className="bg-black border border-white/20 rounded-xl p-2 text-white outline-none w-full" />
-                          ) : b.concept}
-                        </td>
-                        <td className="py-4 text-gray-300">
-                          {isEditing ? (
-                            <input type="number" value={editBudgetValues.estimated} onChange={e => setEditBudgetValues({...editBudgetValues, estimated: e.target.value})} className="bg-black border border-white/20 rounded-xl p-2 text-white outline-none w-24" />
-                          ) : `$${b.estimated}`}
-                        </td>
-                        <td className="py-4 text-white">
-                          {isEditing ? (
-                            <input type="number" value={editBudgetValues.actual} onChange={e => setEditBudgetValues({...editBudgetValues, actual: e.target.value})} className="bg-black border border-white/20 rounded-xl p-2 text-white outline-none w-24" />
-                          ) : `$${b.actual}`}
-                        </td>
-                        <td className="py-4 text-right flex items-center justify-end gap-2">
-                          {isEditing ? (
-                            <>
-                              <button onClick={() => handleUpdateBudget(b.id)} className="p-2 bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl"><Check size={14}/></button>
-                              <button onClick={() => setEditingBudgetId(null)} className="p-2 bg-white/5 text-gray-400 border border-white/10 rounded-xl"><X size={14}/></button>
-                            </>
-                          ) : (
-                            <>
-                              <button onClick={() => { setEditingBudgetId(b.id); setEditBudgetValues({ concept: b.concept, estimated: b.estimated, actual: b.actual }); }} className="p-2 bg-white/[0.03] hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 rounded-xl transition-all"><Edit3 size={14}/></button>
-                              <button onClick={() => handleDelete('budget', b.id)} className="p-2 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all"><Trash2 size={14}/></button>
-                            </>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {budgetItems.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="py-8 text-center text-gray-500 tracking-widest">No hay gastos registrados</td>
+                    </tr>
+                  ) : (
+                    budgetItems.map(b => {
+                      const isEditing = editingBudgetId === b.id;
+                      return (
+                        <tr key={b.id}>
+                          <td className="py-4 text-white">
+                            {isEditing ? (
+                              <input value={editBudgetValues.concept} onChange={e => setEditBudgetValues({...editBudgetValues, concept: e.target.value})} className="bg-black border border-white/20 rounded-xl p-2 text-white outline-none w-full" />
+                            ) : b.concept}
+                          </td>
+                          <td className="py-4 text-gray-300">
+                            {isEditing ? (
+                              <input type="number" value={editBudgetValues.estimated} onChange={e => setEditBudgetValues({...editBudgetValues, estimated: e.target.value})} className="bg-black border border-white/20 rounded-xl p-2 text-white outline-none w-24" />
+                            ) : `$${b.estimated}`}
+                          </td>
+                          <td className="py-4 text-white">
+                            {isEditing ? (
+                              <input type="number" value={editBudgetValues.actual} onChange={e => setEditBudgetValues({...editBudgetValues, actual: e.target.value})} className="bg-black border border-white/20 rounded-xl p-2 text-white outline-none w-24" />
+                            ) : `$${b.actual}`}
+                          </td>
+                          <td className="py-4 text-right flex items-center justify-end gap-2">
+                            {isEditing ? (
+                              <>
+                                <button onClick={() => handleUpdateBudget(b.id)} className="p-2 bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl"><Check size={14}/></button>
+                                <button onClick={() => setEditingBudgetId(null)} className="p-2 bg-white/5 text-gray-400 border border-white/10 rounded-xl"><X size={14}/></button>
+                              </>
+                            ) : (
+                              <>
+                                <button onClick={() => { setEditingBudgetId(b.id); setEditBudgetValues({ concept: b.concept, estimated: b.estimated, actual: b.actual }); }} className="p-2 bg-white/[0.03] hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 rounded-xl transition-all"><Edit3 size={14}/></button>
+                                <button onClick={() => handleDelete('budget', b.id)} className="p-2 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all"><Trash2 size={14}/></button>
+                              </>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
+
+              {/* FILA DE TOTALES GENERALES */}
+              {budgetItems.length > 0 && (
+                <div className="pt-4 border-t border-white/10 flex justify-between items-center text-[10px] font-black tracking-widest px-2">
+                  <span className="text-gray-400">TOTALES GENERALES:</span>
+                  <div className="flex gap-6">
+                    <span className="text-gray-300">ESTIMADO: <span className="text-white">${totalEstimated}</span></span>
+                    <span className="text-gray-300">REAL: <span className="text-white">${totalActual}</span></span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
