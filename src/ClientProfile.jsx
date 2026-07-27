@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Search, LogOut, User, Calendar, MapPin, 
   Trash2, Plus, Edit3, LayoutGrid, ImageIcon, X, ChevronRight, QrCode,
-  RefreshCcw, Menu, Save
+  RefreshCcw, Menu, Save, Upload
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import EventOrganizer from './components/EventOrganizer';
@@ -58,6 +58,18 @@ export default function ClientProfile() {
     return () => unsubscribe();
   }, [navigate]);
 
+  // Función para convertir la imagen seleccionada a Base64 para guardarla de forma inmediata y limpia
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditForm(prev => ({ ...prev, photoURL: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     if (!auth.currentUser) return;
@@ -104,7 +116,6 @@ export default function ClientProfile() {
     } catch (error) { console.error(error); }
   };
 
-  // Funciones auxiliares para el LiveControlPanel
   const currentEvent = events[selectedEventIndex] || events[0];
 
   const handleTogglePause = async () => {
@@ -306,7 +317,7 @@ export default function ClientProfile() {
 
       </main>
 
-      {/* Modal para Editar Perfil */}
+      {/* Modal para Editar Perfil (Con Subida de Foto Directa) */}
       <AnimatePresence>
         {isEditingProfile && (
           <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[250] flex items-center justify-center p-4 uppercase">
@@ -340,13 +351,24 @@ export default function ClientProfile() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[8px] text-gray-400 tracking-widest font-black">URL de Foto de Perfil</label>
-                  <input 
-                    type="url" 
-                    value={editForm.photoURL} 
-                    onChange={(e) => setEditForm({ ...editForm, photoURL: e.target.value })}
-                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-500 transition-colors"
-                  />
+                  <label className="text-[8px] text-gray-400 tracking-widest font-black">Subir Foto de Perfil</label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex-1 flex items-center justify-center gap-2 bg-black border border-dashed border-white/20 hover:border-purple-500 rounded-xl px-4 py-3 text-[9px] text-gray-300 cursor-pointer transition-colors">
+                      <Upload size={14} className="text-purple-400" />
+                      <span>{editForm.photoURL ? "Cambiar imagen..." : "Seleccionar archivo..."}</span>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleImageChange} 
+                        className="hidden" 
+                      />
+                    </label>
+                    {editForm.photoURL && (
+                      <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 flex-shrink-0 bg-black">
+                        <img src={editForm.photoURL} alt="Preview" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="pt-4 flex justify-end gap-3">
