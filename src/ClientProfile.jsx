@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from './firebase';
-import { doc, collection, query, where, onSnapshot, updateDoc, deleteDoc } from 'firebase/firestore';
+import { 
+  doc, collection, query, where, onSnapshot, updateDoc, deleteDoc, 
+  orderBy, addDoc, serverTimestamp 
+} from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search, LogOut, User, Calendar, MapPin, 
   Trash2, Plus, Edit3, LayoutGrid, ImageIcon, X, ChevronRight, QrCode,
-  RefreshCcw, Menu, Save, Upload
+  RefreshCcw, Menu, Save, Upload, MessageSquare, Send
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import EventOrganizer from './components/EventOrganizer';
@@ -70,6 +73,12 @@ export default function ClientProfile() {
 
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'warning', onConfirm: null });
 
+  // Estados para la Mensajería Integrada
+  const [mensajes, setMensajes] = useState([]);
+  const [nuevoMensaje, setNuevoMensaje] = useState('');
+  const [cargandoChat, setCargandoChat] = useState(true);
+  const chatScrollRef = useRef(null);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -114,6 +123,52 @@ export default function ClientProfile() {
     });
     return () => unsubscribe();
   }, [navigate]);
+
+  // Sincronización en tiempo real del Chat del Cliente actual
+  useEffect(() => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    const qMessages = query(
+      collection(db, `clients/${currentUser.uid}/messages`), 
+      orderBy('createdAt', 'asc')
+    );
+
+    const unsubscribeMessages = onSnapshot(qMessages, (snapshot) => {
+      const msgs = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setMensajes(msgs);
+      setCargandoChat(false);
+    }, (error) => {
+      console.error("Error al cargar mensajes del chat:", error);
+      setCargandoChat(false);
+    });
+
+    return () => unsubscribeMessages();
+  }, [loading]);
+
+  // Auto-scroll del chat
+  useEffect(() => {
+    chatScrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [mensajes]);
+
+  const handleEnviarMensaje = async (e) => {
+    e.preventDefault();
+    if (!nuevoMensaje.trim() || !auth.currentUser) return;
+
+    try {
+      await addDoc(collection(db, `clients/${auth.currentUser.uid}/messages`), {
+        text: nuevoMensaje.toUpperCase(),
+        senderId: auth.currentUser.uid,
+        createdAt: serverTimestamp()
+      });
+      setNuevoMensaje('');
+    } catch (error) {
+      console.error("Error al enviar mensaje:", error);
+    }
+  };
 
   const handleProvinceChange = (e) => {
     const provName = e.target.value;
@@ -480,6 +535,71 @@ export default function ClientProfile() {
               ))}
             </div>
           )}
+        </section>
+
+        {/* SECCIÓN DE MENSAJERÍA INTEGRADA */}
+        <section className="space-y-6 pt-4">
+          <div className="flex justify-between items-center border-l-2 border-purple-500 pl-4">
+            <h3 className="text-[10px] text-white/70 uppercase tracking-[0.4em] font-black">mensajería directa</h3>
+          </div>
+
+          <div className="bg-white/[0.07] backdrop-blur-3xl border border-white/25 rounded-2xl p-6 flex flex-col h-[480px] shadow-2xl box-border">
+            <div className="flex items-center gap-3 pb-4 border-b border-white/20">
+              <MessageSquare className="w-5 h-5 text-purple-400" />
+              <h3 className="text-[11px] font-['Poppins'] font-bold text-white tracking-widest uppercase">Chat de Soporte y Gestión</h3>
+            </div>
+
+            {/* Contenedor de Mensajes */}
+            <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-2">
+              {cargandoChat ? (
+                <div className="flex justify-center items-center h-full text-white/50 text-[10px] tracking-widest">
+                  Sincronizando mensajes...
+                </div>
+              ) : mensajes.length === 0 ? (
+                <div className="flex justify-center items-center h-full text-white/40 text-[9px] tracking-widest uppercase">
+                  No hay mensajes en este chat todavía.
+                </div>
+              ) : (
+                mensajes.map((msg) => {
+                  const esMio = msg.senderId === auth.currentUser?.uid;
+                  return (
+                    <div 
+                      key={msg.id} 
+                      className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}
+                    >
+                      <div 
+                        className={`max-w-[75%] px-4 py-3 rounded-2xl text-[10px] shadow-lg ${
+                          esMio 
+                            ? 'bg-purple-600 text-white rounded-br-none border border-purple-400/40' 
+                            : 'bg-white/[0.08] text-white/90 rounded-bl-none border border-white/20 backdrop-blur-md'
+                        }`}
+                      >
+                        <p className="tracking-wider leading-relaxed">{msg.text}</p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+              <div ref={chatScrollRef} />
+            </div>
+
+            {/* Input de Envío */}
+            <form onSubmit={handleEnviarMensaje} className="mt-4 flex gap-3 pt-4 border-t border-white/20">
+              <input
+                type="text"
+                value={nuevoMensaje}
+                onChange={(e) => setNuevoMensaje(e.target.value)}
+                placeholder="ESCRIBE UN MENSAJE..."
+                className="flex-1 bg-white/[0.05] backdrop-blur-md border border-white/25 rounded-xl px-4 py-3 text-[10px] text-white placeholder-white/40 focus:outline-none focus:border-purple-400 uppercase shadow-inner transition-colors"
+              />
+              <button
+                type="submit"
+                className="bg-purple-600 hover:bg-purple-500 border border-purple-400/50 text-white px-5 rounded-xl transition-all flex items-center justify-center cursor-pointer shadow-xl"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
         </section>
 
       </main>
