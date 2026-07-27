@@ -81,19 +81,23 @@ export default function Dashboard() {
 
   const loadProfileDataIntoState = (profilesList, index) => {
     const target = profilesList[index] || profilesList[0];
+    if (!target) return;
+
     const photosData = {};
-    if (target.photos && Array.isArray(target.photos)) {
-      target.photos.forEach((url, i) => { if(i < 10) photosData[`photo${i+1}`] = url; });
-    } else {
-      for (let i = 1; i <= 10; i++) photosData[`photo${i}`] = target[`photo${i}`] || '';
+    for (let i = 1; i <= 10; i++) {
+      photosData[`photo${i}`] = (target.photos && target.photos[i - 1]) || target[`photo${i}`] || '';
     }
 
     setProfile({
-      ...target,
-      ...photosData,
+      name: target.name || '',
+      job: target.job || '',
+      specialty: target.specialty || '',
+      location: target.location || '',
+      bio: target.bio || '',
       videoLink: target.videoLink || '',
       completedCourses: target.completedCourses || [],
-      academyBaseScore: target.academyBaseScore || 0
+      academyBaseScore: target.academyBaseScore || 0,
+      ...photosData
     });
   };
 
@@ -137,27 +141,28 @@ export default function Dashboard() {
     if (profiles.length > 0) {
       loadProfileDataIntoState(profiles, activeProfileIndex);
     }
-  }, [activeProfileIndex]);
+  }, [activeProfileIndex, profiles]);
 
-  const persistProfile = async (updates) => {
+  const persistProfile = async (updatedFields) => {
     const user = auth.currentUser;
     if (!user) return;
     
-    const updatedCurrentProfile = { ...profile, ...updates };
-    const photoList = Array.from({ length: 10 }, (_, i) => updatedCurrentProfile[`photo${i + 1}`]).filter(Boolean);
-    const finalScore = calculateTotalScore(updatedCurrentProfile);
+    const mergedCurrentProfile = { ...profile, ...updatedFields };
+    const photoList = Array.from({ length: 10 }, (_, i) => mergedCurrentProfile[`photo${i + 1}`]).filter(Boolean);
+    const finalScore = calculateTotalScore(mergedCurrentProfile);
 
     const updatedProfiles = [...profiles];
     updatedProfiles[activeProfileIndex] = { 
-      ...updatedCurrentProfile, 
+      ...mergedCurrentProfile, 
       photos: photoList,
       score: finalScore
     };
 
     setProfiles(updatedProfiles);
+    setProfile(mergedCurrentProfile);
 
     const dataToSave = {
-      ...updatedCurrentProfile,
+      ...mergedCurrentProfile,
       photos: photoList,
       score: finalScore,
       profiles: updatedProfiles,
@@ -611,3 +616,4 @@ export default function Dashboard() {
     </div>
   );
 }
+```[cite: 4]
