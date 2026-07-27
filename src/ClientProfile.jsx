@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import EventOrganizer from './components/EventOrganizer';
+import LiveControlPanel from './components/LiveControlPanel'; // <--- Importamos el componente
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ClientProfile() {
@@ -21,8 +22,10 @@ export default function ClientProfile() {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
   const [profile, setProfile] = useState({ name: '', location: '', interests: '', photoURL: '' });
-  const [showQrModal, setShowQrModal] = useState(false);
-  const [selectedEventForQr, setSelectedEventForQr] = useState(null);
+  
+  // Estado para el LiveControlPanel en lugar del modal de QR estático
+  const [showLivePanel, setShowLivePanel] = useState(false);
+  const [selectedEventForLive, setSelectedEventForLive] = useState(null);
 
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'warning', onConfirm: null });
 
@@ -161,7 +164,6 @@ export default function ClientProfile() {
                 <h2 className="text-[14px] md:text-[16px] font-['Poppins'] text-white truncate">{profile.name || 'ORGANIZADOR'}</h2>
                 <button onClick={() => setIsEditingProfile(true)} className="text-gray-500 hover:text-white transition-colors cursor-pointer flex-shrink-0"><Edit3 size={14} /></button>
               </div>
-              <p className="text-[8px] text-purple-400 font-bold tracking-[0.3em] mt-1.5 uppercase">MODO EXPERIENCE</p>
             </div>
           </div>
           
@@ -227,11 +229,12 @@ export default function ClientProfile() {
                     </div>
 
                     <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
+                      {/* Al hacer clic en el botón QR, ahora abrimos el LiveControlPanel pasando el evento */}
                       <button 
-                        onClick={(e) => { e.stopPropagation(); setSelectedEventForQr(ev); setShowQrModal(true); }} 
+                        onClick={(e) => { e.stopPropagation(); setSelectedEventForLive(ev); setShowLivePanel(true); }} 
                         className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.03] hover:bg-white/10 border border-white/10 text-[8px] font-black tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer"
                       >
-                        <QrCode size={13} className="text-purple-400"/> QR
+                        <QrCode size={13} className="text-purple-400"/> LIVE CONTROL
                       </button>
                       <button 
                         onClick={(e) => confirmDelete(ev.id, e)} 
@@ -259,34 +262,25 @@ export default function ClientProfile() {
         )}
       </AnimatePresence>
 
+      {/* Modal que despliega el LiveControlPanel al tocar el botón */}
       <AnimatePresence>
-        {showQrModal && selectedEventForQr && (
-          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-              className="bg-[#0c0c0e] w-full max-w-sm p-8 rounded-[3rem] border border-white/10 relative shadow-2xl text-center space-y-6 uppercase"
+        {showLivePanel && selectedEventForLive && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 md:p-8 overflow-y-auto">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-[#0c0c0e] w-full max-w-4xl p-6 md:p-8 rounded-[2.5rem] border border-white/10 relative shadow-2xl space-y-6 uppercase"
             >
-              <button onClick={() => setShowQrModal(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors cursor-pointer"><X size={20} /></button>
-              
-              <div className="space-y-2">
-                <span className="text-[8px] tracking-[0.3em] font-black text-gray-400">QR INVITADOS</span>
-                <h3 className="text-xl font-['Poppins'] font-normal text-white">{selectedEventForQr.title}</h3>
+              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                <div>
+                  <span className="text-[8px] tracking-[0.3em] font-black text-purple-400">CONTROL EN VIVO</span>
+                  <h3 className="text-lg font-['Poppins'] font-normal text-white">{selectedEventForLive.title}</h3>
+                </div>
+                <button onClick={() => setShowLivePanel(false)} className="text-gray-500 hover:text-white transition-colors cursor-pointer p-2"><X size={22} /></button>
               </div>
 
-              <div className="w-48 h-48 mx-auto bg-white p-3 rounded-2xl flex items-center justify-center shadow-xl">
-                <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://www.classcode.com.ar/guest/${selectedEventForQr.id}`} 
-                  alt="QR Invitados" 
-                  className="w-full h-full object-contain"
-                />
+              {/* Renderizamos el LiveControlPanel pasándole el ID del evento */}
+              <div className="max-h-[75vh] overflow-y-auto pr-2">
+                <LiveControlPanel eventId={selectedEventForLive.id} />
               </div>
-
-              <button onClick={() => {
-                navigator.clipboard.writeText(`https://www.classcode.com.ar/guest/${selectedEventForQr.id}`);
-                setModal({ isOpen: true, title: "GUEST LINK", message: "LINK DE SUBIDA COPIADO.", type: "success" });
-                setShowQrModal(false);
-              }} className="w-full py-3.5 rounded-xl bg-purple-600 text-white font-black text-[9px] tracking-widest uppercase hover:bg-purple-500 transition-all font-['Poppins'] cursor-pointer shadow-xl">
-                COPIAR LINK
-              </button>
             </motion.div>
           </div>
         )}
