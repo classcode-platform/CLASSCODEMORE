@@ -145,6 +145,11 @@ export default function EventDetail() {
   const totalActual = budgetItems.reduce((acc, item) => acc + (Number(item.actual) || 0), 0);
   const confirmedGuestsCount = guests.filter(g => g.status === 'CONFIRMADO').length;
 
+  // CÁLCULO GLOBAL DE CAPACIDAD Y OCUPACIÓN
+  const totalCapacity = tables.reduce((acc, t) => acc + (Number(t.capacity) || 0), 0);
+  const totalOccupied = guests.length; 
+  const globalOccupancyPercentage = totalCapacity > 0 ? Math.min(100, Math.round((totalOccupied / totalCapacity) * 100)) : 0;
+
   return (
     <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] antialiased flex flex-col items-center uppercase selection:bg-white selection:text-black">
       
@@ -219,10 +224,25 @@ export default function EventDetail() {
             </form>
 
             <div className="bg-[#0c0c0e] border border-white/10 rounded-[3rem] p-8 space-y-8 shadow-2xl relative overflow-hidden">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-6 gap-4 font-['Poppins']">
-                <div>
+              
+              {/* CABECERA Y RESUMEN GLOBAL DE OCUPACIÓN */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-6 gap-6 font-['Poppins']">
+                <div className="space-y-1">
                   <span className="text-[8px] tracking-[0.3em] font-black text-gray-500 uppercase">DISTRIBUCIÓN DE SALÓN</span>
                   <h3 className="text-xl font-normal text-white uppercase tracking-wide">Plano Global</h3>
+                </div>
+
+                {/* BLOQUE DE PARÁMETROS GLOBALES DE OCUPACIÓN */}
+                <div className="flex items-center gap-6 bg-black border border-white/10 px-6 py-3 rounded-2xl">
+                  <div className="space-y-0.5 text-right">
+                    <span className="text-[7px] text-gray-500 font-bold tracking-widest block">TOTAL OCUPADO</span>
+                    <span className="text-xs font-normal text-white">{totalOccupied} / {totalCapacity}</span>
+                  </div>
+                  <div className="h-6 w-[1px] bg-white/10"></div>
+                  <div className="space-y-0.5">
+                    <span className="text-[7px] text-gray-500 font-bold tracking-widest block">OCUPACIÓN</span>
+                    <span className="text-xs font-normal text-white">{globalOccupancyPercentage}%</span>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2 bg-black border border-white/10 p-1.5 rounded-2xl">
@@ -274,7 +294,7 @@ export default function EventDetail() {
                               {Array.from({ length: capacity }).map((_, idx) => {
                                 const angle = (idx * 360) / capacity;
                                 const radian = (angle * Math.PI) / 180;
-                                const radius = 58; // Radio amuchado reducido
+                                const radius = 58;
                                 const x = Math.cos(radian) * radius;
                                 const y = Math.sin(radian) * radius;
                                 const assignedGuest = assignedGuests[idx];
