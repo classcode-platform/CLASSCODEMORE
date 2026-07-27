@@ -9,8 +9,8 @@ export default function EventsOrganizer() {
   const [selectedEventId, setSelectedEventId] = useState(null);
   const [event, setEvent] = useState(null);
 
+  // Formulario directo para crear sin modales
   const [newEvent, setNewEvent] = useState({ title: '', category: 'EVENTO', date: '', location: '', coverImage: '' });
-  const [showNewEventModal, setShowNewEventModal] = useState(false);
 
   const [activeTab, setActiveTab] = useState('tables');
   const [guests, setGuests] = useState([]);
@@ -84,8 +84,7 @@ export default function EventsOrganizer() {
         coverImage: newEvent.coverImage || ''
       });
       setNewEvent({ title: '', category: 'EVENTO', date: '', location: '', coverImage: '' });
-      setShowNewEventModal(false);
-      setSelectedEventId(docRef.id);
+      setSelectedEventId(docRef.id); // Entra directamente al evento creado
     } catch (error) {
       console.error("Error al crear evento:", error);
     }
@@ -189,13 +188,27 @@ export default function EventsOrganizer() {
           <h1 className="text-sm sm:text-base text-white uppercase font-['Poppins'] font-normal tracking-[0.05em]">
             CLASSCODE <span className="text-white/40 text-xs">/ EVENTOS</span>
           </h1>
-          <button onClick={() => setShowNewEventModal(true)} className="px-4 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl text-[8px] font-black tracking-widest flex items-center gap-2 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.2)] backdrop-blur-md cursor-pointer">
-            <Plus size={13}/> NUEVO EVENTO
-          </button>
         </nav>
 
         <main className="w-full max-w-[1200px] z-10 space-y-6">
-          <div className="flex justify-between items-center px-2">
+          {/* Formulario directo de creación rápida sin modales */}
+          <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 p-5 sm:p-6 rounded-[2.5rem] shadow-[0_16px_48px_0_rgba(0,0,0,0.4)] space-y-4">
+            <div className="space-y-1">
+              <span className="text-[7px] tracking-[0.3em] font-bold text-white/40">ACCESO RÁPIDO</span>
+              <h3 className="text-lg font-['Poppins'] font-normal text-white">Crear Nuevo Evento</h3>
+            </div>
+
+            <form onSubmit={handleCreateEvent} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 font-bold">
+              <input placeholder="TÍTULO DEL EVENTO" value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} className="bg-white/[0.03] border border-white/15 rounded-xl p-3.5 text-[9px] text-white outline-none focus:border-white tracking-widest uppercase placeholder:text-white/30 backdrop-blur-md" required />
+              <input placeholder="CATEGORÍA (BODA, XV...)" value={newEvent.category} onChange={e => setNewEvent({...newEvent, category: e.target.value})} className="bg-white/[0.03] border border-white/15 rounded-xl p-3.5 text-[9px] text-white outline-none focus:border-white tracking-widest uppercase placeholder:text-white/30 backdrop-blur-md" />
+              <input placeholder="FECHA (EJ: 12 OCT 2026)" value={newEvent.date} onChange={e => setNewEvent({...newEvent, date: e.target.value})} className="bg-white/[0.03] border border-white/15 rounded-xl p-3.5 text-[9px] text-white outline-none focus:border-white tracking-widest uppercase placeholder:text-white/30 backdrop-blur-md" />
+              <button type="submit" className="py-3.5 bg-white/20 hover:bg-white/30 border border-white/30 text-white rounded-xl text-[8px] font-black tracking-[0.3em] uppercase transition-all shadow-[0_4px_20px_rgba(0,0,0,0.3)] backdrop-blur-md flex items-center justify-center gap-2 cursor-pointer">
+                <Plus size={13}/> CREAR Y GESTIONAR
+              </button>
+            </form>
+          </div>
+
+          <div className="flex justify-between items-center px-2 pt-4">
             <h2 className="text-xl font-['Poppins'] tracking-wide text-white/90">Mis Eventos</h2>
             <span className="text-[8px] font-bold text-white/60 bg-white/[0.04] border border-white/10 px-3 py-1 rounded-full backdrop-blur-md">
               TOTAL: {events.length}
@@ -203,11 +216,8 @@ export default function EventsOrganizer() {
           </div>
 
           {events.length === 0 ? (
-            <div className="w-full py-24 border border-white/10 bg-white/[0.01] backdrop-blur-2xl rounded-[2.5rem] text-center text-white/40 text-[9px] font-bold tracking-widest space-y-4 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
+            <div className="w-full py-16 border border-white/10 bg-white/[0.01] backdrop-blur-2xl rounded-[2.5rem] text-center text-white/40 text-[9px] font-bold tracking-widest shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
               <p>NO HAY EVENTOS REGISTRADOS</p>
-              <button onClick={() => setShowNewEventModal(true)} className="px-5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl text-[8px] transition-all backdrop-blur-md">
-                CREAR EL PRIMERO
-              </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -251,33 +261,6 @@ export default function EventsOrganizer() {
             </div>
           )}
         </main>
-
-        <AnimatePresence>
-          {showNewEventModal && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-2xl p-4">
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white/[0.04] backdrop-blur-3xl w-full max-w-md p-6 sm:p-8 rounded-[2.5rem] border border-white/15 relative space-y-5 shadow-[0_16px_48px_0_rgba(0,0,0,0.5)]"
-              >
-                <button onClick={() => setShowNewEventModal(false)} className="absolute top-5 right-5 text-white/50 hover:text-white p-2 rounded-full bg-white/[0.05] border border-white/10 transition-colors"><X size={16}/></button>
-                <div className="space-y-1 text-center">
-                  <span className="text-[7px] tracking-[0.3em] font-bold text-white/40">NUEVO REGISTRO</span>
-                  <h3 className="text-lg font-['Poppins'] font-normal text-white">Crear Evento</h3>
-                </div>
-
-                <form onSubmit={handleCreateEvent} className="space-y-4 font-bold">
-                  <input placeholder="TÍTULO DEL EVENTO" value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} className="w-full bg-white/[0.03] border border-white/15 rounded-xl p-3.5 text-[9px] text-white outline-none focus:border-white tracking-widest uppercase placeholder:text-white/30 backdrop-blur-md" required />
-                  <input placeholder="CATEGORÍA (EJ: BODA, XV, CORPORATIVO)" value={newEvent.category} onChange={e => setNewEvent({...newEvent, category: e.target.value})} className="w-full bg-white/[0.03] border border-white/15 rounded-xl p-3.5 text-[9px] text-white outline-none focus:border-white tracking-widest uppercase placeholder:text-white/30 backdrop-blur-md" />
-                  <input placeholder="FECHA (EJ: 12 OCT 2026)" value={newEvent.date} onChange={e => setNewEvent({...newEvent, date: e.target.value})} className="w-full bg-white/[0.03] border border-white/15 rounded-xl p-3.5 text-[9px] text-white outline-none focus:border-white tracking-widest uppercase placeholder:text-white/30 backdrop-blur-md" />
-                  <input placeholder="UBICACIÓN (EJ: SALÓN LA PLATA)" value={newEvent.location} onChange={e => setNewEvent({...newEvent, location: e.target.value})} className="w-full bg-white/[0.03] border border-white/15 rounded-xl p-3.5 text-[9px] text-white outline-none focus:border-white tracking-widest uppercase placeholder:text-white/30 backdrop-blur-md" />
-                  
-                  <button type="submit" className="w-full py-3.5 bg-white/20 hover:bg-white/30 border border-white/30 text-white rounded-xl text-[8px] font-black tracking-[0.3em] uppercase transition-all shadow-[0_4px_20px_rgba(0,0,0,0.3)] backdrop-blur-md cursor-pointer">
-                    CREAR Y GESTIONAR
-                  </button>
-                </form>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
       </div>
     );
   }
@@ -290,6 +273,7 @@ export default function EventsOrganizer() {
 
   return (
     <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] antialiased flex flex-col items-center uppercase selection:bg-white selection:text-black relative overflow-hidden">
+      {/* Resto de la interfaz de gestión del evento seleccionado queda intacto */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div animate={{ x: [-80, 80, -80], y: [-60, 60, -60], scale: [1, 1.2, 1] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="absolute top-[-15%] left-[-10%] w-[400px] md:w-[700px] h-[400px] md:h-[700px] bg-purple-600/10 rounded-full blur-[140px] md:blur-[200px]" />
         <motion.div animate={{ x: [80, -80, 80], y: [60, -60, 60], scale: [1.2, 1, 1.2] }} transition={{ duration: 24, repeat: Infinity, ease: "linear" }} className="absolute bottom-[-15%] right-[-10%] w-[350px] md:w-[650px] h-[350px] md:h-[650px] bg-indigo-600/10 rounded-full blur-[130px] md:blur-[190px]" />
