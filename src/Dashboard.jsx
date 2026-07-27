@@ -91,11 +91,11 @@ export default function Dashboard() {
         profUnsubscribe = onSnapshot(qProfiles, async (snapshot) => {
           let loadedProfiles = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
           
+          // Forzar la incorporación del documento principal antiguo basado en el UID exacto del usuario
           const mainDocSnap = await getDoc(mainDocRef);
           if (mainDocSnap.exists()) {
             const mainData = { id: mainDocSnap.id, ...mainDocSnap.data() };
-            const existsInList = loadedProfiles.some(p => p.id === mainData.id);
-            if (!existsInList) {
+            if (!loadedProfiles.some(p => p.id === mainData.id)) {
               loadedProfiles = [mainData, ...loadedProfiles];
             }
           }
@@ -373,7 +373,7 @@ export default function Dashboard() {
                       }`}
                     >
                       <User size={12} />
-                      {p.job ? `${p.job}` : 'PERFIL PRINCIPAL'}
+                      {p.id === auth.currentUser?.uid ? 'PERFIL ANTIGUO (PRINCIPAL)' : (p.job ? `${p.job}` : 'PERFIL NUEVO')}
                     </button>
                   );
                 })}
