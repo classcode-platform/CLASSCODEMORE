@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Search, LogOut, User, Calendar, MapPin, 
   Trash2, Plus, Edit3, LayoutGrid, ImageIcon, X, ChevronRight, QrCode,
-  RefreshCcw, Menu, Save, Upload, Sparkles
+  RefreshCcw, Menu, Save, Upload
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import EventOrganizer from './components/EventOrganizer';
@@ -224,7 +224,7 @@ export default function ClientProfile() {
   return (
     <div className="min-h-screen w-full bg-[#070709] text-white font-['Open_Sans'] flex flex-col md:flex-row overflow-x-hidden uppercase antialiased relative text-left box-border m-0 p-0">
       
-      {/* LUCES DINÁMICAS VIVAS DE FONDO (ORBS PÚRPURAS Y ROSAS CLASSCODE) */}
+      {/* LUCES DINÁMICAS VIVAS DE FONDO */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <motion.div 
           animate={{ 
@@ -291,7 +291,7 @@ export default function ClientProfile() {
               
               <button 
                 onClick={handleSwitchToTalent} 
-                className="mb-10 w-full flex items-center justify-between bg-white/[0.08] backdrop-blur-md border border-white/20 hover:border-purple-400/50 p-4 rounded-xl group hover:bg-white/[0.12] transition-all cursor-pointer shadow-lg"
+                className="mb-10 w-full flex items-center justify-between bg-white/[0.12] backdrop-blur-md border border-purple-400/50 p-4 rounded-xl group hover:bg-white/[0.16] transition-all cursor-pointer shadow-lg"
               >
                 <div className="flex items-center gap-4 text-left leading-none">
                   <div className="p-2.5 bg-purple-500/20 rounded-lg text-purple-300 border border-purple-500/40">
@@ -327,15 +327,15 @@ export default function ClientProfile() {
           <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">
             CLASSCODE
           </div>
-          <p className="text-purple-300 text-[10px] font-bold tracking-[0.3em] mt-2.5 leading-none uppercase flex items-center gap-1.5">
-            <Sparkles size={11} className="text-purple-400" /> Experience
+          <p className="text-purple-300 text-[10px] font-bold tracking-[0.3em] mt-2.5 leading-none uppercase">
+            EXPERIENCE
           </p>
         </header>
         
         <div className="mb-10 text-left">
           <button 
             onClick={handleSwitchToTalent} 
-            className="w-full flex items-center justify-between bg-white/[0.08] backdrop-blur-md border border-white/20 hover:border-purple-400/50 p-4 rounded-xl group hover:bg-white/[0.12] transition-all cursor-pointer shadow-lg"
+            className="w-full flex items-center justify-between bg-white/[0.12] backdrop-blur-md border border-purple-400/50 p-4 rounded-xl group hover:bg-white/[0.16] transition-all cursor-pointer shadow-lg"
           >
             <div className="flex items-center gap-3 text-left leading-none">
               <div className="p-2.5 bg-purple-500/20 rounded-lg text-purple-300 border border-purple-500/40">
