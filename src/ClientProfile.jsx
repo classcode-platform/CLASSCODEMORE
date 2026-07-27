@@ -122,9 +122,10 @@ export default function ClientProfile() {
           setEvents(fetchedEvents);
         });
 
-        // Sincronización Realtime del Chat Compartido con Talent
+        // Sincronización Realtime del Chat Compartido alineada a las reglas de Firestore (/chats/{chatId}/messages)
+        const chatId = user.uid;
         const qMessages = query(
-          collection(db, `chats/${user.uid}/messages`), 
+          collection(db, `chats/${chatId}/messages`), 
           orderBy('createdAt', 'asc')
         );
 
@@ -159,7 +160,8 @@ export default function ClientProfile() {
     if (!nuevoMensaje.trim() || !auth.currentUser) return;
 
     try {
-      await addDoc(collection(db, `chats/${auth.currentUser.uid}/messages`), {
+      const chatId = auth.currentUser.uid;
+      await addDoc(collection(db, `chats/${chatId}/messages`), {
         text: nuevoMensaje.toUpperCase(),
         senderId: auth.currentUser.uid,
         createdAt: serverTimestamp()
