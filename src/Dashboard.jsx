@@ -226,7 +226,7 @@ export default function Dashboard() {
       <aside className="hidden md:flex w-72 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50">
         <header className="mb-12 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">CLASSCODE</div>
-          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent</p>
+          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent Dashboard</p>
         </header>
         
         <div className="mb-12 text-left">
@@ -251,7 +251,7 @@ export default function Dashboard() {
         <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-700 hover:text-red-500 text-[10px] font-black tracking-widest transition-all mt-auto pt-8 border-t border-white/5 leading-none"><LogOut size={18}/> CERRAR SESIÓN</button>
       </aside>
 
-      {/* MAIN CONTAINER */}
+      {/* MAIN CONTAINER CORREGIDO CON w-full y overflow-x-hidden */}
       <div className="flex-1 md:ml-72 p-4 md:p-8 mt-16 md:mt-0 relative z-10 w-full max-w-[1400px] mx-auto box-border overflow-x-hidden">
         
         {/* SECCIÓN ESTILO FACEBOOK (BANNER SHOWREEL + HEADER) */}
