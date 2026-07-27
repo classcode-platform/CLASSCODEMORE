@@ -8,7 +8,7 @@ import {
   Upload, X, Eye, Menu, Zap, CheckCircle2, 
   LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, Share2, Plus,
   Camera as CameraIcon, Video as VideoIcon, User as UserIcon, Theater, Smartphone, PartyPopper, 
-  Clapperboard, Sparkles, Shirt, Palette, Music, Utensils, CalendarDays, Home as HomeIcon
+  Clapperboard, Sparkles, Shirt, Palette, Music, Utensils, CalendarDays, Home as HomeIcon, Layers, ArrowUpRight
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,6 +22,7 @@ export default function Dashboard() {
   
   const [profiles, setProfiles] = useState([]);
   const [activeProfileIndex, setActiveProfileIndex] = useState(0);
+  const [copiedId, setCopiedId] = useState(null);
 
   const [profile, setProfile] = useState({
     name: '', job: '', specialty: '', location: '', bio: '', videoLink: '', 
@@ -279,9 +280,19 @@ export default function Dashboard() {
     }
   };
 
+  const copyPublicLink = (profileJob) => {
+    const formattedJob = profileJob ? profileJob.toLowerCase().replace(/\s+/g, '-') : 'perfil';
+    const userId = auth.currentUser?.uid;
+    const link = `${window.location.origin}/profile/${userId}/${formattedJob}`;
+    navigator.clipboard.writeText(link);
+    setCopiedId(profileJob);
+    setTimeout(() => setCopiedId(null), 2500);
+  };
+
   if (loading) return <div className="min-h-screen w-full bg-[#0a0a0a] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-['Poppins'] overflow-x-hidden box-border">CARGANDO DASHBOARD...</div>;
 
   const currentJobIcon = profile.job && RUBRO_ICONS[profile.job] ? React.createElement(RUBRO_ICONS[profile.job], { size: 14, className: "text-purple-400 flex-shrink-0" }) : null;
+  const userId = auth.currentUser?.uid;
 
   return (
     <div className="min-h-screen w-full bg-[#0a0a0a] text-white font-['Open_Sans'] flex flex-col md:flex-row overflow-x-hidden uppercase antialiased relative text-left box-border m-0 p-0">
@@ -353,10 +364,10 @@ export default function Dashboard() {
       <div className="flex-1 md:ml-72 flex flex-col min-h-screen relative z-10 w-full max-w-full box-border overflow-x-hidden">
         
         <div className="flex-1 p-4 md:p-8 mt-16 md:mt-0 w-full max-w-full box-border overflow-x-hidden">
-          <div className="w-full max-w-[1400px] mx-auto box-border overflow-x-hidden">
+          <div className="w-full max-w-[1400px] mx-auto box-border overflow-x-hidden space-y-8">
             
             {profiles.length > 0 && (
-              <div className="flex items-center gap-3 mb-6 overflow-x-auto pb-2">
+              <div className="flex items-center gap-3 overflow-x-auto pb-2">
                 <span className="text-[8px] font-black tracking-widest text-gray-400">PERFILES ACTIVOS:</span>
                 {profiles.map((p, idx) => (
                   <button 
@@ -369,7 +380,7 @@ export default function Dashboard() {
               </div>
             )}
 
-            <div className="w-full bg-white/[0.02] border border-white/5 backdrop-blur-md rounded-2xl p-4 md:p-8 mb-8 shadow-2xl box-border overflow-hidden">
+            <div className="w-full bg-white/[0.02] border border-white/5 backdrop-blur-md rounded-2xl p-4 md:p-8 shadow-2xl box-border overflow-hidden">
               <div className="w-full mx-auto box-border">
                 
                 <label className="w-full h-[180px] md:h-[260px] bg-black relative overflow-hidden group block rounded-2xl border border-white/10 cursor-pointer shadow-xl">
@@ -416,9 +427,6 @@ export default function Dashboard() {
                     <div className="space-y-2 pb-1 min-w-0 flex-1 w-full">
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                         <h1 className="text-lg md:text-2xl font-['Poppins'] font-normal tracking-wide text-white truncate max-w-full">{profile.name || 'NUEVO TALENTO'}</h1>
-                        <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1.5 flex-shrink-0">
-                          <CheckCircle2 size={12}/> TALENTO
-                        </span>
                       </div>
                       <div className="flex items-center justify-center md:justify-start gap-2">
                         {currentJobIcon}
@@ -435,9 +443,6 @@ export default function Dashboard() {
                     <button onClick={handleAddNewProfile} className="px-4 py-4 rounded-2xl bg-white/[0.03] hover:bg-white/15 border border-white/10 transition-all text-white flex items-center gap-2 text-[9px] font-black tracking-widest cursor-pointer" title="Crear otro perfil profesional">
                       <Plus size={16} /> <span className="hidden md:inline">NUEVO PERFIL</span>
                     </button>
-                    <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-4 bg-white/[0.03] hover:bg-white/15 rounded-2xl border border-white/10 transition-all text-white cursor-pointer" title="Ver Perfil Público">
-                      <Eye size={18} />
-                    </button>
                     <button onClick={() => setIsEditingProfile(true)} className="px-6 py-4 rounded-2xl bg-purple-600 text-white font-black text-[10px] tracking-[0.3em] hover:bg-purple-500 transition-all shadow-xl flex items-center justify-center gap-2 cursor-pointer">
                       <Edit3 size={14}/> EDITAR PERFIL
                     </button>
@@ -445,6 +450,51 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+
+            {/* SECCIÓN DE PERFILES PÚBLICOS MÚLTIPLES */}
+            <section className="space-y-6">
+              <div className="flex items-center gap-3 border-l-2 border-purple-500 pl-3">
+                <Layers size={15} className="text-purple-400" />
+                <h2 className="text-[11px] md:text-[13px] font-normal tracking-[0.3em] uppercase">MIS PERFILES PÚBLICOS ({profiles.length})</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {profiles.map((p, index) => {
+                  const jobName = p.job || 'Especialidad';
+                  const subName = p.specialty || '';
+                  const formattedJob = jobName.toLowerCase().replace(/\s+/g, '-');
+                  const publicUrl = `/profile/${userId}/${formattedJob}`;
+                  const isCopied = copiedId === jobName;
+
+                  return (
+                    <div key={index} className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 flex flex-col justify-between space-y-6 backdrop-blur-xl group hover:border-purple-500/30 transition-all shadow-xl">
+                      <div className="space-y-2">
+                        <span className="text-[7px] font-black tracking-widest text-purple-500 uppercase">PERFIL ACTIVO #{index + 1}</span>
+                        <h3 className="text-sm md:text-base font-['Poppins'] font-normal tracking-wide text-white uppercase">{jobName}</h3>
+                        {subName && <p className="text-[9px] text-gray-500 tracking-wider uppercase">{subName}</p>}
+                      </div>
+
+                      <div className="flex items-center gap-3 pt-4 border-t border-white/5">
+                        <button 
+                          onClick={() => navigate(publicUrl)} 
+                          className="flex-grow py-3 bg-white text-black rounded-xl text-[8px] font-black tracking-[0.3em] flex items-center justify-center gap-2 hover:bg-gray-200 transition-all shadow-md uppercase cursor-pointer"
+                        >
+                          VER <ArrowUpRight size={13} strokeWidth={2.5} />
+                        </button>
+                        <button 
+                          onClick={() => copyPublicLink(jobName)} 
+                          className="px-4 py-3 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 rounded-xl text-[8px] font-black tracking-[0.2em] transition-all flex items-center gap-1.5 cursor-pointer"
+                          title="Copiar link público"
+                        >
+                          <Share2 size={13} className="text-purple-400" />
+                          {isCopied ? '¡COPIADO!' : 'COMPARTIR'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
 
             <main className="w-full py-6 grid lg:grid-cols-12 gap-10 relative z-10 box-border">
               
@@ -507,14 +557,6 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="bg-[#050505] border border-white/5 rounded-2xl p-6 shadow-xl box-border">
-                   <button onClick={() => {
-                     navigator.clipboard.writeText(`https://www.classcode.com.ar/profile/${auth.currentUser?.uid}`);
-                     alert("¡Enlace de perfil copiado al portapapeles!");
-                   }} className="w-full group flex items-center justify-center gap-3 text-[9px] font-black tracking-[0.3em] text-gray-400 hover:text-white transition-all uppercase py-2 box-border cursor-pointer">
-                      <Share2 size={16} /> Compartir Perfil Público
-                   </button>
-                </div>
               </div>
 
               <div className="lg:col-span-8 space-y-12 min-w-0 box-border">
