@@ -105,13 +105,7 @@ export default function EventOrganizer() {
 
       {/* CONTENIDO PRINCIPAL */}
       <main className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 flex-1 w-full space-y-10">
-        <div className="flex justify-between items-end border-b border-white/10 pb-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-['Poppins'] font-normal tracking-wide text-white">Proyectos</h1>
-            <p className="text-[10px] text-gray-400 tracking-[0.3em] font-bold mt-1">Gestión integral, mesas, invitados y QR</p>
-          </div>
-        </div>
-
+        
         {events.length === 0 ? (
           <div className="py-24 text-center border border-white/5 rounded-3xl bg-[#0c0c0e] space-y-4">
             <Calendar size={32} className="mx-auto text-white/20" />
@@ -205,7 +199,7 @@ export default function EventOrganizer() {
                     className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white" required 
                   />
                   <input placeholder="UBICACIÓN" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})}
-                    className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest" 
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest" 
                   />
                 </div>
 
