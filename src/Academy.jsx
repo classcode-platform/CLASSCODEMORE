@@ -50,7 +50,16 @@ export default function Academy() {
       const unsubscribe = onSnapshot(doc(db, "professionals", user.uid), (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setUserJob(data.job?.toUpperCase() || '');
+          
+          // Lógica adaptada: soporta perfiles múltiples (array) o perfil único directo
+          let activeJob = '';
+          if (data.profiles && Array.isArray(data.profiles) && data.profiles.length > 0) {
+            activeJob = data.profiles[0].job || data.job || '';
+          } else {
+            activeJob = data.job || '';
+          }
+
+          setUserJob(activeJob.toUpperCase());
           setCompletedCourses(data.completedCourses || []);
           setIsPro(data.isPro || false);
         }
