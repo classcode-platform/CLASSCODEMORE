@@ -23,7 +23,7 @@ export default function Dashboard() {
     photo1: '', photo2: '', photo3: '', photo4: '', photo5: '', 
     photo6: '', photo7: '', photo8: '', photo9: '', photo10: '',
     academyPoints: 0, verified: false, score: 0,
-    completedCourses: [], isVisible: true
+    completedCourses: [] 
   });
 
   const [uploadingStatus, setUploadingStatus] = useState({
@@ -61,7 +61,6 @@ export default function Dashboard() {
   const isProfessionalTestDone = proCourseId && profile.completedCourses?.includes(proCourseId);
 
   const isProfileVisible = 
-  profile.isVisible !== false && 
   profile.name?.trim() && 
   profile.job?.trim() && 
   profile.specialty?.trim() && 
@@ -97,15 +96,13 @@ export default function Dashboard() {
               ...data, 
               ...photosData, 
               completedCourses: data.completedCourses || [],
-              academyBaseScore: data.score || 0,
-              isVisible: data.isVisible !== false 
+              academyBaseScore: data.score || 0 
             }));
           } else {
             setProfile(prev => ({
               ...prev,
               name: user.displayName || 'NUEVO TALENTO',
-              completedCourses: [],
-              isVisible: true
+              completedCourses: []
             }));
           }
           setLoading(false);
@@ -204,10 +201,10 @@ export default function Dashboard() {
         <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[130px]" />
       </div>
 
-      {/* TOPBAR MOBILE */}
-      <header className="md:hidden fixed top-0 left-0 right-0 bg-black/60 backdrop-blur-xl border-b border-white/5 z-[100] px-8 py-6 flex justify-between items-center">
+      {/* TOPBAR MOBILE - Z-INDEX CORREGIDO */}
+      <header className="md:hidden fixed top-0 left-0 right-0 bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-white/5 z-[90] px-6 py-5 flex justify-between items-center">
         <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer">CLASSCODE</div>
-        <button onClick={() => setIsMobileMenuOpen(true)} className="text-white"><Menu size={28} /></button>
+        <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 focus:outline-none"><Menu size={28} /></button>
       </header>
 
       {/* SIDEBAR DESKTOP */}
@@ -237,25 +234,26 @@ export default function Dashboard() {
         <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-700 hover:text-red-500 text-[10px] font-black tracking-widest transition-all mt-auto pt-8 border-t border-white/5 leading-none w-full"><LogOut size={18}/> CERRAR SESIÓN</button>
       </aside>
 
-      {/* MENU MOBILE SIDEBAR OVERLAY */}
+      {/* MENU MOBILE SIDEBAR OVERLAY - Z-INDEX ALTO ASEGURADO */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }} 
-            className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[200] flex flex-col p-10 text-left md:hidden"
+            initial={{ opacity: 0, x: "100%" }} 
+            animate={{ opacity: 1, x: 0 }} 
+            exit={{ opacity: 0, x: "100%" }} 
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed inset-0 bg-[#0a0a0a] z-[300] flex flex-col p-8 text-left md:hidden overflow-y-auto"
           >
-            <div className="flex justify-between items-center mb-16">
+            <div className="flex justify-between items-center mb-12">
               <div>
-                <div onClick={() => { navigate('/home'); setIsMobileMenuOpen(false); }} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white cursor-pointer">CLASSCODE</div>
-                <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 uppercase">Talent</p>
+                <div onClick={() => { navigate('/home'); setIsMobileMenuOpen(false); }} className="text-[20px] font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white cursor-pointer">CLASSCODE</div>
+                <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-1 uppercase">Talent</p>
               </div>
-              <button onClick={() => setIsMobileMenuOpen(false)} className="text-white p-2 bg-white/5 rounded-full"><X size={24} /></button>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="text-white p-3 bg-white/5 rounded-full"><X size={24} /></button>
             </div>
 
-            <div className="mb-12">
-              <button onClick={() => { handleSwitchToClient(); setIsMobileMenuOpen(false); }} className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-5 rounded-2xl group transition-all">
+            <div className="mb-8">
+              <button onClick={() => { handleSwitchToClient(); setIsMobileMenuOpen(false); }} className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-4 rounded-2xl group transition-all">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400"><RefreshCcw size={16} /></div>
                   <div>
@@ -266,19 +264,19 @@ export default function Dashboard() {
               </button>
             </div>
 
-            <nav className="flex-1 space-y-10 flex flex-col justify-center text-left pl-4">
-              <button onClick={() => { navigate('/dashboard'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-white text-[14px] font-black tracking-[0.2em]"><LayoutDashboard size={22} className="text-purple-500"/> DASHBOARD</button>
-              <button onClick={() => { navigate('/academy'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-400 hover:text-white text-[14px] font-black tracking-[0.2em] transition-all"><GraduationCap size={22}/> ACADEMY</button>
-              <button onClick={() => { navigate(`/profile/${auth.currentUser?.uid}`); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-400 hover:text-white text-[14px] font-black tracking-[0.2em] transition-all"><Eye size={22}/> MI PERFIL PÚBLICO</button>
+            <nav className="flex-1 space-y-8 flex flex-col justify-center text-left">
+              <button onClick={() => { navigate('/dashboard'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-white text-[13px] font-black tracking-[0.2em]"><LayoutDashboard size={20} className="text-purple-500"/> DASHBOARD</button>
+              <button onClick={() => { navigate('/academy'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-400 hover:text-white text-[13px] font-black tracking-[0.2em] transition-all"><GraduationCap size={20}/> ACADEMY</button>
+              <button onClick={() => { navigate(`/profile/${auth.currentUser?.uid}`); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-400 hover:text-white text-[13px] font-black tracking-[0.2em] transition-all"><Eye size={20}/> MI PERFIL PÚBLICO</button>
             </nav>
 
-            <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-500 hover:text-red-500 text-[12px] font-black tracking-[0.2em] transition-all pt-8 border-t border-white/5 mt-auto"><LogOut size={20}/> CERRAR SESIÓN</button>
+            <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-500 hover:text-red-500 text-[11px] font-black tracking-[0.2em] transition-all pt-6 border-t border-white/5 mt-auto"><LogOut size={18}/> CERRAR SESIÓN</button>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 md:ml-72 p-6 md:p-16 mt-24 md:mt-0 space-y-8 relative z-10 w-full max-w-[1600px] mx-auto">
+      <main className="flex-1 md:ml-72 p-6 md:p-16 mt-20 md:mt-0 space-y-8 relative z-10 w-full max-w-[1600px] mx-auto">
         <header className="flex justify-between items-center bg-white/[0.02] border border-white/5 p-6 rounded-[2rem] backdrop-blur-md">
           <div className="flex items-center gap-4 md:gap-6 text-left leading-none">
             <div className="relative group w-14 h-14 md:w-16 md:h-16 flex-shrink-0 leading-none">
@@ -300,7 +298,7 @@ export default function Dashboard() {
                     {isProfileVisible ? 'VISIBLE' : 'OCULTO'}
                   </p>
                 </div>
-                <button onClick={() => setIsEditingProfile(true)} className="text-gray-600 hover:text-purple-400 transition-colors leading-none"><Edit3 size={18} /></button>
+                <button onClick={() => setIsEditingProfile(true)} className="text-gray-400 hover:text-purple-400 transition-colors p-2 leading-none"><Edit3 size={18} /></button>
               </div>
               <p className="text-[8px] md:text-[10px] text-purple-400 font-bold tracking-[0.3em] uppercase leading-none">{profile.job || 'SIN CATEGORÍA'}</p>
             </div>
@@ -310,7 +308,7 @@ export default function Dashboard() {
                 <p className="text-[14px] font-black text-white tracking-tighter italic leading-none">{calculateTotalScore(profile)} PTS</p>
                 <p className="text-[7px] text-purple-400 font-black uppercase tracking-widest mt-1 leading-none">Reputación</p>
              </div>
-             <Bell size={20} className="text-gray-600 cursor-pointer hover:text-white transition-colors" />
+             <Bell size={20} className="text-gray-400 cursor-pointer hover:text-white transition-colors" />
           </div>
         </header>
 
@@ -318,7 +316,7 @@ export default function Dashboard() {
           <div className="space-y-12">
             <section className="bg-white/[0.03] backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/5 space-y-8 shadow-2xl relative overflow-hidden group">
                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity"><Award size={100} /></div>
-               <h3 className="text-[9px] text-gray-500 font-black tracking-[0.4em] uppercase leading-none">Estatus de Carrera</h3>
+               <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase leading-none">Estatus de Carrera</h3>
                <div className="space-y-6 leading-none">
                   <div className="flex items-center gap-4 leading-none">
                     <div className={`p-4 rounded-2xl ${isGenericoDone ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-amber-500/10 text-amber-500'} leading-none`}>
@@ -326,17 +324,17 @@ export default function Dashboard() {
                     </div>
                     <div className="leading-none">
                        <p className="text-[11px] font-black uppercase tracking-widest italic leading-none">Nivelación Ingreso</p>
-                       <p className="text-[8px] text-gray-500 uppercase font-bold mt-2 leading-none">{isGenericoDone ? 'VERIFICADO' : 'PENDIENTE'}</p>
+                       <p className="text-[8px] text-gray-400 uppercase font-bold mt-2 leading-none">{isGenericoDone ? 'VERIFICADO' : 'PENDIENTE'}</p>
                     </div>
                     {!isGenericoDone && (
                       <button onClick={() => navigate('/academy-test/Generico')} className="ml-auto bg-amber-500/20 border border-amber-500/40 text-amber-500 p-3 rounded-full hover:bg-amber-500 hover:text-black transition-all cursor-pointer relative z-30"><ArrowRight size={18}/></button>
                     )}
                   </div>
                   <div className="flex items-center gap-4 leading-none">
-                    <div className={`p-4 rounded-2xl ${isProfessionalTestDone ? 'bg-purple-500/10 text-purple-400' : 'bg-white/5 text-gray-600 border border-white/5'} leading-none`}><Award size={24}/></div>
+                    <div className={`p-4 rounded-2xl ${isProfessionalTestDone ? 'bg-purple-500/10 text-purple-400' : 'bg-white/5 text-gray-400 border border-white/5'} leading-none`}><Award size={24}/></div>
                     <div className="leading-none">
                        <p className="text-[11px] font-black uppercase tracking-widest italic leading-none">Especialista {profile.job || ''}</p>
-                       <p className="text-[8px] text-gray-500 uppercase font-bold mt-2 leading-none">{isProfessionalTestDone ? 'CERTIFICADO ELITE' : profile.job ? `INVITACIÓN AL TEST DE ${profile.job.toUpperCase()}` : 'ASIGNA RUBRO'}</p>
+                       <p className="text-[8px] text-gray-400 uppercase font-bold mt-2 leading-none">{isProfessionalTestDone ? 'CERTIFICADO ELITE' : profile.job ? `INVITACIÓN AL TEST DE ${profile.job.toUpperCase()}` : 'ASIGNA RUBRO'}</p>
                     </div>
                     {(!isProfessionalTestDone && profile.job) && (
                        <button onClick={() => navigate(`/academy-test/${encodeURIComponent(profile.job)}`)} className="ml-auto bg-purple-600/20 border border-purple-500/40 text-purple-400 p-3 rounded-full hover:bg-purple-600 hover:text-white transition-all shadow-lg cursor-pointer relative z-30"><Zap size={18} fill="currentColor"/></button>
@@ -345,18 +343,18 @@ export default function Dashboard() {
                </div>
             </section>
             <section className="space-y-6 leading-none">
-               <h3 className="text-[9px] text-gray-500 font-black tracking-[0.4em] uppercase border-b border-white/5 pb-2 flex items-center gap-2 leading-none"><MessageSquare size={12}/> Mensajes</h3>
+               <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase border-b border-white/5 pb-2 flex items-center gap-2 leading-none"><MessageSquare size={12}/> Mensajes</h3>
                <div className="space-y-3 max-h-[400px] overflow-y-auto no-scrollbar pr-2 leading-none">
-                  {messages.length === 0 ? <p className="text-center py-10 text-[8px] text-gray-700 italic uppercase font-black tracking-widest leading-none">Sin conversaciones</p> : messages.map(chat => (
+                  {messages.length === 0 ? <p className="text-center py-10 text-[8px] text-gray-500 italic uppercase font-black tracking-widest leading-none">Sin conversaciones</p> : messages.map(chat => (
                     <div key={chat.id} onClick={() => navigate(`/chat/${chat.id}`)} className="flex justify-between items-center p-5 bg-white/[0.02] border border-white/5 hover:border-purple-500/30 rounded-[1.5rem] group transition-all cursor-pointer leading-none">
                        <div className="flex items-center gap-5 text-left leading-none">
-                          {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-12 h-12 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all border border-white/5" alt="" /> : <div className="w-12 h-12 rounded-full bg-white/5 text-gray-700 flex items-center justify-center leading-none"><User size={18}/></div>}
+                          {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-12 h-12 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all border border-white/5" alt="" /> : <div className="w-12 h-12 rounded-full bg-white/5 text-gray-400 flex items-center justify-center leading-none"><User size={18}/></div>}
                           <div className="leading-none">
                              <p className="text-[11px] font-black text-white uppercase tracking-tight leading-none">{chat.clientName || "USUARIO"}</p>
                              <p className="text-[8px] text-purple-400 font-black uppercase italic mt-1 leading-none">Nuevo mensaje</p>
                           </div>
                        </div>
-                       <ArrowRight size={16} className="text-gray-800 group-hover:text-purple-500 transition-all leading-none" />
+                       <ArrowRight size={16} className="text-gray-600 group-hover:text-purple-500 transition-all leading-none" />
                     </div>
                   ))}
                </div>
@@ -365,12 +363,12 @@ export default function Dashboard() {
           <div className="space-y-12">
             <div className="aspect-video bg-black rounded-[2.5rem] md:rounded-[3rem] overflow-hidden border border-white/5 relative flex items-center justify-center group shadow-2xl leading-none">
                {profile.videoLink ? <video src={profile.videoLink} controls className="w-full h-full object-cover" /> : (
-                 <div className="text-center opacity-30 group-hover:opacity-60 transition-opacity leading-none"><PlayCircle size={60} strokeWidth={1} className="text-white mx-auto leading-none"/><p className="text-[8px] font-black uppercase tracking-[0.5em] mt-4 italic leading-none">Cargar Showreel</p></div>
+                 <div className="text-center opacity-40 group-hover:opacity-80 transition-opacity leading-none"><PlayCircle size={60} strokeWidth={1} className="text-white mx-auto leading-none"/><p className="text-[8px] font-black uppercase tracking-[0.5em] mt-4 italic leading-none">Cargar Showreel</p></div>
                )}
                <input type="file" accept="video/*" onChange={handleVideoUpload} className="absolute inset-0 opacity-0 cursor-pointer z-10 leading-none" />
             </div>
             <section className="space-y-8 pb-32 leading-none">
-              <h3 className="text-[9px] text-gray-500 font-black tracking-[0.4em] uppercase border-b border-white/5 pb-2 text-left leading-none">Portfolio</h3>
+              <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase border-b border-white/5 pb-2 text-left leading-none">Portfolio</h3>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 leading-none">
                 {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
                   <div key={num} className="relative aspect-square bg-white/[0.02] border border-white/5 rounded-2xl md:rounded-3xl overflow-hidden group transition-all hover:border-purple-500/50 shadow-xl leading-none">
@@ -385,7 +383,7 @@ export default function Dashboard() {
                       </>
                     ) : (
                       <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-500/5 transition-all leading-none">
-                        <Upload size={20} className="text-gray-700 mb-2 leading-none"/><span className="text-[6px] font-black text-gray-800 uppercase tracking-widest italic">ESPACIO {num}</span>
+                        <Upload size={20} className="text-gray-500 mb-2 leading-none"/><span className="text-[6px] font-black text-gray-500 uppercase tracking-widest italic">ESPACIO {num}</span>
                         <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, `photo${num}`)} className="hidden leading-none" />
                       </label>
                     )}
@@ -397,21 +395,23 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* MODAL EDIT PROFILE */}
+      {/* MODAL EDIT PROFILE - CORREGIDO Z-INDEX Y FONDO */}
       <AnimatePresence>
         {isEditingProfile && (
-          <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[150] flex items-center justify-center p-6 antialiased uppercase leading-none overflow-y-auto">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-[#050505] border border-white/10 rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-12 max-w-md w-full space-y-12 shadow-2xl text-center relative leading-none border-t-purple-500/20 uppercase my-auto">
-              <button onClick={() => setIsEditingProfile(false)} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full leading-none"><X size={24} /></button>
-              <h3 className="text-[14px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/5 pb-6 text-left leading-none font-bold">Editar Identidad</h3>
-              <div className="space-y-8 text-left leading-none">
-                <div className="space-y-3 leading-none">
-                  <label className="text-[8px] text-gray-600 font-black uppercase tracking-[0.3em] pl-1 leading-none">Nombre Profesional</label>
-                  <input className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-[12px] font-bold uppercase outline-none focus:border-purple-500 transition-all text-white leading-none shadow-inner" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[400] flex items-center justify-center p-4 md:p-6 antialiased uppercase overflow-y-auto">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-[#121214] border border-white/15 rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-12 max-w-lg w-full space-y-8 shadow-2xl text-center relative my-auto uppercase">
+              <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full"><X size={22} /></button>
+              <h3 className="text-[14px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/10 pb-4 text-left font-bold">Editar Identidad</h3>
+              
+              <div className="space-y-6 text-left max-h-[60vh] overflow-y-auto pr-2">
+                <div className="space-y-2">
+                  <label className="text-[8px] text-gray-400 font-black uppercase tracking-[0.3em] pl-1">Nombre Profesional</label>
+                  <input className="w-full bg-black/40 border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase outline-none focus:border-purple-500 text-white" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
                 </div>
-                <div className="space-y-4 text-left">
-                  <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Especialidad</label>
-                  <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500 mb-4" 
+                
+                <div className="space-y-3">
+                  <label className="text-[8px] text-gray-400 font-black tracking-[0.3em] pl-1">Especialidad</label>
+                  <select className="w-full bg-[#1a1a1c] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500 mb-3" 
                           value={profile.job || ""} 
                           onChange={e => setProfile({...profile, job: e.target.value, specialty: ""})}>
                     <option value="">SELECCIONAR RUBRO</option>
@@ -419,7 +419,7 @@ export default function Dashboard() {
                   </select>
 
                   {profile.job && (
-                    <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
+                    <select className="w-full bg-[#1a1a1c] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
                             value={profile.specialty || ""} 
                             onChange={e => setProfile({...profile, specialty: e.target.value})}>
                       <option value="">SELECCIONAR ESPECIALIDAD</option>
@@ -429,8 +429,8 @@ export default function Dashboard() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[8px] text-gray-600 font-black tracking-[0.3em] pl-1">Ubicación</label>
-                  <select className="w-full bg-[#1a1a1a] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
+                  <label className="text-[8px] text-gray-400 font-black tracking-[0.3em] pl-1">Ubicación</label>
+                  <select className="w-full bg-[#1a1a1c] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
                           value={profile.location || ""} 
                           onChange={e => setProfile({...profile, location: e.target.value})}>
                     <option value="">SELECCIONAR PROVINCIA</option>
@@ -439,16 +439,20 @@ export default function Dashboard() {
                 </div>
 
                 <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
-                  <label className="text-[8px] text-gray-600 font-black tracking-[0.3em]">Perfil Público (Visible)</label>
-                  <input type="checkbox" checked={profile.isVisible ?? true} onChange={e => setProfile({...profile, isVisible: e.target.checked})} className="toggle toggle-primary cursor-pointer" />
+                  <label className="text-[8px] text-gray-400 font-black tracking-[0.3em]">Perfil Público (Visible)</label>
+                  <input type="checkbox" checked={profile.isVisible || false} onChange={e => setProfile({...profile, isVisible: e.target.checked})} className="toggle toggle-primary" />
                 </div>
 
-                <div className="space-y-3 leading-none">
-                  <label className="text-[8px] text-gray-600 font-black uppercase tracking-[0.3em] pl-1 leading-none">Biografía</label>
-                  <textarea className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-[11px] h-32 resize-none font-bold outline-none focus:border-purple-500 transition-all text-white font-['Open_Sans'] leading-relaxed shadow-inner" value={profile.bio} onChange={e => setProfile({...profile, bio: e.target.value})} />
+                <div className="space-y-2">
+                  <label className="text-[8px] text-gray-400 font-black uppercase tracking-[0.3em] pl-1">Biografía</label>
+                  <textarea className="w-full bg-black/40 border border-white/10 p-4 rounded-2xl text-[11px] h-28 resize-none font-bold outline-none focus:border-purple-500 text-white font-['Open_Sans']" value={profile.bio} onChange={e => setProfile({...profile, bio: e.target.value})} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 pt-4 leading-none"><button onClick={() => setIsEditingProfile(false)} className="py-5 bg-white/5 text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all hover:bg-white/10 leading-none cursor-pointer">DESCARTAR</button><button onClick={handleSaveProfileData} className="py-5 bg-purple-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-purple-900/40 hover:bg-purple-500 active:scale-95 transition-all leading-none cursor-pointer">GUARDAR</button></div>
+
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <button onClick={() => setIsEditingProfile(false)} className="py-4 bg-white/5 text-gray-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">DESCARTAR</button>
+                <button onClick={handleSaveProfileData} className="py-4 bg-purple-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-purple-900/40 hover:bg-purple-500 transition-all">GUARDAR</button>
+              </div>
             </motion.div>
           </div>
         )}
