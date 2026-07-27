@@ -10,7 +10,7 @@ import Results from './Results';
 import Dashboard from './Dashboard';   
 import ProfileP from './ProfileP';     
 import ClientProfile from './ClientProfile'; 
-import EventOrganizer from './EventOrganizer'; // <--- Importado con su nombre correcto
+import EventOrganizer from './components/EventOrganizer';
 import Academy from './Academy';       
 import Terms from './Terms';           
 import Privacy from './Privacy'; 
