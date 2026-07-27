@@ -11,6 +11,7 @@ import Dashboard from './Dashboard';
 import ProfileP from './ProfileP';     
 import ClientProfile from './ClientProfile'; 
 import EventOrganizer from './components/EventOrganizer';
+import EventDetail from './components/EventDetail';
 import Academy from './Academy';       
 import Terms from './Terms';           
 import Privacy from './Privacy'; 
@@ -47,8 +48,9 @@ function AppContent() {
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/client-profile" element={<ProtectedRoute><ClientProfile /></ProtectedRoute>} /> 
         
-        {/* --- RUTA DE ORGANIZADOR --- */}
+        {/* --- RUTAS DE ORGANIZADOR --- */}
         <Route path="/organizer" element={<ProtectedRoute><EventOrganizer /></ProtectedRoute>} /> 
+        <Route path="/organizer/:eventId" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} /> 
 
         <Route path="/academy" element={<ProtectedRoute><Academy /></ProtectedRoute>} />      
         <Route path="/academy-test/:category" element={<ProtectedRoute><AcademyTest /></ProtectedRoute>} /> 
