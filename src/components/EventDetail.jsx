@@ -1,31 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db, auth } from "../firebase";
+import { db } from "../firebase";
 import { doc, getDoc, collection, onSnapshot, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Users, LayoutGrid, DollarSign, Plus, Trash2, Edit3, Image as ImageIcon, Check, X, Calendar, MapPin } from 'lucide-react';
+import { ArrowLeft, Users, LayoutGrid, DollarSign, Plus, Trash2, Edit3, Image as ImageIcon, Check, X, Calendar, MapPin, Upload } from 'lucide-react';
 
 export default function EventDetail() {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
-  const [activeTab, setActiveTab] = useState('guests'); // 'guests' | 'tables' | 'budget'
+  const [activeTab, setActiveTab] = useState('guests');
 
-  // Estados para datos internos
   const [guests, setGuests] = useState([]);
   const [tables, setTables] = useState([]);
   const [budgetItems, setBudgetItems] = useState([]);
 
-  // Estados de edición de presupuesto
   const [editingBudgetId, setEditingBudgetId] = useState(null);
   const [editBudgetValues, setEditBudgetValues] = useState({ concept: '', estimated: 0, actual: 0 });
 
-  // Inputs temporales
   const [newGuest, setNewGuest] = useState({ name: '', table: 'Mesa 1', status: 'PENDIENTE' });
   const [newTable, setNewTable] = useState({ name: 'Mesa Principal', capacity: 10 });
   const [newBudget, setNewBudget] = useState({ concept: '', estimated: '', actual: '' });
   
-  // Estado para cambiar foto de portada
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [coverUrl, setCoverUrl] = useState('');
 
@@ -104,6 +100,23 @@ export default function EventDetail() {
     }
   };
 
+  // Manejo de subida de imagen local desde el ordenador (Base64)
+  const handleImageFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 1048576) {
+      alert("La imagen es muy pesada. Elegí una menor a 1MB para optimizar el almacenamiento.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setCoverUrl(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleUpdateCover = async (e) => {
     e.preventDefault();
     try {
@@ -119,74 +132,81 @@ export default function EventDetail() {
     await deleteDoc(doc(db, "events_organizer", eventId, subcol, id));
   };
 
-  if (!event) return <div className="min-h-screen bg-[#070709] flex items-center justify-center text-white text-[10px] tracking-[0.4em] uppercase font-['Poppins']">Cargando organizador...</div>;
+  if (!event) return <div className="min-h-screen bg-[#070709] flex items-center justify-center text-white text-[10px] tracking-[0.4em] uppercase font-['Poppins']">Cargando...</div>;
 
   const totalEstimated = budgetItems.reduce((acc, item) => acc + (Number(item.estimated) || 0), 0);
   const totalActual = budgetItems.reduce((acc, item) => acc + (Number(item.actual) || 0), 0);
   const confirmedGuestsCount = guests.filter(g => g.status === 'CONFIRMADO').length;
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] antialiased flex flex-col relative uppercase selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] antialiased flex flex-col items-center uppercase selection:bg-white selection:text-black">
       
-      {/* TOPBAR */}
-      <nav className="p-6 md:p-10 w-full sticky top-0 z-50 bg-[#070709]/90 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-[1440px] mx-auto flex justify-between items-center w-full font-['Poppins']">
-          <button onClick={() => navigate('/organizer')} className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-bold">
-            <ArrowLeft size={14}/> VOLVER AL PANEL
+      {/* TOPBAR CENTRALIZADA */}
+      <nav className="w-full border-b border-white/5 bg-[#070709]/90 backdrop-blur-xl sticky top-0 z-50 px-6 py-6 flex justify-center">
+        <div className="max-w-[1200px] w-full flex justify-between items-center font-['Poppins']">
+          <button onClick={() => navigate('/organizer')} className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] tracking-[0.3em] font-bold transition-colors">
+            <ArrowLeft size={14}/> VOLVER
           </button>
-          <div className="text-lg md:text-xl tracking-[0.05em] uppercase font-normal">{event.title}</div>
+          
+          <div className="flex flex-col items-center">
+            <span className="text-xl md:text-2xl font-semibold tracking-[0.05em] text-white">CLASSCODE</span>
+            <span className="text-[8px] font-light tracking-[0.35em] text-gray-400 self-end -mt-1">Academy</span>
+          </div>
+
           <span className="text-[8px] tracking-widest px-3 py-1 bg-white/5 border border-white/10 rounded-full text-gray-300">{event.category}</span>
         </div>
       </nav>
 
-      {/* PORTADA / BANNER DE FOTO CUSTOMIZABLE */}
-      <div className="relative w-full h-56 md:h-72 bg-[#0c0c0e] border-b border-white/10 overflow-hidden group">
-        {event.coverImage ? (
-          <img src={event.coverImage} alt={event.title} className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-white/[0.02] to-white/[0.06]">
-            <span className="text-[10px] text-gray-500 tracking-[0.3em] font-bold">SIN IMAGEN DE PORTADA</span>
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-transparent to-black/40 flex items-end p-6 md:p-12">
-          <div className="max-w-[1200px] w-full mx-auto flex justify-between items-end">
-            <div className="space-y-1">
-              <span className="text-[9px] font-black tracking-[0.3em] text-gray-400">DETALLE DEL EVENTO</span>
-              <h1 className="text-2xl md:text-4xl font-['Poppins'] font-normal text-white">{event.title}</h1>
-              <div className="flex gap-4 text-[10px] text-gray-300 font-bold pt-2">
-                {event.date && <span className="flex items-center gap-1.5"><Calendar size={13}/> {event.date}</span>}
-                {event.location && <span className="flex items-center gap-1.5"><MapPin size={13}/> {event.location}</span>}
-              </div>
+      {/* BANNER / PORTADA CENTRALIZADA */}
+      <div className="w-full max-w-[1200px] px-6 mt-8">
+        <div className="relative w-full h-64 md:h-80 bg-[#0c0c0e] border border-white/10 rounded-[2.5rem] overflow-hidden group shadow-2xl">
+          {event.coverImage ? (
+            <img src={event.coverImage} alt={event.title} className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-white/[0.02] to-white/[0.06]">
+              <span className="text-[9px] text-gray-500 tracking-[0.3em] font-bold">SIN IMAGEN DE PORTADA</span>
             </div>
-            <button onClick={() => setShowPhotoModal(true)} className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-[9px] font-black tracking-widest flex items-center gap-2 backdrop-blur-md transition-all">
-              <ImageIcon size={14}/> EDITAR PORTADA
-            </button>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-transparent to-black/30 flex items-end p-8 md:p-12">
+            <div className="w-full flex justify-between items-end">
+              <div className="space-y-2">
+                <span className="text-[8px] font-black tracking-[0.3em] text-gray-400">PANEL DE CONTROL</span>
+                <h1 className="text-2xl md:text-4xl font-['Poppins'] font-normal text-white">{event.title}</h1>
+                <div className="flex gap-4 text-[10px] text-gray-300 font-bold pt-1">
+                  {event.date && <span className="flex items-center gap-1.5"><Calendar size={13}/> {event.date}</span>}
+                  {event.location && <span className="flex items-center gap-1.5"><MapPin size={13}/> {event.location}</span>}
+                </div>
+              </div>
+              <button onClick={() => setShowPhotoModal(true)} className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-[9px] font-black tracking-widest flex items-center gap-2 backdrop-blur-md transition-all">
+                <ImageIcon size={14}/> EDITAR PORTADA
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* PESTAÑAS DE NAVEGACIÓN INTERNA */}
-      <div className="w-full bg-[#0c0c0e] border-b border-white/5 px-6 md:px-12 py-4">
-        <div className="max-w-[1200px] mx-auto flex gap-4 overflow-x-auto scrollbar-hide font-['Poppins']">
-          <button onClick={() => setActiveTab('guests')} className={`px-6 py-3 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 ${activeTab === 'guests' ? 'bg-white text-black shadow-xl' : 'bg-white/[0.03] text-gray-400 hover:text-white border border-white/10'}`}>
-            <Users size={14}/> INVITADOS ({guests.length} total / {confirmedGuestsCount} confirmados)
+      {/* PESTAÑAS DE NAVEGACIÓN INTERNA CENTRADAS */}
+      <div className="w-full max-w-[1200px] px-6 mt-8">
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide font-['Poppins'] justify-start md:justify-center">
+          <button onClick={() => setActiveTab('guests')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg ${activeTab === 'guests' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
+            <Users size={14}/> INVITADOS ({guests.length} / {confirmedGuestsCount} CONFIRM.)
           </button>
-          <button onClick={() => setActiveTab('tables')} className={`px-6 py-3 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 ${activeTab === 'tables' ? 'bg-white text-black shadow-xl' : 'bg-white/[0.03] text-gray-400 hover:text-white border border-white/10'}`}>
-            <LayoutGrid size={14}/> MESAS Y ASIENTOS ({tables.length} mesas)
+          <button onClick={() => setActiveTab('tables')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg ${activeTab === 'tables' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
+            <LayoutGrid size={14}/> MESAS ({tables.length})
           </button>
-          <button onClick={() => setActiveTab('budget')} className={`px-6 py-3 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 ${activeTab === 'budget' ? 'bg-white text-black shadow-xl' : 'bg-white/[0.03] text-gray-400 hover:text-white border border-white/10'}`}>
-            <DollarSign size={14}/> PRESUPUESTO (${totalActual} / Est: ${totalEstimated})
+          <button onClick={() => setActiveTab('budget')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg ${activeTab === 'budget' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
+            <DollarSign size={14}/> PRESUPUESTO (${totalActual} / EST. ${totalEstimated})
           </button>
         </div>
       </div>
 
-      {/* CONTENIDO SEGÚN PESTAÑA ACTIVA */}
-      <main className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 flex-1 w-full space-y-8">
+      {/* CONTENEDOR PRINCIPAL */}
+      <main className="w-full max-w-[1200px] px-6 py-8 flex-1 space-y-8">
         
         {/* VISTA 1: INVITADOS */}
         {activeTab === 'guests' && (
-          <div className="space-y-8">
-            <form onSubmit={handleAddGuest} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-3xl grid md:grid-cols-4 gap-4 font-bold items-center shadow-xl">
+          <div className="space-y-6">
+            <form onSubmit={handleAddGuest} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-[2rem] grid md:grid-cols-4 gap-4 font-bold items-center shadow-xl">
               <input placeholder="NOMBRE Y APELLIDO" value={newGuest.name} onChange={e => setNewGuest({...newGuest, name: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
               <select value={newGuest.table} onChange={e => setNewGuest({...newGuest, table: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest">
                 {tables.length === 0 ? <option>Sin mesas creadas</option> : tables.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
@@ -216,10 +236,10 @@ export default function EventDetail() {
           </div>
         )}
 
-        {/* VISTA 2: MESAS Y ASIENTOS */}
+        {/* VISTA 2: MESAS */}
         {activeTab === 'tables' && (
-          <div className="space-y-8">
-            <form onSubmit={handleAddTable} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-3xl grid md:grid-cols-3 gap-4 font-bold items-center shadow-xl">
+          <div className="space-y-6">
+            <form onSubmit={handleAddTable} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-[2rem] grid md:grid-cols-3 gap-4 font-bold items-center shadow-xl">
               <input placeholder="NOMBRE DE MESA (EJ: FAMILIA)" value={newTable.name} onChange={e => setNewTable({...newTable, name: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
               <input type="number" placeholder="CAPACIDAD (EJ: 10)" value={newTable.capacity} onChange={e => setNewTable({...newTable, capacity: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
               <button type="submit" className="py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
@@ -238,7 +258,7 @@ export default function EventDetail() {
                         <Trash2 size={14}/>
                       </button>
                     </div>
-                    <p className="text-[9px] text-gray-400 font-bold tracking-widest">Asignados: {assignedGuests.length} / {t.capacity} Asientos</p>
+                    <p className="text-[9px] text-gray-400 font-bold tracking-widest">Asignados: {assignedGuests.length} / {t.capacity}</p>
                     <div className="space-y-2 pt-2 border-t border-white/5 max-h-40 overflow-y-auto">
                       {assignedGuests.map(ag => (
                         <div key={ag.id} className="text-[10px] text-gray-300 bg-white/[0.03] px-3 py-2 rounded-xl border border-white/5 flex justify-between">
@@ -256,8 +276,8 @@ export default function EventDetail() {
 
         {/* VISTA 3: PRESUPUESTO */}
         {activeTab === 'budget' && (
-          <div className="space-y-8">
-            <form onSubmit={handleAddBudget} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-3xl grid md:grid-cols-4 gap-4 font-bold items-center shadow-xl">
+          <div className="space-y-6">
+            <form onSubmit={handleAddBudget} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-[2rem] grid md:grid-cols-4 gap-4 font-bold items-center shadow-xl">
               <input placeholder="CONCEPTO (EJ: CATERING)" value={newBudget.concept} onChange={e => setNewBudget({...newBudget, concept: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
               <input type="number" placeholder="ESTIMADO ($)" value={newBudget.estimated} onChange={e => setNewBudget({...newBudget, estimated: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" />
               <input type="number" placeholder="REAL ($)" value={newBudget.actual} onChange={e => setNewBudget({...newBudget, actual: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" />
@@ -266,7 +286,7 @@ export default function EventDetail() {
               </button>
             </form>
 
-            <div className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 overflow-x-auto shadow-xl">
+            <div className="bg-[#0c0c0e] border border-white/10 rounded-[2.5rem] p-6 overflow-x-auto shadow-xl">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-white/10 text-[9px] text-gray-400 tracking-[0.3em] font-black">
@@ -320,12 +340,12 @@ export default function EventDetail() {
 
       </main>
 
-      {/* MODAL PARA EDITAR FOTO DE PORTADA */}
+      {/* MODAL PARA CAMBIAR FOTO DE PORTADA (DESDE ORDENADOR O URL) */}
       <AnimatePresence>
         {showPhotoModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0c0c0e] w-full max-w-md p-8 rounded-[3rem] border border-white/10 relative shadow-2xl space-y-6"
+              className="bg-[#0c0c0e] w-full max-w-md p-8 rounded-[3rem] border border-white/10 relative shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
             >
               <button onClick={() => setShowPhotoModal(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
               
@@ -335,8 +355,30 @@ export default function EventDetail() {
               </div>
 
               <form onSubmit={handleUpdateCover} className="space-y-4 font-bold">
-                <input placeholder="PEGAR URL DE LA IMAGEN" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
-                <button type="submit" className="w-full py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-[0.3em] uppercase hover:bg-gray-200 transition-all">
+                <div className="space-y-2">
+                  <label className="text-[8px] tracking-[0.3em] text-gray-400">Subir desde el ordenador</label>
+                  <label className="w-full bg-white/[0.03] border border-white/10 hover:border-white/30 rounded-2xl p-4 flex items-center justify-center gap-2 cursor-pointer transition-all text-[10px] text-gray-300">
+                    <Upload size={16} />
+                    <span>Seleccionar archivo...</span>
+                    <input type="file" accept="image/*" onChange={handleImageFileChange} className="hidden" />
+                  </label>
+                </div>
+
+                <div className="relative flex py-2 items-center">
+                  <div className="flex-grow border-t border-white/10"></div>
+                  <span className="flex-shrink mx-4 text-gray-500 text-[8px] tracking-widest">O PEGAR URL</span>
+                  <div className="flex-grow border-t border-white/10"></div>
+                </div>
+
+                <input placeholder="https://..." value={coverUrl.startsWith('data:') ? '' : coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" />
+                
+                {coverUrl && (
+                  <div className="w-full h-24 rounded-xl overflow-hidden border border-white/10 mt-2">
+                    <img src={coverUrl} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
+
+                <button type="submit" className="w-full py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-[0.3em] uppercase hover:bg-gray-200 transition-all shadow-xl">
                   GUARDAR PORTADA
                 </button>
               </form>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { db, auth } from "../firebase";
 import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Plus, Calendar, MapPin, QrCode, Trash2, X, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, MapPin, QrCode, Trash2, X, ChevronRight, Image as ImageIcon } from 'lucide-react';
 
 const MACRO_CATEGORIES = [
   "CAMPAÑA",
@@ -69,6 +69,7 @@ export default function EventOrganizer() {
         date: formData.date,
         location: formData.location ? formData.location.toUpperCase() : '',
         notes: formData.notes ? formData.notes.toUpperCase() : '',
+        coverImage: '',
         status: 'PLANIFICACION',
         createdAt: serverTimestamp()
       });
@@ -87,7 +88,7 @@ export default function EventOrganizer() {
     if (!confirm("¿Eliminar este proyecto?")) return;
     try {
       await deleteDoc(doc(db, "events_organizer", id));
-    } catch (e) { console.error(e); }
+    } catch (err) { console.error(err); }
   };
 
   const handleToggleStatus = async (event, e) => {
@@ -95,13 +96,13 @@ export default function EventOrganizer() {
     const nextStatus = event.status === 'PLANIFICACION' ? 'EN_CURSO' : event.status === 'EN_CURSO' ? 'FINALIZADO' : 'PLANIFICACION';
     try {
       await updateDoc(doc(db, "events_organizer", event.id), { status: nextStatus });
-    } catch (e) { console.error(e); }
+    } catch (err) { console.error(err); }
   };
 
   return (
     <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] antialiased flex flex-col relative uppercase selection:bg-white selection:text-black">
       
-      {/* TOPBAR CON CLASSCODE LIMPIO (SIN ORGANIZADOR AL LADO) */}
+      {/* TOPBAR CON CLASSCODE LIMPIO */}
       <nav className="p-6 md:p-10 w-full sticky top-0 z-50 bg-[#070709]/90 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-[1440px] mx-auto flex justify-between items-center w-full">
           <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-bold font-['Poppins']">
@@ -141,47 +142,62 @@ export default function EventOrganizer() {
                 initial={{ opacity: 0, y: 10 }} 
                 animate={{ opacity: 1, y: 0 }}
                 onClick={() => navigate(`/organizer/${ev.id}`)}
-                className="bg-[#0c0c0e] border border-white/10 hover:border-white/30 rounded-3xl p-6 flex flex-col justify-between gap-6 relative shadow-xl cursor-pointer transition-all group"
+                className="bg-[#0c0c0e] border border-white/10 hover:border-white/30 rounded-3xl overflow-hidden flex flex-col justify-between shadow-xl cursor-pointer transition-all group"
               >
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[8px] tracking-[0.3em] font-black px-3 py-1 bg-white/5 border border-white/10 rounded-full text-gray-300">
+                {/* PORTADA EN TARJETA */}
+                <div className="relative w-full h-40 bg-black/40 overflow-hidden border-b border-white/5">
+                  {ev.coverImage ? (
+                    <img src={ev.coverImage} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-white/[0.02] to-white/[0.06]">
+                      <ImageIcon size={20} className="text-white/20" />
+                    </div>
+                  )}
+                  <div className="absolute top-3 left-3">
+                    <span className="text-[8px] tracking-[0.3em] font-black px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-gray-300">
                       {ev.category}
                     </span>
+                  </div>
+                  <div className="absolute top-3 right-3">
                     <button 
                       onClick={(e) => handleToggleStatus(ev, e)} 
-                      className={`text-[8px] tracking-widest font-black px-2.5 py-1 rounded-full border transition-all ${
-                        ev.status === 'FINALIZADO' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                        ev.status === 'EN_CURSO' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                        'bg-white/5 text-gray-400 border-white/10'
+                      className={`text-[8px] tracking-widest font-black px-2.5 py-1 rounded-full border backdrop-blur-md transition-all ${
+                        ev.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                        ev.status === 'EN_CURSO' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
+                        'bg-black/60 text-gray-300 border-white/10'
                       }`}
                     >
                       {ev.status}
                     </button>
                   </div>
-                  <h3 className="text-lg font-['Poppins'] font-normal tracking-wide text-white group-hover:text-gray-200 flex items-center justify-between">
-                    {ev.title}
-                    <ChevronRight size={16} className="text-white/40 group-hover:translate-x-1 transition-transform" />
-                  </h3>
-                  <div className="space-y-1.5 text-[10px] text-gray-400 font-bold tracking-wider">
-                    {ev.date && <p className="flex items-center gap-2"><Calendar size={13} className="text-white"/> {ev.date}</p>}
-                    {ev.location && <p className="flex items-center gap-2"><MapPin size={13} className="text-white"/> {ev.location}</p>}
-                  </div>
                 </div>
 
-                <div className="pt-4 border-t border-white/5 flex items-center justify-between gap-2">
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); setShowQrModal(true); }} 
-                    className="flex-1 py-3 px-4 rounded-xl bg-white/[0.03] hover:bg-white/10 border border-white/10 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all"
-                  >
-                    <QrCode size={14}/> QR
-                  </button>
-                  <button 
-                    onClick={(e) => handleDeleteEvent(ev.id, e)} 
-                    className="p-3 bg-white/[0.03] hover:bg-red-500/20 hover:text-red-400 border border-white/10 rounded-xl transition-all"
-                  >
-                    <Trash2 size={16}/>
-                  </button>
+                <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-['Poppins'] font-normal tracking-wide text-white group-hover:text-gray-200 flex items-center justify-between">
+                      {ev.title}
+                      <ChevronRight size={16} className="text-white/40 group-hover:translate-x-1 transition-transform" />
+                    </h3>
+                    <div className="space-y-1.5 text-[10px] text-gray-400 font-bold tracking-wider">
+                      {ev.date && <p className="flex items-center gap-2"><Calendar size={13} className="text-white"/> {ev.date}</p>}
+                      {ev.location && <p className="flex items-center gap-2"><MapPin size={13} className="text-white"/> {ev.location}</p>}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-white/5 flex items-center justify-between gap-2">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); setShowQrModal(true); }} 
+                      className="flex-1 py-3 px-4 rounded-xl bg-white/[0.03] hover:bg-white/10 border border-white/10 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all"
+                    >
+                      <QrCode size={14}/> QR
+                    </button>
+                    <button 
+                      onClick={(e) => handleDeleteEvent(ev.id, e)} 
+                      className="p-3 bg-white/[0.03] hover:bg-red-500/20 hover:text-red-400 border border-white/10 rounded-xl transition-all"
+                    >
+                      <Trash2 size={16}/>
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             ))}
