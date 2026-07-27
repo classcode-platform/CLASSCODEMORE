@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from './firebase';
 import { 
-  doc, collection, query, where, onSnapshot, updateDoc, deleteDoc, 
-  orderBy, addDoc, serverTimestamp 
+  doc, collection, query, orderBy, onSnapshot, updateDoc, deleteDoc, 
+  addDoc, serverTimestamp 
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
@@ -73,7 +73,7 @@ export default function ClientProfile() {
 
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'warning', onConfirm: null });
 
-  // Estados para la Mensajería Integrada
+  // Estados para la Mensajería Sincronizada
   const [mensajes, setMensajes] = useState([]);
   const [nuevoMensaje, setNuevoMensaje] = useState('');
   const [cargandoChat, setCargandoChat] = useState(true);
@@ -82,6 +82,7 @@ export default function ClientProfile() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
+        // Cargar Datos del Perfil
         onSnapshot(doc(db, "users", user.uid), (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
@@ -111,12 +112,36 @@ export default function ClientProfile() {
           setLoading(false);
         });
 
-        const qEvents = query(collection(db, "events_organizer"), where("userId", "==", user.uid));
+        // Cargar Eventos
+        const qEvents = query(collection(db, "events_organizer"));
         onSnapshot(qEvents, (snap) => {
-          const fetchedEvents = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          const fetchedEvents = snap.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(ev => ev.userId === user.uid);
           fetchedEvents.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
           setEvents(fetchedEvents);
         });
+
+        // Sincronización Realtime del Chat (Colección: users/{uid}/chats)
+        const qMessages = query(
+          collection(db, `users/${user.uid}/chats`), 
+          orderBy('createdAt', 'asc')
+        );
+
+        const unsubscribeMessages = onSnapshot(qMessages, (snapshot) => {
+          const msgs = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setMensajes(msgs);
+          setCargandoChat(false);
+        }, (error) => {
+          console.error("Error al sincronizar chat:", error);
+          setCargandoChat(false);
+        });
+
+        return () => unsubscribeMessages();
+
       } else { 
         navigate('/'); 
       }
@@ -124,32 +149,7 @@ export default function ClientProfile() {
     return () => unsubscribe();
   }, [navigate]);
 
-  // Sincronización en tiempo real del Chat del Cliente actual
-  useEffect(() => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
-
-    const qMessages = query(
-      collection(db, `clients/${currentUser.uid}/messages`), 
-      orderBy('createdAt', 'asc')
-    );
-
-    const unsubscribeMessages = onSnapshot(qMessages, (snapshot) => {
-      const msgs = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setMensajes(msgs);
-      setCargandoChat(false);
-    }, (error) => {
-      console.error("Error al cargar mensajes del chat:", error);
-      setCargandoChat(false);
-    });
-
-    return () => unsubscribeMessages();
-  }, [loading]);
-
-  // Auto-scroll del chat
+  // Auto-scroll al final del chat cuando llegan nuevos mensajes
   useEffect(() => {
     chatScrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [mensajes]);
@@ -159,7 +159,7 @@ export default function ClientProfile() {
     if (!nuevoMensaje.trim() || !auth.currentUser) return;
 
     try {
-      await addDoc(collection(db, `clients/${auth.currentUser.uid}/messages`), {
+      await addDoc(collection(db, `users/${auth.currentUser.uid}/chats`), {
         text: nuevoMensaje.toUpperCase(),
         senderId: auth.currentUser.uid,
         createdAt: serverTimestamp()
@@ -282,32 +282,17 @@ export default function ClientProfile() {
       {/* LUCES DINÁMICAS VIVAS DE FONDO */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <motion.div 
-          animate={{ 
-            x: [-100, 100, -100], 
-            y: [-70, 70, -70], 
-            scale: [1, 1.3, 1],
-            opacity: [0.35, 0.55, 0.35]
-          }} 
+          animate={{ x: [-100, 100, -100], y: [-70, 70, -70], scale: [1, 1.3, 1], opacity: [0.35, 0.55, 0.35] }} 
           transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }} 
           className="absolute -top-20 -left-20 w-[600px] h-[600px] bg-purple-600/40 rounded-full blur-[130px]" 
         />
         <motion.div 
-          animate={{ 
-            x: [90, -90, 90], 
-            y: [80, -80, 80], 
-            scale: [1.2, 0.9, 1.2],
-            opacity: [0.3, 0.5, 0.3]
-          }} 
+          animate={{ x: [90, -90, 90], y: [80, -80, 80], scale: [1.2, 0.9, 1.2], opacity: [0.3, 0.5, 0.3] }} 
           transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }} 
           className="absolute top-1/2 -right-20 w-[550px] h-[550px] bg-fuchsia-600/30 rounded-full blur-[140px]" 
         />
         <motion.div 
-          animate={{ 
-            x: [-50, 50, -50], 
-            y: [60, -60, 60], 
-            scale: [0.9, 1.2, 0.9],
-            opacity: [0.25, 0.45, 0.25]
-          }} 
+          animate={{ x: [-50, 50, -50], y: [60, -60, 60], scale: [0.9, 1.2, 0.9], opacity: [0.25, 0.45, 0.25] }} 
           transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }} 
           className="absolute -bottom-20 left-1/3 w-[500px] h-[500px] bg-purple-900/40 rounded-full blur-[150px]" 
         />
@@ -327,27 +312,13 @@ export default function ClientProfile() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
-              onClick={() => setIsMobileMenuOpen(false)} 
-              className="fixed inset-0 bg-black/70 backdrop-blur-md z-[110] md:hidden" 
-            />
-            <motion.div 
-              initial={{ x: '100%' }} 
-              animate={{ x: 0 }} 
-              exit={{ x: '100%' }} 
-              className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-[#0b0c10]/80 backdrop-blur-3xl border-l border-white/20 z-[120] p-10 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto"
-            >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileMenuOpen(false)} className="fixed inset-0 bg-black/70 backdrop-blur-md z-[110] md:hidden" />
+            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-[#0b0c10]/80 backdrop-blur-3xl border-l border-white/20 z-[120] p-10 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto">
               <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-10 text-white/60 hover:text-white transition-colors cursor-pointer">
                 <X size={28} />
               </button>
               
-              <button 
-                onClick={handleSwitchToTalent} 
-                className="mb-10 w-full flex items-center justify-between bg-white/[0.12] backdrop-blur-md border border-purple-400/50 p-4 rounded-xl group hover:bg-white/[0.16] transition-all cursor-pointer shadow-lg"
-              >
+              <button onClick={handleSwitchToTalent} className="mb-10 w-full flex items-center justify-between bg-white/[0.12] backdrop-blur-md border border-purple-400/50 p-4 rounded-xl group hover:bg-white/[0.16] transition-all cursor-pointer shadow-lg">
                 <div className="flex items-center gap-4 text-left leading-none">
                   <div className="p-2.5 bg-purple-500/20 rounded-lg text-purple-300 border border-purple-500/40">
                     <RefreshCcw size={16} className="group-hover:rotate-180 transition-transform duration-700" />
@@ -388,10 +359,7 @@ export default function ClientProfile() {
         </header>
         
         <div className="mb-10 text-left">
-          <button 
-            onClick={handleSwitchToTalent} 
-            className="w-full flex items-center justify-between bg-white/[0.12] backdrop-blur-md border border-purple-400/50 p-4 rounded-xl group hover:bg-white/[0.16] transition-all cursor-pointer shadow-lg"
-          >
+          <button onClick={handleSwitchToTalent} className="w-full flex items-center justify-between bg-white/[0.12] backdrop-blur-md border border-purple-400/50 p-4 rounded-xl group hover:bg-white/[0.16] transition-all cursor-pointer shadow-lg">
             <div className="flex items-center gap-3 text-left leading-none">
               <div className="p-2.5 bg-purple-500/20 rounded-lg text-purple-300 border border-purple-500/40">
                 <RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
@@ -448,10 +416,7 @@ export default function ClientProfile() {
             </div>
           </div>
           
-          <button 
-            onClick={() => setIsCreatingEvent(true)} 
-            className="px-5 py-3 bg-purple-600 backdrop-blur-md border border-purple-400/50 text-white rounded-xl text-[9px] font-black flex items-center gap-2 hover:bg-purple-500 transition-all tracking-widest font-['Poppins'] cursor-pointer shadow-xl flex-shrink-0"
-          >
+          <button onClick={() => setIsCreatingEvent(true)} className="px-5 py-3 bg-purple-600 backdrop-blur-md border border-purple-400/50 text-white rounded-xl text-[9px] font-black flex items-center gap-2 hover:bg-purple-500 transition-all tracking-widest font-['Poppins'] cursor-pointer shadow-xl flex-shrink-0">
             <Plus size={14}/> NUEVO EVENTO
           </button>
         </header>
@@ -466,21 +431,14 @@ export default function ClientProfile() {
             <div className="py-20 text-center border border-white/25 rounded-2xl bg-white/[0.06] backdrop-blur-3xl space-y-4 shadow-2xl">
               <Calendar size={36} className="mx-auto text-white/40" />
               <p className="text-[9px] text-white/70 tracking-[0.3em] font-black uppercase">No hay eventos registrados</p>
-              <button 
-                onClick={() => setIsCreatingEvent(true)} 
-                className="px-6 py-3.5 bg-purple-600 backdrop-blur-md border border-purple-400/50 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-purple-500 transition-all font-['Poppins'] cursor-pointer shadow-xl"
-              >
+              <button onClick={() => setIsCreatingEvent(true)} className="px-6 py-3.5 bg-purple-600 backdrop-blur-md border border-purple-400/50 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-purple-500 transition-all font-['Poppins'] cursor-pointer shadow-xl">
                 CREAR PRIMER EVENTO
               </button>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.map((ev, index) => (
-                <div 
-                  key={ev.id} 
-                  onClick={() => navigate(`/organizer/${ev.id}`)} 
-                  className="bg-white/[0.07] backdrop-blur-3xl border border-white/25 hover:border-purple-400/60 hover:bg-white/[0.11] rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl cursor-pointer transition-all duration-300 group box-border"
-                >
+                <div key={ev.id} onClick={() => navigate(`/organizer/${ev.id}`)} className="bg-white/[0.07] backdrop-blur-3xl border border-white/25 hover:border-purple-400/60 hover:bg-white/[0.11] rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl cursor-pointer transition-all duration-300 group box-border">
                   <div className="relative w-full h-36 bg-black/40 overflow-hidden border-b border-white/20 flex items-center justify-center">
                     {ev.coverImage ? (
                       <img src={ev.coverImage} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" />
@@ -493,14 +451,11 @@ export default function ClientProfile() {
                       </span>
                     </div>
                     <div className="absolute top-3 right-3">
-                      <button 
-                        onClick={(e) => handleToggleStatus(ev, e)} 
-                        className={`text-[7px] tracking-widest font-black px-3 py-1 rounded-full border backdrop-blur-md transition-all uppercase shadow-lg ${
-                          ev.status === 'FINALIZADO' ? 'bg-emerald-500/30 text-emerald-300 border-emerald-400/50' :
-                          ev.status === 'EN_CURSO' ? 'bg-amber-500/30 text-amber-300 border-amber-400/50' :
-                          'bg-white/20 text-white border-white/30'
-                        }`}
-                      >
+                      <button onClick={(e) => handleToggleStatus(ev, e)} className={`text-[7px] tracking-widest font-black px-3 py-1 rounded-full border backdrop-blur-md transition-all uppercase shadow-lg ${
+                        ev.status === 'FINALIZADO' ? 'bg-emerald-500/30 text-emerald-300 border-emerald-400/50' :
+                        ev.status === 'EN_CURSO' ? 'bg-amber-500/30 text-amber-300 border-amber-400/50' :
+                        'bg-white/20 text-white border-white/30'
+                      }`}>
                         {ev.status}
                       </button>
                     </div>
@@ -517,16 +472,10 @@ export default function ClientProfile() {
                     </div>
 
                     <div className="pt-4 border-t border-white/20 flex items-center justify-between gap-3">
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); setSelectedEventIndex(index); setShowLivePanel(true); }} 
-                        className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.08] backdrop-blur-md hover:bg-white/[0.15] border border-white/25 text-[8px] font-black tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer text-white shadow-lg"
-                      >
+                      <button onClick={(e) => { e.stopPropagation(); setSelectedEventIndex(index); setShowLivePanel(true); }} className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.08] backdrop-blur-md hover:bg-white/[0.15] border border-white/25 text-[8px] font-black tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer text-white shadow-lg">
                         <QrCode size={13} className="text-purple-400"/> LIVE CONTROL
                       </button>
-                      <button 
-                        onClick={(e) => confirmDelete(ev.id, e)} 
-                        className="p-2.5 bg-white/[0.08] backdrop-blur-md hover:bg-red-500/30 hover:text-red-300 border border-white/25 rounded-xl transition-all text-white/80 cursor-pointer shadow-lg"
-                      >
+                      <button onClick={(e) => confirmDelete(ev.id, e)} className="p-2.5 bg-white/[0.08] backdrop-blur-md hover:bg-red-500/30 hover:text-red-300 border border-white/25 rounded-xl transition-all text-white/80 cursor-pointer shadow-lg">
                         <Trash2 size={14}/>
                       </button>
                     </div>
@@ -563,17 +512,12 @@ export default function ClientProfile() {
                 mensajes.map((msg) => {
                   const esMio = msg.senderId === auth.currentUser?.uid;
                   return (
-                    <div 
-                      key={msg.id} 
-                      className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}
-                    >
-                      <div 
-                        className={`max-w-[75%] px-4 py-3 rounded-2xl text-[10px] shadow-lg ${
-                          esMio 
-                            ? 'bg-purple-600 text-white rounded-br-none border border-purple-400/40' 
-                            : 'bg-white/[0.08] text-white/90 rounded-bl-none border border-white/20 backdrop-blur-md'
-                        }`}
-                      >
+                    <div key={msg.id} className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}>
+                      <div className={`max-w-[75%] px-4 py-3 rounded-2xl text-[10px] shadow-lg ${
+                        esMio 
+                          ? 'bg-purple-600 text-white rounded-br-none border border-purple-400/40' 
+                          : 'bg-white/[0.08] text-white/90 rounded-bl-none border border-white/20 backdrop-blur-md'
+                      }`}>
                         <p className="tracking-wider leading-relaxed">{msg.text}</p>
                       </div>
                     </div>
@@ -592,10 +536,7 @@ export default function ClientProfile() {
                 placeholder="ESCRIBE UN MENSAJE..."
                 className="flex-1 bg-white/[0.05] backdrop-blur-md border border-white/25 rounded-xl px-4 py-3 text-[10px] text-white placeholder-white/40 focus:outline-none focus:border-purple-400 uppercase shadow-inner transition-colors"
               />
-              <button
-                type="submit"
-                className="bg-purple-600 hover:bg-purple-500 border border-purple-400/50 text-white px-5 rounded-xl transition-all flex items-center justify-center cursor-pointer shadow-xl"
-              >
+              <button type="submit" className="bg-purple-600 hover:bg-purple-500 border border-purple-400/50 text-white px-5 rounded-xl transition-all flex items-center justify-center cursor-pointer shadow-xl">
                 <Send className="w-4 h-4" />
               </button>
             </form>
@@ -618,22 +559,12 @@ export default function ClientProfile() {
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-[8px] text-white/80 tracking-widest font-black">Nombre / Organizador</label>
-                  <input 
-                    type="text" 
-                    value={editForm.name} 
-                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                    className="w-full bg-white/[0.08] backdrop-blur-md border border-white/25 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors shadow-inner"
-                    required
-                  />
+                  <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full bg-white/[0.08] backdrop-blur-md border border-white/25 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors shadow-inner" required />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[8px] text-white/80 tracking-widest font-black">Provincia</label>
-                  <select 
-                    value={editForm.province} 
-                    onChange={handleProvinceChange}
-                    className="w-full bg-[#121318] border border-white/25 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner"
-                  >
+                  <select value={editForm.province} onChange={handleProvinceChange} className="w-full bg-[#121318] border border-white/25 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner">
                     {ARGENTINE_PROVINCES.map((prov) => (
                       <option key={prov.name} value={prov.name} className="bg-[#121318] text-white">{prov.name}</option>
                     ))}
@@ -642,11 +573,7 @@ export default function ClientProfile() {
 
                 <div className="space-y-2">
                   <label className="text-[8px] text-white/80 tracking-widest font-black">Localidad / Zona</label>
-                  <select 
-                    value={editForm.locality} 
-                    onChange={(e) => setEditForm({ ...editForm, locality: e.target.value })}
-                    className="w-full bg-[#121318] border border-white/25 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner"
-                  >
+                  <select value={editForm.locality} onChange={(e) => setEditForm({ ...editForm, locality: e.target.value })} className="w-full bg-[#121318] border border-white/25 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner">
                     {selectedProvinceObj.localities.map((loc) => (
                       <option key={loc} value={loc} className="bg-[#121318] text-white">{loc}</option>
                     ))}
@@ -670,17 +597,10 @@ export default function ClientProfile() {
                 </div>
 
                 <div className="pt-4 flex justify-end gap-3">
-                  <button 
-                    type="button" 
-                    onClick={() => setIsEditingProfile(false)} 
-                    className="px-5 py-3 bg-white/[0.08] backdrop-blur-md border border-white/25 rounded-xl text-[9px] font-black tracking-widest hover:bg-white/[0.15] transition-all cursor-pointer text-white shadow-lg"
-                  >
+                  <button type="button" onClick={() => setIsEditingProfile(false)} className="px-5 py-3 bg-white/[0.08] backdrop-blur-md border border-white/25 rounded-xl text-[9px] font-black tracking-widest hover:bg-white/[0.15] transition-all cursor-pointer text-white shadow-lg">
                     Cancelar
                   </button>
-                  <button 
-                    type="submit" 
-                    className="px-6 py-3 bg-purple-600 border border-purple-400/50 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-purple-500 transition-all cursor-pointer flex items-center gap-2 shadow-xl"
-                  >
+                  <button type="submit" className="px-6 py-3 bg-purple-600 border border-purple-400/50 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-purple-500 transition-all cursor-pointer flex items-center gap-2 shadow-xl">
                     <Save size={14} /> Guardar Cambios
                   </button>
                 </div>
