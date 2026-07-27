@@ -381,7 +381,7 @@ export default function Dashboard() {
           <div className="w-full pb-6">
             <div className="w-full mx-auto box-border space-y-6">
               
-              <label className="w-full h-[180px] md:h-[260px] bg-black/40 relative group block rounded-xl border border-white/10 cursor-pointer overflow-hidden">
+              <label className="w-full h-[180px] md:h-[260px] bg-black/40 relative group block rounded-2xl overflow-hidden cursor-pointer border border-white/5">
                 {profile.videoLink ? (
                   <video 
                     src={profile.videoLink} 
@@ -392,7 +392,7 @@ export default function Dashboard() {
                     className="w-full h-full object-cover pointer-events-none opacity-90" 
                   />
                 ) : (
-                  <div className="w-full h-full bg-[#070709] flex flex-col items-center justify-center p-6 text-center border border-white/5 box-border">
+                  <div className="w-full h-full bg-[#070709] flex flex-col items-center justify-center p-6 text-center">
                     <Play size={28} className="text-white/40 mb-2" strokeWidth={1}/>
                     <span className="text-[8px] tracking-[0.4em] text-white/70 font-black">
                       {uploadingStatus.video ? 'SUBIENDO VIDEO...' : 'SIN SHOWREEL CARGADO'}
@@ -400,17 +400,17 @@ export default function Dashboard() {
                   </div>
                 )}
                 
-                <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md hover:bg-black/80 text-white px-4 py-2 rounded-lg text-[8px] font-black tracking-widest border border-white/15 transition-all flex items-center gap-2 z-20 cursor-pointer">
+                <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-md hover:bg-black/90 text-white px-4 py-2 rounded-full text-[8px] font-black tracking-widest transition-all flex items-center gap-2 z-20 cursor-pointer">
                   <Upload size={14} className="text-purple-400" /> {uploadingStatus.video ? 'SUBIENDO...' : (profile.videoLink ? 'CAMBIAR' : 'SUBIR')}
                 </div>
                 
                 <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
               </label>
 
-              <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 w-full">
+              <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 w-full px-2">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left w-full md:w-auto min-w-0">
                   
-                  <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-xl border border-white/20 overflow-hidden bg-black/50 flex-shrink-0 group">
+                  <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full border-2 border-purple-500/30 overflow-hidden bg-black/50 flex-shrink-0 group shadow-xl">
                     {profile.photo1 ? (
                       <img src={profile.photo1} className="w-full h-full object-cover" alt="" />
                     ) : (
@@ -422,7 +422,7 @@ export default function Dashboard() {
                     </label>
                   </div>
 
-                  <div className="space-y-2 min-w-0 flex-1 w-full">
+                  <div className="space-y-2 min-w-0 flex-1 w-full pt-2">
                     <h1 className="text-lg md:text-2xl font-['Poppins'] font-normal tracking-wide text-white truncate max-w-full">{profile.name || 'NUEVO TALENTO'}</h1>
                     <div className="flex items-center justify-center md:justify-start gap-2">
                       {currentJobIcon}
@@ -443,10 +443,10 @@ export default function Dashboard() {
                 </div>
 
                 <div className="flex items-center gap-3 w-full md:w-auto justify-center flex-shrink-0">
-                  <button onClick={handleViewPublicProfile} className="px-4 py-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 transition-all text-white flex items-center gap-2 text-[9px] font-black tracking-widest cursor-pointer font-['Poppins']" title="Ver perfil público">
+                  <button onClick={handleViewPublicProfile} className="px-5 py-3 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-all text-white flex items-center gap-2 text-[9px] font-black tracking-widest cursor-pointer font-['Poppins'] shadow-lg">
                     <Eye size={14} className="text-purple-400" /> <span className="hidden md:inline">VER PÚBLICO</span>
                   </button>
-                  <button onClick={() => setIsEditingProfile(true)} className="px-6 py-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 text-white font-black text-[9px] tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer font-['Poppins']">
+                  <button onClick={() => setIsEditingProfile(true)} className="px-6 py-3 rounded-full bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-white font-black text-[9px] tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer font-['Poppins'] shadow-lg">
                     <Edit3 size={14} className="text-purple-400"/> EDITAR PERFIL
                   </button>
                 </div>
