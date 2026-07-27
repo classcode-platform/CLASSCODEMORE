@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { db, auth } from "../firebase";
 import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Plus, Calendar, MapPin, QrCode, Trash2, X, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, MapPin, QrCode, Trash2, X, ChevronRight, Image as ImageIcon, User } from 'lucide-react';
 
 const MACRO_CATEGORIES = [
   "CAMPAÑA",
@@ -15,6 +15,7 @@ const MACRO_CATEGORIES = [
 
 export default function EventOrganizer() {
   const navigate = useNavigate();
+  const { clientId } = useParams();
   const [events, setEvents] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
@@ -32,10 +33,19 @@ export default function EventOrganizer() {
   useEffect(() => {
     if (!auth.currentUser) return;
     
-    const q = query(
-      collection(db, "events_organizer"),
-      where("userId", "==", auth.currentUser.uid)
-    );
+    let q;
+    if (clientId) {
+      q = query(
+        collection(db, "events_organizer"),
+        where("userId", "==", auth.currentUser.uid),
+        where("clientId", "==", clientId)
+      );
+    } else {
+      q = query(
+        collection(db, "events_organizer"),
+        where("userId", "==", auth.currentUser.uid)
+      );
+    }
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -46,7 +56,7 @@ export default function EventOrganizer() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [clientId]);
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
@@ -64,6 +74,7 @@ export default function EventOrganizer() {
     try {
       await addDoc(collection(db, "events_organizer"), {
         userId: auth.currentUser.uid,
+        clientId: clientId || '',
         title: formData.title.toUpperCase(),
         category: formData.category,
         date: formData.date,
@@ -105,7 +116,10 @@ export default function EventOrganizer() {
       {/* TOPBAR CON CLASSCODE LIMPIO */}
       <nav className="p-6 md:p-10 w-full sticky top-0 z-50 bg-[#070709]/90 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-[1440px] mx-auto flex justify-between items-center w-full">
-          <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-bold font-['Poppins']">
+          <button 
+            onClick={() => navigate(clientId ? `/organizer/client/${clientId}` : '/organizer')} 
+            className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-bold font-['Poppins'] transition-colors"
+          >
             <ArrowLeft size={14}/> VOLVER
           </button>
           
@@ -122,7 +136,7 @@ export default function EventOrganizer() {
       {/* CONTENIDO PRINCIPAL */}
       <main className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 flex-1 w-full space-y-10">
         <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-['Poppins'] font-normal tracking-wide text-white">ORGANIZADOR</h1>
+          <h1 className="text-xl font-['Poppins'] font-normal tracking-wide text-white">ORGANIZADOR DE EVENTOS</h1>
         </div>
 
         {events.length === 0 ? (
