@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from './firebase'; 
-import { collection, query, where, onSnapshot, doc, setDoc, getDoc, updateDoc, addDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, query, where, onSnapshot, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, GraduationCap, Play, 
   Upload, X, Eye, Menu, Zap, 
-  LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, 
+  LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, Plus,
   Camera as CameraIcon, Video as VideoIcon, User as UserIcon, Theater, Smartphone, PartyPopper, 
-  Clapperboard, Sparkles, Shirt, Palette, Music, Utensils, CalendarDays, Home as HomeIcon, Plus
+  Clapperboard, Sparkles, Shirt, Palette, Music, Utensils, CalendarDays, Home as HomeIcon
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,7 +21,7 @@ export default function Dashboard() {
   const [messages, setMessages] = useState([]);
   
   const [profiles, setProfiles] = useState([]);
-  const [activeProfileId, setActiveProfileId] = useState(null);
+  const [activeProfileIndex, setActiveProfileIndex] = useState(0);
 
   const [profile, setProfile] = useState({
     name: '', job: '', specialty: '', location: '', bio: '', videoLink: '', 
@@ -79,130 +79,98 @@ export default function Dashboard() {
     return bonus + (currentProfile.academyBaseScore || 0);
   };
 
+  const loadProfileDataIntoState = (profilesList, index) => {
+    const target = profilesList[index] || profilesList[0];
+    if (!target) return;
+
+    const photosData = {};
+    for (let i = 1; i <= 10; i++) {
+      photosData[`photo${i}`] = (target.photos && target.photos[i - 1]) || target[`photo${i}`] || '';
+    }
+
+    setProfile({
+      name: target.name || '',
+      job: target.job || '',
+      specialty: target.specialty || '',
+      location: target.location || '',
+      bio: target.bio || '',
+      videoLink: target.videoLink || '',
+      completedCourses: target.completedCourses || [],
+      academyBaseScore: target.academyBaseScore || 0,
+      ...photosData
+    });
+  };
+
   useEffect(() => {
-    let unsubs = [];
+    let profUnsubscribe = () => {};
+    let chatUnsubscribe = () => {};
 
-    const authUnsubscribe = onAuthStateChanged(auth, async (user) => {
+    const authUnsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        const mainDocRef = doc(db, "professionals", user.uid);
-        
-        const mainSnap = await getDoc(mainDocRef);
-        if (!mainSnap.exists()) {
-          const defaultNewProfile = {
-            uid: user.uid,
-            name: user.displayName || 'NUEVO TALENTO',
-            job: '', specialty: '', location: '', bio: '', videoLink: '', completedCourses: [], academyBaseScore: 0
-          };
-          await setDoc(mainDocRef, defaultNewProfile, { merge: true });
-        }
-
-        const unsubMain = onSnapshot(mainDocRef, (mainDoc) => {
-          const mainData = mainDoc.exists() ? { id: mainDoc.id, ...mainDoc.data() } : null;
-          
-          const qProfiles = query(collection(db, "professionals"), where("uid", "==", user.uid));
-          const unsubQuery = onSnapshot(qProfiles, (snapshot) => {
-            let list = [];
-            if (mainData) list.push(mainData);
-
-            snapshot.docs.forEach(docSnap => {
-              if (docSnap.id !== user.uid) {
-                list.push({ id: docSnap.id, ...docSnap.data() });
-              }
-            });
-
-            setProfiles(list);
-
-            setActiveProfileId(prevId => {
-              if (prevId && list.some(p => p.id === prevId)) {
-                return prevId;
-              }
-              return list[0]?.id || user.uid;
-            });
-
-            setLoading(false);
-          });
-
-          unsubs.push(unsubQuery);
+        profUnsubscribe = onSnapshot(doc(db, "professionals", user.uid), (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            let listProfiles = data.profiles && data.profiles.length > 0 ? data.profiles : [data];
+            setProfiles(listProfiles);
+            loadProfileDataIntoState(listProfiles, activeProfileIndex);
+          } else {
+            const initialProf = {
+              name: user.displayName || 'NUEVO TALENTO',
+              job: '', specialty: '', location: '', bio: '', videoLink: '', completedCourses: [], academyBaseScore: 0
+            };
+            setProfiles([initialProf]);
+            setProfile(initialProf);
+          }
+          setLoading(false);
         });
-
-        unsubs.push(unsubMain);
-
-        const qChats = query(collection(db, "chats"), where("participants", "array-contains", user.uid));
-        const unsubChats = onSnapshot(qChats, (snap) => {
+        const q = query(collection(db, "chats"), where("participants", "array-contains", user.uid));
+        chatUnsubscribe = onSnapshot(q, (snap) => {
             setMessages(snap.docs.map(chatDoc => ({ id: chatDoc.id, ...chatDoc.data() })));
         });
-        unsubs.push(unsubChats);
-
-      } else { 
-        navigate('/'); 
-      }
+      } else { navigate('/'); }
     });
 
     return () => {
       authUnsubscribe();
-      unsubs.forEach(unsub => unsub());
+      profUnsubscribe();
+      chatUnsubscribe();
     };
   }, [navigate]);
 
   useEffect(() => {
-    if (activeProfileId && profiles.length > 0) {
-      const targetProfile = profiles.find(p => p.id === activeProfileId) || profiles[0];
-      if (targetProfile) {
-        const photosData = {};
-        for (let i = 1; i <= 10; i++) {
-          photosData[`photo${i}`] = (targetProfile.photos && targetProfile.photos[i - 1]) || targetProfile[`photo${i}`] || '';
-        }
-        setProfile({
-          ...targetProfile,
-          ...photosData
-        });
-      }
+    if (profiles.length > 0) {
+      loadProfileDataIntoState(profiles, activeProfileIndex);
     }
-  }, [activeProfileId, profiles]);
-
-  const handleSwitchProfile = (id) => {
-    setActiveProfileId(id);
-  };
-
-  const handleCreateNewProfile = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const newEmptyProfile = {
-      uid: user.uid,
-      name: user.displayName || 'NUEVO TALENTO',
-      job: '', specialty: '', location: '', bio: '', videoLink: '', completedCourses: [], academyBaseScore: 0,
-      score: 15
-    };
-
-    try {
-      const docRef = await addDoc(collection(db, "professionals"), newEmptyProfile);
-      setActiveProfileId(docRef.id);
-      setModal({ isOpen: true, type: 'success', title: "NUEVO PERFIL", message: "Se ha creado un nuevo perfil independiente." });
-    } catch (e) {
-      console.error("Error al crear perfil:", e);
-    }
-  };
+  }, [activeProfileIndex, profiles]);
 
   const persistProfile = async (updatedFields) => {
     const user = auth.currentUser;
-    if (!user || !activeProfileId) return;
+    if (!user) return;
     
     const mergedCurrentProfile = { ...profile, ...updatedFields };
     const photoList = Array.from({ length: 10 }, (_, i) => mergedCurrentProfile[`photo${i + 1}`]).filter(Boolean);
     const finalScore = calculateTotalScore(mergedCurrentProfile);
 
+    const updatedProfiles = [...profiles];
+    updatedProfiles[activeProfileIndex] = { 
+      ...mergedCurrentProfile, 
+      photos: photoList,
+      score: finalScore
+    };
+
+    setProfiles(updatedProfiles);
     setProfile(mergedCurrentProfile);
 
     const dataToSave = {
       ...mergedCurrentProfile,
       photos: photoList,
       score: finalScore,
+      profiles: updatedProfiles,
       uid: user.uid
     };
 
     try {
-      await setDoc(doc(db, "professionals", activeProfileId), dataToSave, { merge: true });
+      await setDoc(doc(db, "professionals", user.uid), dataToSave, { merge: true });
     } catch (e) { console.error("Error al persistir:", e); }
   };
 
@@ -210,6 +178,41 @@ export default function Dashboard() {
     await persistProfile(profile);
     setIsEditingProfile(false);
     setModal({ isOpen: true, type: 'success', title: "ÉXITO", message: "PERFIL ACTUALIZADO." });
+  };
+
+  const handleAddNewProfile = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const newBlankProfile = {
+      name: profile.name || 'NUEVO TALENTO',
+      job: '', specialty: '', location: profile.location || '', bio: '', videoLink: '',
+      photos: [],
+      completedCourses: [],
+      academyBaseScore: 0
+    };
+    
+    for (let i = 1; i <= 10; i++) newBlankProfile[`photo${i}`] = '';
+
+    const updatedProfiles = [...profiles, newBlankProfile];
+    const newIndex = updatedProfiles.length - 1;
+
+    setProfiles(updatedProfiles);
+    setActiveProfileIndex(newIndex);
+    setProfile(newBlankProfile);
+
+    const dataToSave = {
+      ...newBlankProfile,
+      profiles: updatedProfiles,
+      uid: user.uid
+    };
+
+    try {
+      await setDoc(doc(db, "professionals", user.uid), dataToSave, { merge: true });
+      setModal({ isOpen: true, type: 'success', title: "NUEVO PERFIL", message: "SE CREÓ UN NUEVO PERFIL PROFESIONAL." });
+    } catch (e) {
+      console.error("Error al crear perfil:", e);
+    }
   };
 
   const handleSwitchToClient = async () => {
@@ -275,11 +278,8 @@ export default function Dashboard() {
   };
 
   const handleViewPublicProfile = () => {
-    if (activeProfileId) {
-      navigate(`/profile/${activeProfileId}`);
-    } else {
-      setModal({ isOpen: true, type: 'warning', title: 'ACCESO DENEGADO', message: 'No hay un perfil seleccionado para mostrar.' });
-    }
+    const userId = auth.currentUser?.uid;
+    navigate(`/profile/${userId}`);
   };
 
   if (loading) return <div className="min-h-screen w-full bg-[#0a0a0a] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-['Poppins'] overflow-x-hidden box-border">CARGANDO DASHBOARD...</div>;
@@ -295,9 +295,7 @@ export default function Dashboard() {
       </div>
 
       <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-black/60 backdrop-blur-xl border-b border-white/5 z-[100] px-8 py-6 flex justify-between items-center box-border">
-        <div onClick={() => navigate('/home')} className="flex flex-col cursor-pointer leading-none">
-          <span className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white">CLASSCODE</span>
-        </div>
+        <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer text-white">CLASSCODE</div>
         <button onClick={() => setIsMobileMenuOpen(true)} className="text-white"><Menu size={28} /></button>
       </header>
 
@@ -329,10 +327,8 @@ export default function Dashboard() {
 
       <aside className="hidden md:flex w-72 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50 box-border">
         <header className="mb-12 text-left leading-none">
-          <div onClick={() => navigate('/home')} className="flex flex-col cursor-pointer leading-none">
-            <span className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white">CLASSCODE</span>
-          </div>
-          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-3 leading-none uppercase">Talent</p>
+          <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">CLASSCODE</div>
+          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent</p>
         </header>
         
         <div className="mb-12 text-left">
@@ -362,35 +358,19 @@ export default function Dashboard() {
         <div className="flex-1 p-4 md:p-8 mt-16 md:mt-0 w-full max-w-full box-border overflow-x-hidden">
           <div className="w-full max-w-[1400px] mx-auto box-border overflow-x-hidden space-y-8">
             
-            <div className="w-full bg-[#050505] border border-white/5 rounded-2xl p-4 md:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 box-border">
-              <div className="flex items-center gap-3 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
-                <span className="text-[9px] text-gray-500 font-black tracking-widest uppercase flex-shrink-0">TUS PERFILES:</span>
-                {profiles.map((p) => {
-                  const isActive = p.id === activeProfileId;
-                  const labelName = p.job ? p.job.toUpperCase() : (p.id === auth.currentUser?.uid ? 'ESCÉNICO' : 'FOTOGRAFÍA');
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => handleSwitchProfile(p.id)}
-                      className={`px-4 py-2.5 rounded-xl text-[9px] font-black tracking-wider transition-all flex items-center gap-2 flex-shrink-0 cursor-pointer ${
-                        isActive 
-                          ? 'bg-purple-600 text-white shadow-lg border border-purple-400/30' 
-                          : 'bg-white/[0.03] text-gray-400 hover:bg-white/10 border border-white/5'
-                      }`}
-                    >
-                      <User size={12} />
-                      {labelName}
-                    </button>
-                  );
-                })}
+            {profiles.length > 0 && (
+              <div className="flex items-center gap-3 overflow-x-auto pb-2">
+                <span className="text-[8px] font-black tracking-widest text-gray-400">PERFILES ACTIVOS:</span>
+                {profiles.map((p, idx) => (
+                  <button 
+                    key={idx} 
+                    onClick={() => setActiveProfileIndex(idx)}
+                    className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-widest border transition-all uppercase cursor-pointer ${activeProfileIndex === idx ? 'bg-purple-600 border-purple-500 text-white shadow-lg' : 'bg-white/[0.03] border-white/10 text-gray-400 hover:text-white'}`}>
+                    {p.job || `PERFIL ${idx + 1}`}
+                  </button>
+                ))}
               </div>
-              <button 
-                onClick={handleCreateNewProfile}
-                className="w-full md:w-auto px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all flex-shrink-0 cursor-pointer"
-              >
-                <Plus size={14} className="text-purple-400" /> CREAR OTRO PERFIL
-              </button>
-            </div>
+            )}
 
             <div className="w-full bg-white/[0.02] border border-white/5 backdrop-blur-md rounded-2xl p-4 md:p-8 shadow-2xl box-border overflow-hidden">
               <div className="w-full mx-auto box-border">
@@ -452,6 +432,9 @@ export default function Dashboard() {
                   </div>
 
                   <div className="flex items-center gap-3 w-full md:w-auto justify-center pb-2 flex-shrink-0">
+                    <button onClick={handleAddNewProfile} className="px-4 py-4 rounded-2xl bg-white/[0.03] hover:bg-white/15 border border-white/10 transition-all text-white flex items-center gap-2 text-[9px] font-black tracking-widest cursor-pointer" title="Crear otro perfil profesional">
+                      <Plus size={16} /> <span className="hidden md:inline">NUEVO PERFIL</span>
+                    </button>
                     <button onClick={() => setIsEditingProfile(true)} className="px-6 py-4 rounded-2xl bg-purple-600 text-white font-black text-[10px] tracking-[0.3em] hover:bg-purple-500 transition-all shadow-xl flex items-center justify-center gap-2 cursor-pointer">
                       <Edit3 size={14}/> EDITAR PERFIL
                     </button>
@@ -559,10 +542,8 @@ export default function Dashboard() {
         </div>
 
         <footer className="w-full bg-black py-16 px-6 border-t border-white/5 text-center relative z-10 box-border font-['Poppins'] mt-auto">
-          <div className="max-w-[1400px] mx-auto box-border flex flex-col items-center">
-            <div className="flex flex-col items-center leading-none mb-3">
-              <span className="text-white text-2xl md:text-3xl font-normal tracking-[0.05em] uppercase opacity-30">CLASSCODE</span>
-            </div>
+          <div className="max-w-[1400px] mx-auto box-border">
+            <h2 className="text-white text-2xl md:text-3xl font-normal tracking-[0.1em] uppercase mb-3 opacity-30">CLASSCODE</h2>
             <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-gray-600 opacity-30">© 2026 — TODOS LOS DERECHOS RESERVADOS</p>
           </div>
         </footer>
