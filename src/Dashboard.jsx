@@ -60,7 +60,6 @@ export default function Dashboard() {
   const proCourseId = profile.job ? `cert_${profile.job.toLowerCase().replace(/\s/g, '')}` : null;
   const isProfessionalTestDone = proCourseId && profile.completedCourses?.includes(proCourseId);
 
-  // VISIBILIDAD DE MÍNIMO COMPROMISO: Solo requiere Nombre y Rubro básico.
   const isProfileVisible = Boolean(profile.name?.trim() && profile.job?.trim());
 
   const calculateTotalScore = (currentProfile) => {
@@ -69,7 +68,6 @@ export default function Dashboard() {
     if (currentProfile.job?.trim()) bonus += 15;
     const photoCount = Array.from({ length: 10 }, (_, i) => currentProfile[`photo${i + 1}`]).filter(Boolean).length;
     bonus += photoCount * 5; 
-    if (currentProfile.videoLink) bonus += 20;
     return bonus + (currentProfile.academyBaseScore || 0);
   };
 
@@ -208,9 +206,9 @@ export default function Dashboard() {
         </header>
         
         <div className="mb-12 text-left">
-          <button onClick={handleSwitchToClient} className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-4 rounded-2xl group hover:bg-purple-500/10 transition-all leading-none">
+          <button onClick={handleSwitchToClient} className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-4 rounded-2xl group hover:bg-purple-500/15 transition-all leading-none">
             <div className="flex items-center gap-3 text-left leading-none">
-              <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400"><RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" /></div>
+              <div className="p-2 bg-purple-500/15 rounded-lg text-purple-400"><RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" /></div>
               <div>
                 <p className="text-[6px] font-black text-gray-500 tracking-[0.2em] leading-none">SWITCH MOOD</p>
                 <p className="text-[9px] font-black text-white tracking-widest uppercase mt-1 leading-none">MODO EXPERIENCE</p>
@@ -248,7 +246,7 @@ export default function Dashboard() {
             <div className="mb-8">
               <button onClick={() => { handleSwitchToClient(); setIsMobileMenuOpen(false); }} className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-4 rounded-2xl group transition-all">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400"><RefreshCcw size={16} /></div>
+                  <div className="p-3 bg-purple-500/15 rounded-xl text-purple-400"><RefreshCcw size={16} /></div>
                   <div>
                     <p className="text-[7px] font-black text-gray-500 tracking-[0.2em]">SWITCH MOOD</p>
                     <p className="text-[10px] font-black text-white tracking-widest uppercase mt-1">MODO EXPERIENCE</p>
@@ -324,7 +322,7 @@ export default function Dashboard() {
                     )}
                   </div>
                   <div className="flex items-center gap-4 leading-none">
-                    <div className={`p-4 rounded-2xl ${isProfessionalTestDone ? 'bg-purple-500/10 text-purple-400' : 'bg-white/5 text-gray-400 border border-white/5'} leading-none`}><Award size={24}/></div>
+                    <div className={`p-4 rounded-2xl ${isProfessionalTestDone ? 'bg-purple-500/15 text-purple-400' : 'bg-white/5 text-gray-400 border border-white/5'} leading-none`}><Award size={24}/></div>
                     <div className="leading-none">
                        <p className="text-[11px] font-black uppercase tracking-widest italic leading-none">Especialista {profile.job || ''}</p>
                        <p className="text-[8px] text-gray-400 uppercase font-bold mt-2 leading-none">{isProfessionalTestDone ? 'CERTIFICADO ELITE' : profile.job ? `INVITACIÓN AL TEST DE ${profile.job.toUpperCase()}` : 'ASIGNA RUBRO'}</p>
@@ -388,63 +386,61 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* MODAL EDIT PROFILE - AISLADO Y CON Z-INDEX SOLIDO CONTRA PANTALLA NEGRA */}
-      <AnimatePresence>
-        {isEditingProfile && (
-          <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 md:p-6 bg-black/9oidal backdrop-blur-md overflow-y-auto">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-[#121214] border border-white/15 rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-12 max-w-lg w-full space-y-8 shadow-2xl text-center relative my-auto uppercase">
-              <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full"><X size={22} /></button>
-              <h3 className="text-[14px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/10 pb-4 text-left font-bold">Editar Identidad</h3>
+      {/* MODAL EDIT PROFILE - MODAL NATIVO ULTRA SEGURO CONTRA PANTALLA NEGRA */}
+      {isEditingProfile && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 md:p-6 bg-black/90 backdrop-blur-md overflow-y-auto">
+          <div className="bg-[#121214] border border-white/15 rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-12 max-w-lg w-full space-y-8 shadow-2xl text-center relative my-auto uppercase">
+            <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full"><X size={22} /></button>
+            <h3 className="text-[14px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/10 pb-4 text-left font-bold">Editar Identidad</h3>
+            
+            <div className="space-y-6 text-left max-h-[60vh] overflow-y-auto pr-2">
+              <div className="space-y-2">
+                <label className="text-[8px] text-gray-400 font-black uppercase tracking-[0.3em] pl-1">Nombre Profesional</label>
+                <input className="w-full bg-black/40 border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase outline-none focus:border-purple-500 text-white" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
+              </div>
               
-              <div className="space-y-6 text-left max-h-[60vh] overflow-y-auto pr-2">
-                <div className="space-y-2">
-                  <label className="text-[8px] text-gray-400 font-black uppercase tracking-[0.3em] pl-1">Nombre Profesional</label>
-                  <input className="w-full bg-black/40 border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase outline-none focus:border-purple-500 text-white" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
-                </div>
-                
-                <div className="space-y-3">
-                  <label className="text-[8px] text-gray-400 font-black tracking-[0.3em] pl-1">Especialidad</label>
-                  <select className="w-full bg-[#1a1a1c] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500 mb-3" 
-                          value={profile.job || ""} 
-                          onChange={e => setProfile({...profile, job: e.target.value, specialty: ""})}>
-                    <option value="">SELECCIONAR RUBRO</option>
-                    {Object.keys(RUBROS).map(rubro => <option key={rubro} value={rubro}>{rubro}</option>)}
-                  </select>
+              <div className="space-y-3">
+                <label className="text-[8px] text-gray-400 font-black tracking-[0.3em] pl-1">Especialidad</label>
+                <select className="w-full bg-[#1a1a1c] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500 mb-3" 
+                        value={profile.job || ""} 
+                        onChange={e => setProfile({...profile, job: e.target.value, specialty: ""})}>
+                  <option value="">SELECCIONAR RUBRO</option>
+                  {Object.keys(RUBROS).map(rubro => <option key={rubro} value={rubro}>{rubro}</option>)}
+                </select>
 
-                  {profile.job && (
-                    <select className="w-full bg-[#1a1a1c] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
-                            value={profile.specialty || ""} 
-                            onChange={e => setProfile({...profile, specialty: e.target.value})}>
-                      <option value="">SELECCIONAR ESPECIALIDAD</option>
-                      {RUBROS[profile.job].map(spec => <option key={spec} value={spec}>{spec.toUpperCase()}</option>)}
-                    </select>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[8px] text-gray-400 font-black tracking-[0.3em] pl-1">Ubicación</label>
+                {profile.job && (
                   <select className="w-full bg-[#1a1a1c] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
-                          value={profile.location || ""} 
-                          onChange={e => setProfile({...profile, location: e.target.value})}>
-                    <option value="">SELECCIONAR PROVINCIA</option>
-                    {PROVINCIAS.map(prov => <option key={prov} value={prov}>{prov.toUpperCase()}</option>)}
+                          value={profile.specialty || ""} 
+                          onChange={e => setProfile({...profile, specialty: e.target.value})}>
+                    <option value="">SELECCIONAR ESPECIALIDAD</option>
+                    {RUBROS[profile.job].map(spec => <option key={spec} value={spec}>{spec.toUpperCase()}</option>)}
                   </select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[8px] text-gray-400 font-black uppercase tracking-[0.3em] pl-1">Biografía</label>
-                  <textarea className="w-full bg-black/40 border border-white/10 p-4 rounded-2xl text-[11px] h-28 resize-none font-bold outline-none focus:border-purple-500 text-white font-['Open_Sans']" value={profile.bio} onChange={e => setProfile({...profile, bio: e.target.value})} />
-                </div>
+                )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <button onClick={() => setIsEditingProfile(false)} className="py-4 bg-white/5 text-gray-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">DESCARTAR</button>
-                <button onClick={handleSaveProfileData} className="py-4 bg-purple-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-purple-900/40 hover:bg-purple-500 transition-all">GUARDAR</button>
+              <div className="space-y-2">
+                <label className="text-[8px] text-gray-400 font-black tracking-[0.3em] pl-1">Ubicación</label>
+                <select className="w-full bg-[#1a1a1c] border border-white/10 p-4 rounded-2xl text-[11px] font-bold uppercase text-white outline-none focus:border-purple-500" 
+                        value={profile.location || ""} 
+                        onChange={e => setProfile({...profile, location: e.target.value})}>
+                  <option value="">SELECCIONAR PROVINCIA</option>
+                  {PROVINCIAS.map(prov => <option key={prov} value={prov}>{prov.toUpperCase()}</option>)}
+                </select>
               </div>
-            </motion.div>
+
+              <div className="space-y-2">
+                <label className="text-[8px] text-gray-400 font-black tracking-[0.3em] pl-1">Biografía</label>
+                <textarea className="w-full bg-black/40 border border-white/10 p-4 rounded-2xl text-[11px] h-28 resize-none font-bold outline-none focus:border-purple-500 text-white font-['Open_Sans']" value={profile.bio} onChange={e => setProfile({...profile, bio: e.target.value})} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <button onClick={() => setIsEditingProfile(false)} className="py-4 bg-white/5 text-gray-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">DESCARTAR</button>
+              <button onClick={handleSaveProfileData} className="py-4 bg-purple-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-purple-900/40 hover:bg-purple-500 transition-all">GUARDAR</button>
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
 
       <CustomModal isOpen={modal.isOpen} onClose={() => setModal({ ...modal, isOpen: false })} title={modal.title} message={modal.message} type={modal.type} />
     </div>
