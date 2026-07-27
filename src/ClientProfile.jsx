@@ -5,7 +5,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search, LogOut, User, Calendar, MapPin, 
-  Trash2, Plus, Edit3, LayoutGrid, ImageIcon, X, ChevronRight, QrCode, RefreshCcw
+  Trash2, Plus, Edit3, LayoutGrid, ImageIcon, X, ChevronRight, QrCode
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import EventOrganizer from './components/EventOrganizer';
@@ -79,29 +79,24 @@ export default function ClientProfile() {
   return (
     <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] flex overflow-x-hidden uppercase antialiased relative text-left">
       
-      {/* Sidebar de Navegación con Switch de Estilo Pill Elegante */}
+      {/* Sidebar de Navegación con Switch de Modos Original */}
       <aside className="hidden md:flex w-72 bg-[#070709]/90 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50">
         <header className="mb-10 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[20px] font-['Poppins'] tracking-[0.05em] cursor-pointer text-white">CLASSCODE</div>
           
-          {/* SWITCH DE MODOS: ESTILO PILL / BOTÓN ÚNICO ELEGANTE */}
-          <div className="mt-6 text-left">
+          {/* SWITCH TALENT / EXPERIENCE */}
+          <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 mt-6">
             <button 
-              onClick={() => setProfileMode(profileMode === 'experience' ? 'talent' : 'experience')} 
-              className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-3.5 rounded-full group hover:bg-purple-500/10 transition-all leading-none box-border cursor-pointer"
+              onClick={() => setProfileMode('experience')}
+              className={`flex-1 py-1.5 rounded-lg text-[8px] font-black tracking-widest transition-all ${profileMode === 'experience' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
             >
-              <div className="flex items-center gap-3 text-left leading-none">
-                <div className="p-2 bg-purple-500/10 rounded-full text-purple-400">
-                  <RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
-                </div>
-                <div>
-                  <p className="text-[6px] font-black text-gray-500 tracking-[0.2em] leading-none">MODO</p>
-                  <p className="text-[9px] font-black text-white tracking-widest uppercase mt-1 leading-none">{profileMode === 'experience' ? 'LIVE EXPERIENCE' : 'TALENT'}</p>
-                </div>
-              </div>
-              <div className="w-7 h-3.5 bg-purple-600/30 rounded-full relative p-0.5 border border-purple-500/50 flex items-center">
-                <div className={`w-2.5 h-2.5 bg-purple-400 rounded-full shadow-md transform transition-transform ${profileMode === 'talent' ? 'translate-x-3.5' : 'translate-x-0'}`}></div>
-              </div>
+              EXPERIENCE
+            </button>
+            <button 
+              onClick={() => setProfileMode('talent')}
+              className={`flex-1 py-1.5 rounded-lg text-[8px] font-black tracking-widest transition-all ${profileMode === 'talent' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
+            >
+              TALENT
             </button>
           </div>
         </header>
@@ -150,7 +145,7 @@ export default function ClientProfile() {
         {/* VISTA SEGÚN EL MODO SELECCIONADO */}
         {profileMode === 'experience' ? (
           <section className="space-y-6">
-            <h3 className="text-[10px] text-gray-400 tracking-[0.4em]">Panel Experience ({events.length})[cite: 4]</h3>
+            <h3 className="text-[10px] text-gray-400 tracking-[0.4em]">Panel Experience ({events.length})</h3>
             
             {events.length === 0 ? (
               <div className="py-20 text-center border border-white/5 rounded-3xl bg-[#0c0c0e] space-y-4">
@@ -176,7 +171,7 @@ export default function ClientProfile() {
                       )}
                       <div className="absolute top-3 left-3">
                         <span className="text-[7px] tracking-[0.3em] px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-gray-300">
-                          {ev.category || 'EVENTO'}[cite: 4]
+                          {ev.category || 'EVENTO'}
                         </span>
                       </div>
                       <div className="absolute top-3 right-3">
@@ -188,19 +183,19 @@ export default function ClientProfile() {
                             'bg-black/60 text-gray-300 border-white/10'
                           }`}
                         >
-                          {ev.status}[cite: 4]
+                          {ev.status}
                         </button>
                       </div>
                     </div>
 
                     <div className="p-6 space-y-4">
                       <h4 className="text-sm font-['Poppins'] text-white group-hover:text-gray-200 flex items-center justify-between">
-                        {ev.title}[cite: 4]
+                        {ev.title}
                         <ChevronRight size={16} className="text-white/40 group-hover:translate-x-1 transition-transform" />
                       </h4>
                       <div className="space-y-1 text-[9px] text-gray-400">
-                        {ev.date && <p className="flex items-center gap-2"><Calendar size={12}/> {ev.date}[cite: 4]</p>}
-                        {ev.location && <p className="flex items-center gap-2"><MapPin size={12}/> {ev.location}[cite: 4]</p>}
+                        {ev.date && <p className="flex items-center gap-2"><Calendar size={12}/> {ev.date}</p>}
+                        {ev.location && <p className="flex items-center gap-2"><MapPin size={12}/> {ev.location}</p>}
                       </div>
 
                       <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
@@ -225,10 +220,10 @@ export default function ClientProfile() {
           </section>
         ) : (
           <section className="space-y-6">
-            <h3 className="text-[10px] text-gray-400 tracking-[0.4em]">Panel Talent[cite: 4]</h3>
+            <h3 className="text-[10px] text-gray-400 tracking-[0.4em]">Dashboard Talent</h3>
             <div className="py-20 text-center border border-white/5 rounded-3xl bg-[#0c0c0e] space-y-4">
               <User size={32} className="mx-auto text-white/20" />
-              <p className="text-[9px] text-gray-500 tracking-[0.3em]">Vista Talent Activa</p>
+              <p className="text-[9px] text-gray-500 tracking-[0.3em]">Dashboard Talent Activo</p>
             </div>
           </section>
         )}
@@ -257,7 +252,7 @@ export default function ClientProfile() {
               
               <div className="space-y-2">
                 <span className="text-[8px] tracking-[0.3em] font-black text-gray-400">QR INVITADOS</span>
-                <h3 className="text-xl font-['Poppins'] font-normal text-white">{selectedEventForQr.title}[cite: 4]</h3>
+                <h3 className="text-xl font-['Poppins'] font-normal text-white">{selectedEventForQr.title}</h3>
               </div>
 
               <div className="w-48 h-48 mx-auto bg-white p-3 rounded-2xl flex items-center justify-center shadow-xl">
