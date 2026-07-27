@@ -181,7 +181,7 @@ export default function Dashboard() {
   if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-['Poppins']">CARGANDO DASHBOARD...</div>;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white font-['Open_Sans'] flex overflow-x-hidden uppercase antialiased relative text-left">
+    <div className="min-h-screen w-screen bg-[#0a0a0a] text-white font-['Open_Sans'] flex overflow-x-hidden uppercase antialiased relative text-left">
       
       {/* FONDO ANIMADO */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
@@ -195,7 +195,7 @@ export default function Dashboard() {
         <button onClick={() => setIsMobileMenuOpen(true)} className="text-white"><Menu size={28} /></button>
       </header>
 
-      {/* MENU MOBILE SIDEBAR ANIMADO (ESTILO CLIENT PROFILE) */}
+      {/* MENU MOBILE SIDEBAR ANIMADO */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
@@ -222,7 +222,7 @@ export default function Dashboard() {
         )}
       </AnimatePresence>
 
-      {/* SIDEBAR DESKTOP (ESTILO CLIENT PROFILE) */}
+      {/* SIDEBAR DESKTOP */}
       <aside className="hidden md:flex w-72 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50">
         <header className="mb-12 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">CLASSCODE</div>
@@ -251,11 +251,11 @@ export default function Dashboard() {
         <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-700 hover:text-red-500 text-[10px] font-black tracking-widest transition-all mt-auto pt-8 border-t border-white/5 leading-none"><LogOut size={18}/> CERRAR SESIÓN</button>
       </aside>
 
-      {/* MAIN CONTAINER CORREGIDO CON w-full y overflow-x-hidden */}
+      {/* MAIN CONTAINER */}
       <div className="flex-1 md:ml-72 p-4 md:p-8 mt-16 md:mt-0 relative z-10 w-full max-w-[1400px] mx-auto box-border overflow-x-hidden">
         
-        {/* SECCIÓN ESTILO FACEBOOK (BANNER SHOWREEL + HEADER) */}
-        <div className="w-full bg-white/[0.02] border border-white/5 backdrop-blur-md rounded-2xl p-4 md:p-8 mb-8 shadow-2xl box-border overflow-x-hidden">
+        {/* SECCIÓN ESTILO FACEBOOK */}
+        <div className="w-full max-w-full bg-white/[0.02] border border-white/5 backdrop-blur-md rounded-2xl p-4 md:p-8 mb-8 shadow-2xl box-border overflow-hidden">
           <div className="w-full max-w-[1200px] mx-auto box-border">
             
             {/* Banner / Showreel Container */}
@@ -328,7 +328,7 @@ export default function Dashboard() {
         </div>
 
         {/* CONTENIDO PRINCIPAL */}
-        <main className="w-full max-w-[1200px] mx-auto py-6 grid lg:grid-cols-12 gap-10 relative z-10 box-border">
+        <main className="w-full max-w-full py-6 grid lg:grid-cols-12 gap-10 relative z-10 box-border">
           
           {/* COLUMNA IZQUIERDA */}
           <div className="lg:col-span-4 space-y-8 min-w-0 box-border">
@@ -490,7 +490,7 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-2 gap-4 mt-8 pt-4 border-t border-white/5">
-              <button onClick={() => setIsEditingProfile(false)} className="py-4 rounded-2xl bg-white/5 text-gray-400 font-black text-[9px] tracking-[0.3em] uppercase hover:bg-white/10 transition-all">DESCARTAR</button>
+              <button onClick={() => setIsEditingProfile(false)} className="py-4 rounded-2xl bg-white/5 text-gray-400 font-black text-[9px] tracking-[0.3em] uppercase hover:bg-white/15 transition-all">DESCARTAR</button>
               <button onClick={handleSaveProfileData} className="py-4 rounded-2xl bg-purple-600 text-white font-black text-[9px] tracking-[0.3em] uppercase hover:bg-purple-500 transition-all shadow-xl">GUARDAR</button>
             </div>
           </div>
