@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db, auth } from "../firebase";
-import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Plus, Calendar, MapPin, QrCode, Trash2, X, ChevronRight } from 'lucide-react';
 
@@ -39,7 +39,7 @@ export default function EventOrganizer() {
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      docs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      docs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
       setEvents(docs);
     }, (error) => {
       console.error("Error cargando eventos:", error);
@@ -70,14 +70,14 @@ export default function EventOrganizer() {
         location: formData.location ? formData.location.toUpperCase() : '',
         notes: formData.notes ? formData.notes.toUpperCase() : '',
         status: 'PLANIFICACION',
-        createdAt: new Date().toISOString()
+        createdAt: serverTimestamp()
       });
       
       setFormData({ title: '', category: 'EVENTOS SOCIALES', date: '', location: '', notes: '' });
       setShowCreateModal(false);
     } catch (error) {
       console.error("Error al crear:", error);
-      alert("Error al guardar en Firebase. Verificá tu conexión o permisos.");
+      alert("Error al guardar en Firebase. Verificá las reglas de seguridad.");
     }
     setLoading(false);
   };
@@ -101,16 +101,15 @@ export default function EventOrganizer() {
   return (
     <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] antialiased flex flex-col relative uppercase selection:bg-white selection:text-black">
       
-      {/* TOPBAR CON LA MARCA Y EL DESCRIPTOR CHICO */}
+      {/* TOPBAR CON CLASSCODE LIMPIO (SIN ORGANIZADOR AL LADO) */}
       <nav className="p-6 md:p-10 w-full sticky top-0 z-50 bg-[#070709]/90 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-[1440px] mx-auto flex justify-between items-center w-full">
           <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-bold font-['Poppins']">
             <ArrowLeft size={14}/> VOLVER
           </button>
           
-          <div className="flex flex-col items-end font-['Poppins']">
+          <div className="font-['Poppins']">
             <span className="text-base font-normal tracking-[0.05em] uppercase leading-none">CLASSCODE</span>
-            <span className="text-[8px] font-light tracking-[0.3em] text-gray-500 uppercase mt-1">organizador</span>
           </div>
 
           <button onClick={() => setShowCreateModal(true)} className="px-5 py-2.5 rounded-xl bg-white text-black font-black text-[9px] tracking-widest hover:bg-gray-200 transition-all flex items-center gap-2 font-['Poppins']">
@@ -121,6 +120,11 @@ export default function EventOrganizer() {
 
       {/* CONTENIDO PRINCIPAL */}
       <main className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 flex-1 w-full space-y-10">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-xl font-['Poppins'] font-normal tracking-wide text-white">PROYECTOS</h1>
+          <span className="text-[9px] font-light tracking-[0.3em] text-gray-500">organizador</span>
+        </div>
+
         {events.length === 0 ? (
           <div className="py-24 text-center border border-white/5 rounded-3xl bg-[#0c0c0e] space-y-4">
             <Calendar size={32} className="mx-auto text-white/20" />
