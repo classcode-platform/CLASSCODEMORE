@@ -243,20 +243,37 @@ export default function Dashboard() {
   const handleVideoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    if (!file.type.startsWith('video/')) {
+      setModal({ isOpen: true, type: 'warning', title: 'FORMATO INCORRECTO', message: 'Por favor selecciona un archivo de video válido.' });
+      return;
+    }
+
     setUploadingStatus(prev => ({ ...prev, video: true }));
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', UPLOAD_PRESET);
+
     try {
-      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, { method: 'POST', body: formData });
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, { 
+        method: 'POST', 
+        body: formData 
+      });
+      
       const data = await response.json();
+      
       if (data?.secure_url) {
         const updates = { videoLink: data.secure_url };
         setProfile(prev => ({ ...prev, ...updates }));
         await persistProfile(updates);
+        setModal({ isOpen: true, type: 'success', title: 'SHOWREEL', message: 'Video subido y actualizado correctamente.' });
+      } else {
+        console.error("Error de Cloudinary:", data);
+        setModal({ isOpen: true, type: 'warning', title: 'ERROR DE SUBIDA', message: data.error?.message || 'No se pudo subir el video. Verifica el preset de Cloudinary.' });
       }
     } catch (err) {
-      console.error("Error al subir video:", err);
+      console.error("Error de red al subir video:", err);
+      setModal({ isOpen: true, type: 'warning', title: 'ERROR DE RED', message: 'Ocurrió un error de conexión al intentar subir el video.' });
     } finally { 
       setUploadingStatus(prev => ({ ...prev, video: false })); 
     }
@@ -308,7 +325,7 @@ export default function Dashboard() {
       <aside className="hidden md:flex w-72 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50 box-border">
         <header className="mb-12 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">CLASSCODE</div>
-          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent Dashboard</p>
+          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent</p>
         </header>
         
         <div className="mb-12 text-left">
