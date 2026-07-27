@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { db, auth } from "../firebase";
 import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Plus, Calendar, MapPin, QrCode, Trash2, X, ChevronRight, Image as ImageIcon, User } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, MapPin, QrCode, Trash2, X, ChevronRight, Image as ImageIcon } from 'lucide-react';
 
 const MACRO_CATEGORIES = [
   "CAMPAÑA",
@@ -117,7 +117,7 @@ export default function EventOrganizer() {
       <nav className="p-6 md:p-10 w-full sticky top-0 z-50 bg-[#070709]/90 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-[1440px] mx-auto flex justify-between items-center w-full">
           <button 
-            onClick={() => navigate(clientId ? `/organizer/client/${clientId}` : '/organizer')} 
+            onClick={() => navigate(clientId ? `/src/ClientProfile/${clientId}` : -1)} 
             className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-bold font-['Poppins'] transition-colors"
           >
             <ArrowLeft size={14}/> VOLVER
@@ -136,7 +136,7 @@ export default function EventOrganizer() {
       {/* CONTENIDO PRINCIPAL */}
       <main className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 flex-1 w-full space-y-10">
         <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-['Poppins'] font-normal tracking-wide text-white">ORGANIZADOR DE EVENTOS</h1>
+          <h1 className="text-xl font-['Poppins'] font-normal tracking-wide text-white">ORGANIZADOR</h1>
         </div>
 
         {events.length === 0 ? (
