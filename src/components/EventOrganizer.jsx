@@ -34,7 +34,6 @@ export default function EventOrganizer() {
     if (!auth.currentUser) return;
     
     let q;
-    // Unificación directa de la colección de eventos del organizador
     if (clientId) {
       q = query(
         collection(db, "events_organizer"),
@@ -90,7 +89,7 @@ export default function EventOrganizer() {
       setShowCreateModal(false);
     } catch (error) {
       console.error("Error al crear:", error);
-      alert("Error al guardar en Firebase. Verificá las reglas de seguridad.");
+      alert("Error al guardar en Firebase.");
     }
     setLoading(false);
   };
@@ -216,6 +215,7 @@ export default function EventOrganizer() {
         )}
       </main>
 
+      {/* Modal Crear Evento */}
       <AnimatePresence>
         {showCreateModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4">
@@ -261,6 +261,7 @@ export default function EventOrganizer() {
         )}
       </AnimatePresence>
 
+      {/* Modal QR */}
       <AnimatePresence>
         {showQrModal && selectedEvent && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4">

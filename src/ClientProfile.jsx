@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from './firebase';
-import { doc, setDoc, collection, query, where, onSnapshot, updateDoc, deleteDoc } from 'firebase/firestore';
+import { doc, collection, query, where, onSnapshot, updateDoc, deleteDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Search, LogOut, User, QrCode, Calendar, MapPin, 
-  Trash2, Plus, Edit3, Share2, Power, Link as LinkIcon, Pause, Play, LayoutGrid, ImageIcon, X
+  Search, LogOut, User, Calendar, MapPin, 
+  Trash2, Plus, Edit3, LayoutGrid, ImageIcon, X, ArrowLeft, Sliders
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import EventOrganizer from './components/EventOrganizer';
@@ -16,11 +16,12 @@ export default function ClientProfile() {
   const navigate = useNavigate();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
-  const [activeTab, setActiveTab] = useState('live'); 
+  
+  const [profileMode, setProfileMode] = useState('events'); 
   const [loading, setLoading] = useState(true);
   
   const [events, setEvents] = useState([]);
-  const [selectedEventIndex, setSelectedEventIndex] = useState(0); 
+  const [selectedEventIndex, setSelectedEventIndex] = useState(null); 
   const [profile, setProfile] = useState({ name: '', location: '', interests: '', photoURL: '' });
   const [previewImage, setPreviewImage] = useState(null);
 
@@ -47,7 +48,7 @@ export default function ClientProfile() {
     return () => unsubscribe();
   }, [navigate]);
 
-  const currentEvent = events[selectedEventIndex] || events[0];
+  const currentEvent = selectedEventIndex !== null ? events[selectedEventIndex] : null;
 
   const handleEventCreated = (newEvent) => {
     setIsCreatingEvent(false);
@@ -100,6 +101,10 @@ export default function ClientProfile() {
       type: 'warning',
       onConfirm: async () => {
         await deleteDoc(doc(db, "events", id));
+        if (selectedEventIndex !== null) {
+          setSelectedEventIndex(null);
+          setProfileMode('events');
+        }
         setModal({ isOpen: false });
       }
     });
@@ -110,7 +115,7 @@ export default function ClientProfile() {
   return (
     <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] flex overflow-x-hidden uppercase antialiased relative text-left">
       
-      {/* Sidebar */}
+      {/* Sidebar de Navegación del Perfil */}
       <aside className="hidden md:flex w-72 bg-[#070709]/90 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50">
         <header className="mb-12 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[20px] font-['Poppins'] tracking-[0.05em] cursor-pointer text-white">CLASSCODE</div>
@@ -118,12 +123,22 @@ export default function ClientProfile() {
         </header>
 
         <nav className="flex-1 space-y-6 text-left font-['Poppins']">
-          <button onClick={() => setActiveTab('live')} className={`flex items-center gap-4 text-[10px] tracking-widest transition-all ${activeTab === 'live' ? 'text-white' : 'text-gray-400'}`}>
-            <QrCode size={18}/> LIVE CONTROL
+          <button 
+            onClick={() => { setProfileMode('events'); setSelectedEventIndex(null); }} 
+            className={`flex items-center gap-4 text-[10px] tracking-widest transition-all ${profileMode === 'events' ? 'text-white' : 'text-gray-400'}`}
+          >
+            <LayoutGrid size={18}/> ORGANIZADOR
           </button>
-          <button onClick={() => setActiveTab('events')} className={`flex items-center gap-4 text-[10px] tracking-widest transition-all ${activeTab === 'events' ? 'text-white' : 'text-gray-400'}`}>
-            <LayoutGrid size={18}/> MIS EVENTOS ({events.length})
-          </button>
+
+          {currentEvent && (
+            <button 
+              onClick={() => setProfileMode('detail')} 
+              className={`flex items-center gap-4 text-[10px] tracking-widest transition-all ${profileMode === 'detail' ? 'text-white' : 'text-gray-400'}`}
+            >
+              <Sliders size={18}/> LIVE CONTROL
+            </button>
+          )}
+          
           <button onClick={() => navigate('/home')} className="flex items-center gap-4 text-gray-400 hover:text-white text-[10px] tracking-widest transition-all">
             <Search size={18}/> EXPLORAR
           </button>
@@ -134,9 +149,10 @@ export default function ClientProfile() {
         </button>
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <main className="flex-1 md:ml-72 p-6 md:p-12 mt-16 md:mt-0 relative z-10 w-full max-w-[1400px] mx-auto space-y-8">
         
+        {/* Header del Perfil */}
         <header className="flex justify-between items-center bg-[#0c0c0e] border border-white/5 p-5 md:p-6 rounded-3xl backdrop-blur-md shadow-xl">
           <div className="flex items-center gap-5">
             <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center">
@@ -156,35 +172,27 @@ export default function ClientProfile() {
           </button>
         </header>
 
-        {activeTab === 'live' && (
-          <LiveControlPanel 
-            currentEvent={currentEvent}
-            events={events}
-            selectedEventIndex={selectedEventIndex}
-            setSelectedEventIndex={setSelectedEventIndex}
-            onTogglePause={togglePause}
-            onConfirmFinish={confirmFinish}
-            onCopyGuestLink={copyGuestLink}
-            onShareTV={handleShareTV}
-            onOpenTV={handleOpenTV}
-            onOpenCreate={() => setIsCreatingEvent(true)}
-            setPreviewImage={setPreviewImage}
-          />
-        )}
-
-        {activeTab === 'events' && (
+        {/* MODO 1: VISTA DE ORGANIZADOR (PRINCIPAL) */}
+        {profileMode === 'events' && (
           <section className="space-y-6">
-            <h3 className="text-[10px] text-gray-400 tracking-[0.4em]">Gestión de Eventos Creados</h3>
+            <h3 className="text-[10px] text-gray-400 tracking-[0.4em]">Panel de Organización ({events.length})</h3>
             
             {events.length === 0 ? (
               <div className="py-20 text-center border border-white/5 rounded-3xl bg-[#0c0c0e] space-y-4">
                 <Calendar size={32} className="mx-auto text-white/20" />
                 <p className="text-[9px] text-gray-500 tracking-[0.3em]">No hay eventos registrados</p>
+                <button onClick={() => setIsCreatingEvent(true)} className="px-6 py-3 bg-white text-black rounded-xl text-[9px] tracking-widest hover:bg-gray-200 transition-all font-['Poppins']">
+                  CREAR PRIMER EVENTO
+                </button>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {events.map((ev, idx) => (
-                  <div key={ev.id} onClick={() => { setSelectedEventIndex(idx); setActiveTab('live'); }} className="bg-[#0c0c0e] border border-white/10 hover:border-white/30 rounded-3xl overflow-hidden flex flex-col justify-between shadow-xl cursor-pointer transition-all group">
+                  <div 
+                    key={ev.id} 
+                    onClick={() => { setSelectedEventIndex(idx); setProfileMode('detail'); }} 
+                    className="bg-[#0c0c0e] border border-white/10 hover:border-white/30 rounded-3xl overflow-hidden flex flex-col justify-between shadow-xl cursor-pointer transition-all group"
+                  >
                     <div className="relative w-full h-36 bg-black/40 overflow-hidden border-b border-white/5 flex items-center justify-center">
                       <ImageIcon size={24} className="text-white/20" />
                       <div className="absolute top-3 left-3">
@@ -202,7 +210,7 @@ export default function ClientProfile() {
                       </div>
 
                       <div className="pt-3 border-t border-white/5 flex items-center justify-between">
-                        <span className="text-[8px] text-emerald-400 tracking-widest">VER LIVE CONTROL</span>
+                        <span className="text-[8px] text-emerald-400 tracking-widest">VER DETALLE / LIVE</span>
                         <button onClick={(e) => confirmDelete(ev.id, e)} className="p-2 text-gray-500 hover:text-red-400 transition-colors"><Trash2 size={14}/></button>
                       </div>
                     </div>
@@ -213,9 +221,35 @@ export default function ClientProfile() {
           </section>
         )}
 
+        {/* MODO 2: DETALLE DEL EVENTO Y PANEL LIVE CONTROL */}
+        {profileMode === 'detail' && currentEvent && (
+          <div className="space-y-6">
+            <button 
+              onClick={() => { setProfileMode('events'); setSelectedEventIndex(null); }}
+              className="flex items-center gap-2 text-[9px] text-gray-400 hover:text-white tracking-widest transition-colors font-['Poppins']"
+            >
+              <ArrowLeft size={14}/> VOLVER A ORGANIZADOR
+            </button>
+
+            <LiveControlPanel 
+              currentEvent={currentEvent}
+              events={events}
+              selectedEventIndex={selectedEventIndex}
+              setSelectedEventIndex={setSelectedEventIndex}
+              onTogglePause={togglePause}
+              onConfirmFinish={confirmFinish}
+              onCopyGuestLink={copyGuestLink}
+              onShareTV={handleShareTV}
+              onOpenTV={handleOpenTV}
+              onOpenCreate={() => setIsCreatingEvent(true)}
+              setPreviewImage={setPreviewImage}
+            />
+          </div>
+        )}
+
       </main>
 
-      {/* Modal Organizer */}
+      {/* Organizador y Creador de Eventos (Modal con QR y logica de alta) */}
       <AnimatePresence>
         {isCreatingEvent && (
           <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[250] flex items-center justify-center p-4 uppercase">
@@ -229,6 +263,7 @@ export default function ClientProfile() {
         )}
       </AnimatePresence>
 
+      {/* Visor de Imágenes en Pantalla Completa */}
       <AnimatePresence>
         {previewImage && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPreviewImage(null)} className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out">
