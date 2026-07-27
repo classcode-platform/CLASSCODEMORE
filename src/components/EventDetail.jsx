@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { db, auth } from "../firebase";
 import { doc, getDoc, collection, onSnapshot, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Users, LayoutGrid, DollarSign, Plus, Trash2, QrCode, X, Check, Clock } from 'lucide-react';
+import { ArrowLeft, Users, LayoutGrid, DollarSign, Plus, Trash2, Edit3, Image as ImageIcon, Check, X, Calendar, MapPin } from 'lucide-react';
 
 export default function EventDetail() {
   const { eventId } = useParams();
@@ -16,21 +16,30 @@ export default function EventDetail() {
   const [tables, setTables] = useState([]);
   const [budgetItems, setBudgetItems] = useState([]);
 
+  // Estados de edición de presupuesto
+  const [editingBudgetId, setEditingBudgetId] = useState(null);
+  const [editBudgetValues, setEditBudgetValues] = useState({ concept: '', estimated: 0, actual: 0 });
+
   // Inputs temporales
   const [newGuest, setNewGuest] = useState({ name: '', table: 'Mesa 1', status: 'PENDIENTE' });
   const [newTable, setNewTable] = useState({ name: 'Mesa Principal', capacity: 10 });
   const [newBudget, setNewBudget] = useState({ concept: '', estimated: '', actual: '' });
+  
+  // Estado para cambiar foto de portada
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [coverUrl, setCoverUrl] = useState('');
 
   useEffect(() => {
     if (!eventId) return;
-    // Cargar datos del evento principal
     const fetchEvent = async () => {
       const docSnap = await getDoc(doc(db, "events_organizer", eventId));
-      if (docSnap.exists()) setEvent(docSnap.data());
+      if (docSnap.exists()) {
+        setEvent(docSnap.data());
+        setCoverUrl(docSnap.data().coverImage || '');
+      }
     };
     fetchEvent();
 
-    // Subscripciones a subcolecciones
     const unsubGuests = onSnapshot(collection(db, "events_organizer", eventId, "guests"), (snap) => {
       setGuests(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
@@ -50,7 +59,6 @@ export default function EventDetail() {
     };
   }, [eventId]);
 
-  // Funciones de adición
   const handleAddGuest = async (e) => {
     e.preventDefault();
     if (!newGuest.name) return;
@@ -59,7 +67,7 @@ export default function EventDetail() {
       table: newGuest.table,
       status: newGuest.status
     });
-    setNewGuest({ name: '', table: 'Mesa 1', status: 'PENDIENTE' });
+    setNewGuest({ name: '', table: tables[0]?.name || 'Mesa 1', status: 'PENDIENTE' });
   };
 
   const handleAddTable = async (e) => {
@@ -83,11 +91,39 @@ export default function EventDetail() {
     setNewBudget({ concept: '', estimated: '', actual: '' });
   };
 
+  const handleUpdateBudget = async (id) => {
+    try {
+      await updateDoc(doc(db, "events_organizer", eventId, "budget", id), {
+        concept: editBudgetValues.concept.toUpperCase(),
+        estimated: Number(editBudgetValues.estimated) || 0,
+        actual: Number(editBudgetValues.actual) || 0
+      });
+      setEditingBudgetId(null);
+    } catch (error) {
+      console.error("Error al actualizar presupuesto:", error);
+    }
+  };
+
+  const handleUpdateCover = async (e) => {
+    e.preventDefault();
+    try {
+      await updateDoc(doc(db, "events_organizer", eventId), { coverImage: coverUrl });
+      setEvent({ ...event, coverImage: coverUrl });
+      setShowPhotoModal(false);
+    } catch (error) {
+      console.error("Error al actualizar portada:", error);
+    }
+  };
+
   const handleDelete = async (subcol, id) => {
     await deleteDoc(doc(db, "events_organizer", eventId, subcol, id));
   };
 
   if (!event) return <div className="min-h-screen bg-[#070709] flex items-center justify-center text-white text-[10px] tracking-[0.4em] uppercase font-['Poppins']">Cargando organizador...</div>;
+
+  const totalEstimated = budgetItems.reduce((acc, item) => acc + (Number(item.estimated) || 0), 0);
+  const totalActual = budgetItems.reduce((acc, item) => acc + (Number(item.actual) || 0), 0);
+  const confirmedGuestsCount = guests.filter(g => g.status === 'CONFIRMADO').length;
 
   return (
     <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] antialiased flex flex-col relative uppercase selection:bg-white selection:text-black">
@@ -103,17 +139,43 @@ export default function EventDetail() {
         </div>
       </nav>
 
+      {/* PORTADA / BANNER DE FOTO CUSTOMIZABLE */}
+      <div className="relative w-full h-56 md:h-72 bg-[#0c0c0e] border-b border-white/10 overflow-hidden group">
+        {event.coverImage ? (
+          <img src={event.coverImage} alt={event.title} className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-white/[0.02] to-white/[0.06]">
+            <span className="text-[10px] text-gray-500 tracking-[0.3em] font-bold">SIN IMAGEN DE PORTADA</span>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-transparent to-black/40 flex items-end p-6 md:p-12">
+          <div className="max-w-[1200px] w-full mx-auto flex justify-between items-end">
+            <div className="space-y-1">
+              <span className="text-[9px] font-black tracking-[0.3em] text-gray-400">DETALLE DEL EVENTO</span>
+              <h1 className="text-2xl md:text-4xl font-['Poppins'] font-normal text-white">{event.title}</h1>
+              <div className="flex gap-4 text-[10px] text-gray-300 font-bold pt-2">
+                {event.date && <span className="flex items-center gap-1.5"><Calendar size={13}/> {event.date}</span>}
+                {event.location && <span className="flex items-center gap-1.5"><MapPin size={13}/> {event.location}</span>}
+              </div>
+            </div>
+            <button onClick={() => setShowPhotoModal(true)} className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-[9px] font-black tracking-widest flex items-center gap-2 backdrop-blur-md transition-all">
+              <ImageIcon size={14}/> EDITAR PORTADA
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* PESTAÑAS DE NAVEGACIÓN INTERNA */}
       <div className="w-full bg-[#0c0c0e] border-b border-white/5 px-6 md:px-12 py-4">
         <div className="max-w-[1200px] mx-auto flex gap-4 overflow-x-auto scrollbar-hide font-['Poppins']">
           <button onClick={() => setActiveTab('guests')} className={`px-6 py-3 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 ${activeTab === 'guests' ? 'bg-white text-black shadow-xl' : 'bg-white/[0.03] text-gray-400 hover:text-white border border-white/10'}`}>
-            <Users size={14}/> LISTA DE INVITADOS ({guests.length})
+            <Users size={14}/> INVITADOS ({guests.length} total / {confirmedGuestsCount} confirmados)
           </button>
           <button onClick={() => setActiveTab('tables')} className={`px-6 py-3 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 ${activeTab === 'tables' ? 'bg-white text-black shadow-xl' : 'bg-white/[0.03] text-gray-400 hover:text-white border border-white/10'}`}>
-            <LayoutGrid size={14}/> MESAS Y ASIENTOS ({tables.length})
+            <LayoutGrid size={14}/> MESAS Y ASIENTOS ({tables.length} mesas)
           </button>
           <button onClick={() => setActiveTab('budget')} className={`px-6 py-3 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 ${activeTab === 'budget' ? 'bg-white text-black shadow-xl' : 'bg-white/[0.03] text-gray-400 hover:text-white border border-white/10'}`}>
-            <DollarSign size={14}/> PRESUPUESTO Y GASTOS
+            <DollarSign size={14}/> PRESUPUESTO (${totalActual} / Est: ${totalEstimated})
           </button>
         </div>
       </div>
@@ -124,7 +186,7 @@ export default function EventDetail() {
         {/* VISTA 1: INVITADOS */}
         {activeTab === 'guests' && (
           <div className="space-y-8">
-            <form onSubmit={handleAddGuest} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-3xl grid md:grid-cols-4 gap-4 font-bold items-center">
+            <form onSubmit={handleAddGuest} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-3xl grid md:grid-cols-4 gap-4 font-bold items-center shadow-xl">
               <input placeholder="NOMBRE Y APELLIDO" value={newGuest.name} onChange={e => setNewGuest({...newGuest, name: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
               <select value={newGuest.table} onChange={e => setNewGuest({...newGuest, table: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest">
                 {tables.length === 0 ? <option>Sin mesas creadas</option> : tables.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
@@ -157,8 +219,8 @@ export default function EventDetail() {
         {/* VISTA 2: MESAS Y ASIENTOS */}
         {activeTab === 'tables' && (
           <div className="space-y-8">
-            <form onSubmit={handleAddTable} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-3xl grid md:grid-cols-3 gap-4 font-bold items-center">
-              <input placeholder="NOMBRE DE MESA (EJ: MESA FAMILIA)" value={newTable.name} onChange={e => setNewTable({...newTable, name: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
+            <form onSubmit={handleAddTable} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-3xl grid md:grid-cols-3 gap-4 font-bold items-center shadow-xl">
+              <input placeholder="NOMBRE DE MESA (EJ: FAMILIA)" value={newTable.name} onChange={e => setNewTable({...newTable, name: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
               <input type="number" placeholder="CAPACIDAD (EJ: 10)" value={newTable.capacity} onChange={e => setNewTable({...newTable, capacity: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
               <button type="submit" className="py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
                 <Plus size={14}/> CREAR MESA
@@ -176,7 +238,7 @@ export default function EventDetail() {
                         <Trash2 size={14}/>
                       </button>
                     </div>
-                    <p className="text-[9px] text-gray-400 font-bold tracking-widest">Capacidad: {assignedGuests.length} / {t.capacity} Asientos</p>
+                    <p className="text-[9px] text-gray-400 font-bold tracking-widest">Asignados: {assignedGuests.length} / {t.capacity} Asientos</p>
                     <div className="space-y-2 pt-2 border-t border-white/5 max-h-40 overflow-y-auto">
                       {assignedGuests.map(ag => (
                         <div key={ag.id} className="text-[10px] text-gray-300 bg-white/[0.03] px-3 py-2 rounded-xl border border-white/5 flex justify-between">
@@ -195,10 +257,10 @@ export default function EventDetail() {
         {/* VISTA 3: PRESUPUESTO */}
         {activeTab === 'budget' && (
           <div className="space-y-8">
-            <form onSubmit={handleAddBudget} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-3xl grid md:grid-cols-4 gap-4 font-bold items-center">
-              <input placeholder="CONCEPTO (EJ: CATERING / FOTO)" value={newBudget.concept} onChange={e => setNewBudget({...newBudget, concept: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
-              <input type="number" placeholder="COSTO ESTIMADO ($)" value={newBudget.estimated} onChange={e => setNewBudget({...newBudget, estimated: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" />
-              <input type="number" placeholder="COSTO REAL ($)" value={newBudget.actual} onChange={e => setNewBudget({...newBudget, actual: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" />
+            <form onSubmit={handleAddBudget} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-3xl grid md:grid-cols-4 gap-4 font-bold items-center shadow-xl">
+              <input placeholder="CONCEPTO (EJ: CATERING)" value={newBudget.concept} onChange={e => setNewBudget({...newBudget, concept: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
+              <input type="number" placeholder="ESTIMADO ($)" value={newBudget.estimated} onChange={e => setNewBudget({...newBudget, estimated: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" />
+              <input type="number" placeholder="REAL ($)" value={newBudget.actual} onChange={e => setNewBudget({...newBudget, actual: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" />
               <button type="submit" className="py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
                 <Plus size={14}/> AGREGAR GASTO
               </button>
@@ -211,22 +273,45 @@ export default function EventDetail() {
                     <th className="pb-4">Concepto</th>
                     <th className="pb-4">Estimado</th>
                     <th className="pb-4">Real</th>
-                    <th className="pb-4 text-right">Acción</th>
+                    <th className="pb-4 text-right">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5 text-[10px] font-bold">
-                  {budgetItems.map(b => (
-                    <tr key={b.id}>
-                      <td className="py-4 text-white">{b.concept}</td>
-                      <td className="py-4 text-gray-300">${b.estimated}</td>
-                      <td className="py-4 text-white">${b.actual}</td>
-                      <td className="py-4 text-right">
-                        <button onClick={() => handleDelete('budget', b.id)} className="p-2 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all">
-                          <Trash2 size={14}/>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {budgetItems.map(b => {
+                    const isEditing = editingBudgetId === b.id;
+                    return (
+                      <tr key={b.id}>
+                        <td className="py-4 text-white">
+                          {isEditing ? (
+                            <input value={editBudgetValues.concept} onChange={e => setEditBudgetValues({...editBudgetValues, concept: e.target.value})} className="bg-black border border-white/20 rounded-xl p-2 text-white outline-none w-full" />
+                          ) : b.concept}
+                        </td>
+                        <td className="py-4 text-gray-300">
+                          {isEditing ? (
+                            <input type="number" value={editBudgetValues.estimated} onChange={e => setEditBudgetValues({...editBudgetValues, estimated: e.target.value})} className="bg-black border border-white/20 rounded-xl p-2 text-white outline-none w-24" />
+                          ) : `$${b.estimated}`}
+                        </td>
+                        <td className="py-4 text-white">
+                          {isEditing ? (
+                            <input type="number" value={editBudgetValues.actual} onChange={e => setEditBudgetValues({...editBudgetValues, actual: e.target.value})} className="bg-black border border-white/20 rounded-xl p-2 text-white outline-none w-24" />
+                          ) : `$${b.actual}`}
+                        </td>
+                        <td className="py-4 text-right flex items-center justify-end gap-2">
+                          {isEditing ? (
+                            <>
+                              <button onClick={() => handleUpdateBudget(b.id)} className="p-2 bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl"><Check size={14}/></button>
+                              <button onClick={() => setEditingBudgetId(null)} className="p-2 bg-white/5 text-gray-400 border border-white/10 rounded-xl"><X size={14}/></button>
+                            </>
+                          ) : (
+                            <>
+                              <button onClick={() => { setEditingBudgetId(b.id); setEditBudgetValues({ concept: b.concept, estimated: b.estimated, actual: b.actual }); }} className="p-2 bg-white/[0.03] hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 rounded-xl transition-all"><Edit3 size={14}/></button>
+                              <button onClick={() => handleDelete('budget', b.id)} className="p-2 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all"><Trash2 size={14}/></button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -234,6 +319,32 @@ export default function EventDetail() {
         )}
 
       </main>
+
+      {/* MODAL PARA EDITAR FOTO DE PORTADA */}
+      <AnimatePresence>
+        {showPhotoModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-[#0c0c0e] w-full max-w-md p-8 rounded-[3rem] border border-white/10 relative shadow-2xl space-y-6"
+            >
+              <button onClick={() => setShowPhotoModal(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
+              
+              <div className="space-y-2 text-center">
+                <span className="text-[8px] tracking-[0.3em] font-black text-gray-400">CUSTOMIZACIÓN</span>
+                <h3 className="text-xl font-['Poppins'] font-normal text-white">Imagen de Portada</h3>
+              </div>
+
+              <form onSubmit={handleUpdateCover} className="space-y-4 font-bold">
+                <input placeholder="PEGAR URL DE LA IMAGEN" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
+                <button type="submit" className="w-full py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-[0.3em] uppercase hover:bg-gray-200 transition-all">
+                  GUARDAR PORTADA
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
