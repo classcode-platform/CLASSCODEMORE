@@ -31,6 +31,10 @@ export default function EventDetail() {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [locationValue, setLocationValue] = useState('');
 
+  // Estados para editar la fecha
+  const [showDateModal, setShowDateModal] = useState(false);
+  const [dateValue, setDateValue] = useState('');
+
   useEffect(() => {
     if (!eventId) return;
     const fetchEvent = async () => {
@@ -40,6 +44,7 @@ export default function EventDetail() {
         setEvent(data);
         setCoverUrl(data.coverImage || '');
         setLocationValue(data.location || '');
+        setDateValue(data.date || '');
       }
     };
     fetchEvent();
@@ -153,6 +158,18 @@ export default function EventDetail() {
     }
   };
 
+  const handleUpdateDate = async (e) => {
+    e.preventDefault();
+    try {
+      const formattedDate = dateValue.trim().toUpperCase();
+      await updateDoc(doc(db, "events_organizer", eventId), { date: formattedDate });
+      setEvent({ ...event, date: formattedDate });
+      setShowDateModal(false);
+    } catch (error) {
+      console.error("Error al actualizar fecha:", error);
+    }
+  };
+
   const handleDelete = async (subcol, id) => {
     await deleteDoc(doc(db, "events_organizer", eventId, subcol, id));
   };
@@ -221,7 +238,13 @@ export default function EventDetail() {
             <div className="space-y-2 max-w-xl">
               <h2 className="text-lg sm:text-2xl font-['Poppins'] font-normal text-white tracking-wide leading-tight">{event.title}</h2>
               <div className="flex flex-wrap items-center gap-3 text-[8px] text-white/80 font-bold">
-                {event.date && <span className="flex items-center gap-1.5"><Calendar size={12} className="text-purple-300"/> {event.date}</span>}
+                
+                {/* FECHA EDITABLE AL CLICKEAR O CON BOTÓN SUTIL */}
+                <button onClick={() => setShowDateModal(true)} className="flex items-center gap-1.5 bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 px-2.5 py-1 rounded-lg transition-all cursor-pointer text-white/90">
+                  <Calendar size={12} className="text-purple-300"/> 
+                  <span>{event.date || 'AGREGAR FECHA'}</span>
+                  <Edit3 size={10} className="text-white/40 ml-1"/>
+                </button>
                 
                 {/* UBICACIÓN EDITABLE AL CLICKEAR O CON BOTÓN SUTIL */}
                 <button onClick={() => setShowLocationModal(true)} className="flex items-center gap-1.5 bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 px-2.5 py-1 rounded-lg transition-all cursor-pointer text-white/90">
@@ -674,6 +697,41 @@ export default function EventDetail() {
 
                 <button type="submit" className="w-full py-3 bg-white/[0.08] hover:bg-white/[0.15] border border-white/20 text-white rounded-xl text-[8px] font-black tracking-[0.3em] uppercase transition-all shadow-sm cursor-pointer">
                   GUARDAR UBICACIÓN
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL CONFIGURACIÓN DE FECHA */}
+      <AnimatePresence>
+        {showDateModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-md p-4 uppercase">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-[#0b0c10]/90 backdrop-blur-3xl w-full max-w-md p-6 sm:p-7 rounded-2xl border border-white/20 relative shadow-xl space-y-5"
+            >
+              <button onClick={() => setShowDateModal(false)} className="absolute top-5 right-5 text-white/60 hover:text-white transition-colors cursor-pointer p-1.5"><X size={18} /></button>
+              
+              <div className="space-y-1 text-center">
+                <span className="text-[7px] tracking-[0.3em] font-black text-white/50 uppercase">CONFIGURACIÓN</span>
+                <h3 className="text-base font-['Poppins'] font-normal text-white uppercase">Fecha del Evento</h3>
+              </div>
+
+              <form onSubmit={handleUpdateDate} className="space-y-4 font-bold">
+                <div className="space-y-1.5">
+                  <label className="text-[7px] tracking-[0.3em] text-white/70 font-black">Fecha / Horario</label>
+                  <input 
+                    placeholder="EJ: 15 DE OCTUBRE, 21:00 HS" 
+                    value={dateValue} 
+                    onChange={e => setDateValue(e.target.value)} 
+                    className="w-full bg-white/[0.06] border border-white/15 rounded-xl px-3.5 py-3 text-[9px] text-white outline-none focus:border-white/40 tracking-widest uppercase placeholder:text-white/30" 
+                    required 
+                  />
+                </div>
+
+                <button type="submit" className="w-full py-3 bg-white/[0.08] hover:bg-white/[0.15] border border-white/20 text-white rounded-xl text-[8px] font-black tracking-[0.3em] uppercase transition-all shadow-sm cursor-pointer">
+                  GUARDAR FECHA
                 </button>
               </form>
             </motion.div>
