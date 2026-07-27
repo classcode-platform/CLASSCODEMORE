@@ -178,10 +178,10 @@ export default function Dashboard() {
     } finally { setUploadingStatus(prev => ({ ...prev, video: false })); }
   };
 
-  if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-['Poppins']">CARGANDO DASHBOARD...</div>;
+  if (loading) return <div className="min-h-screen w-full bg-[#0a0a0a] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-['Poppins'] overflow-x-hidden box-border">CARGANDO DASHBOARD...</div>;
 
   return (
-    <div className="min-h-screen w-screen bg-[#0a0a0a] text-white font-['Open_Sans'] flex overflow-x-hidden uppercase antialiased relative text-left">
+    <div className="min-h-screen w-full bg-[#0a0a0a] text-white font-['Open_Sans'] flex flex-col md:flex-row overflow-x-hidden uppercase antialiased relative text-left box-border m-0 p-0">
       
       {/* FONDO ANIMADO */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
@@ -190,7 +190,7 @@ export default function Dashboard() {
       </div>
 
       {/* TOPBAR MOBILE */}
-      <header className="md:hidden fixed top-0 left-0 right-0 bg-black/60 backdrop-blur-xl border-b border-white/5 z-[100] px-8 py-6 flex justify-between items-center">
+      <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-black/60 backdrop-blur-xl border-b border-white/5 z-[100] px-8 py-6 flex justify-between items-center box-border">
         <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer text-white">CLASSCODE</div>
         <button onClick={() => setIsMobileMenuOpen(true)} className="text-white"><Menu size={28} /></button>
       </header>
@@ -200,9 +200,9 @@ export default function Dashboard() {
         {isMobileMenuOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileMenuOpen(false)} className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[110] md:hidden" />
-            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed top-0 right-0 bottom-0 w-[85%] bg-[#050505] z-[120] p-12 flex flex-col md:hidden shadow-2xl">
+            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-[#050505] z-[120] p-12 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto">
               <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-12 text-gray-500 hover:text-white transition-colors"><X size={32} /></button>
-              <button onClick={handleSwitchToClient} className="mb-12 w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-5 rounded-2xl group hover:bg-purple-500/10 transition-all">
+              <button onClick={handleSwitchToClient} className="mb-12 w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-5 rounded-2xl group hover:bg-purple-500/10 transition-all box-border">
                 <div className="flex items-center gap-4 text-left leading-none">
                   <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400"><RefreshCcw size={20} className="group-hover:rotate-180 transition-transform duration-700" /></div>
                   <div>
@@ -216,21 +216,21 @@ export default function Dashboard() {
                 <button onClick={() => { navigate('/academy'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase"><GraduationCap size={22}/> ACADEMY</button>
                 <button onClick={() => { navigate(`/profile/${auth.currentUser?.uid}`); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase"><Eye size={22}/> PERFIL PÚBLICO</button>
               </nav>
-              <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-700 text-[10px] font-black tracking-widest uppercase"><LogOut size={20}/> SALIR</button>
+              <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-700 text-[10px] font-black tracking-widest uppercase mt-8"><LogOut size={20}/> SALIR</button>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
       {/* SIDEBAR DESKTOP */}
-      <aside className="hidden md:flex w-72 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50">
+      <aside className="hidden md:flex w-72 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50 box-border">
         <header className="mb-12 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">CLASSCODE</div>
           <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent Dashboard</p>
         </header>
         
         <div className="mb-12 text-left">
-          <button onClick={handleSwitchToClient} className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-4 rounded-2xl group hover:bg-purple-500/10 transition-all leading-none">
+          <button onClick={handleSwitchToClient} className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-4 rounded-2xl group hover:bg-purple-500/10 transition-all leading-none box-border">
             <div className="flex items-center gap-3 text-left leading-none">
               <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
                 <RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
@@ -251,190 +251,204 @@ export default function Dashboard() {
         <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-700 hover:text-red-500 text-[10px] font-black tracking-widest transition-all mt-auto pt-8 border-t border-white/5 leading-none"><LogOut size={18}/> CERRAR SESIÓN</button>
       </aside>
 
-      {/* MAIN CONTAINER */}
-      <div className="flex-1 md:ml-72 p-4 md:p-8 mt-16 md:mt-0 relative z-10 w-full max-w-[1400px] mx-auto box-border overflow-x-hidden">
+      {/* MAIN CONTAINER GENERAL */}
+      <div className="flex-1 md:ml-72 flex flex-col min-h-screen relative z-10 w-full max-w-full box-border overflow-x-hidden">
         
-        {/* SECCIÓN ESTILO FACEBOOK */}
-        <div className="w-full max-w-full bg-white/[0.02] border border-white/5 backdrop-blur-md rounded-2xl p-4 md:p-8 mb-8 shadow-2xl box-border overflow-hidden">
-          <div className="w-full max-w-[1200px] mx-auto box-border">
+        {/* WRAPPER DE CONTENIDO */}
+        <div className="flex-1 p-4 md:p-8 mt-16 md:mt-0 w-full max-w-full box-border overflow-x-hidden">
+          <div className="w-full max-w-[1400px] mx-auto box-border overflow-x-hidden">
             
-            {/* Banner / Showreel Container */}
-            <div className="w-full h-[180px] md:h-[260px] bg-black relative overflow-hidden group box-border rounded-2xl border border-white/10">
-              {profile.videoLink ? (
-                <video 
-                  src={profile.videoLink} 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline 
-                  className="w-full h-full object-cover pointer-events-none opacity-90" 
-                />
-              ) : (
-                <div className="w-full h-full bg-[#070709] flex flex-col items-center justify-center p-6 text-center border border-white/5 box-border">
-                  <Play size={28} className="text-white/20 mb-2" strokeWidth={1}/>
-                  <span className="text-[8px] tracking-[0.4em] text-gray-500 font-black">SIN SHOWREEL CARGADO</span>
-                </div>
-              )}
-              
-              <label className="absolute bottom-4 right-4 bg-black/80 hover:bg-black text-white px-3 py-2 rounded-xl text-[8px] font-black tracking-widest cursor-pointer border border-white/10 transition-all flex items-center gap-2 shadow-xl z-20">
-                <Upload size={14} /> {profile.videoLink ? 'CAMBIAR' : 'SUBIR'}
-                <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
-              </label>
-            </div>
-
-            {/* Perfil Header */}
-            <div className="pb-8 relative -mt-10 md:-mt-16 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 z-20 box-border w-full max-w-full">
-              <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left w-full md:w-auto min-w-0">
+            {/* SECCIÓN ESTILO FACEBOOK */}
+            <div className="w-full bg-white/[0.02] border border-white/5 backdrop-blur-md rounded-2xl p-4 md:p-8 mb-8 shadow-2xl box-border overflow-hidden">
+              <div className="w-full mx-auto box-border">
                 
-                {/* Foto de Perfil */}
-                <div className="relative w-28 h-28 md:w-36 md:h-36 rounded-full border-4 border-black overflow-hidden bg-black shadow-2xl flex-shrink-0 group">
-                  {profile.photo1 ? (
-                    <img src={profile.photo1} className="w-full h-full object-cover" alt="" />
+                {/* Banner / Showreel Container */}
+                <div className="w-full h-[180px] md:h-[260px] bg-black relative overflow-hidden group box-border rounded-2xl border border-white/10">
+                  {profile.videoLink ? (
+                    <video 
+                      src={profile.videoLink} 
+                      autoPlay 
+                      loop 
+                      muted 
+                      playsInline 
+                      className="w-full h-full object-cover pointer-events-none opacity-90" 
+                    />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-white/5 text-gray-500"><User size={40}/></div>
+                    <div className="w-full h-full bg-[#070709] flex flex-col items-center justify-center p-6 text-center border border-white/5 box-border">
+                      <Play size={28} className="text-white/20 mb-2" strokeWidth={1}/>
+                      <span className="text-[8px] tracking-[0.4em] text-gray-500 font-black">SIN SHOWREEL CARGADO</span>
+                    </div>
                   )}
-                  <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 cursor-pointer transition-all">
-                    <Camera size={20} className="text-white"/>
-                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'photo1')} className="hidden" />
+                  
+                  <label className="absolute bottom-4 right-4 bg-black/80 hover:bg-black text-white px-3 py-2 rounded-xl text-[8px] font-black tracking-widest cursor-pointer border border-white/10 transition-all flex items-center gap-2 shadow-xl z-20">
+                    <Upload size={14} /> {profile.videoLink ? 'CAMBIAR' : 'SUBIR'}
+                    <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
                   </label>
                 </div>
 
-                <div className="space-y-2 pb-1 min-w-0 flex-1 w-full">
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                    <h1 className="text-lg md:text-2xl font-['Poppins'] font-normal tracking-wide text-white truncate max-w-full">{profile.name || 'NUEVO TALENTO'}</h1>
-                    <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1.5 flex-shrink-0">
-                      <CheckCircle2 size={12}/> TALENTO
-                    </span>
+                {/* Perfil Header */}
+                <div className="pb-4 relative -mt-10 md:-mt-16 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 z-20 box-border w-full">
+                  <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left w-full md:w-auto min-w-0">
+                    
+                    {/* Foto de Perfil */}
+                    <div className="relative w-28 h-28 md:w-36 md:h-36 rounded-full border-4 border-black overflow-hidden bg-black shadow-2xl flex-shrink-0 group">
+                      {profile.photo1 ? (
+                        <img src={profile.photo1} className="w-full h-full object-cover" alt="" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-white/5 text-gray-500"><User size={40}/></div>
+                      )}
+                      <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 cursor-pointer transition-all">
+                        <Camera size={20} className="text-white"/>
+                        <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'photo1')} className="hidden" />
+                      </label>
+                    </div>
+
+                    <div className="space-y-2 pb-1 min-w-0 flex-1 w-full">
+                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                        <h1 className="text-lg md:text-2xl font-['Poppins'] font-normal tracking-wide text-white truncate max-w-full">{profile.name || 'NUEVO TALENTO'}</h1>
+                        <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1.5 flex-shrink-0">
+                          <CheckCircle2 size={12}/> TALENTO
+                        </span>
+                      </div>
+                      <p className="text-gray-400 text-[10px] md:text-xs tracking-[0.3em] font-bold truncate">{profile.job || 'ASIGNAR RUBRO'}</p>
+                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] text-gray-500 font-bold tracking-widest pt-1">
+                        {profile.location && <span className="flex items-center gap-1.5"><MapPin size={14} className="text-purple-400"/> {profile.location}</span>}
+                        <span className="flex items-center gap-1.5"><Award size={14} className="text-purple-400"/> {calculateTotalScore(profile)} PTS</span>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-gray-400 text-[10px] md:text-xs tracking-[0.3em] font-bold truncate">{profile.job || 'ASIGNAR RUBRO'}</p>
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] text-gray-500 font-bold tracking-widest pt-1">
-                    {profile.location && <span className="flex items-center gap-1.5"><MapPin size={14} className="text-purple-400"/> {profile.location}</span>}
-                    <span className="flex items-center gap-1.5"><Award size={14} className="text-purple-400"/> {calculateTotalScore(profile)} PTS</span>
+
+                  {/* Botones de Acción */}
+                  <div className="flex items-center gap-3 w-full md:w-auto justify-center pb-2 flex-shrink-0">
+                    <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-4 bg-white/[0.03] hover:bg-white/15 rounded-2xl border border-white/10 transition-all text-white" title="Ver Perfil Público">
+                      <Eye size={18} />
+                    </button>
+                    <button onClick={() => setIsEditingProfile(true)} className="px-6 py-4 rounded-2xl bg-purple-600 text-white font-black text-[10px] tracking-[0.3em] hover:bg-purple-500 transition-all shadow-xl flex items-center justify-center gap-2">
+                      <Edit3 size={14}/> EDITAR PERFIL
+                    </button>
                   </div>
                 </div>
               </div>
-
-              {/* Botones de Acción */}
-              <div className="flex items-center gap-3 w-full md:w-auto justify-center pb-2 flex-shrink-0">
-                <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-4 bg-white/[0.03] hover:bg-white/15 rounded-2xl border border-white/10 transition-all text-white" title="Ver Perfil Público">
-                  <Eye size={18} />
-                </button>
-                <button onClick={() => setIsEditingProfile(true)} className="px-6 py-4 rounded-2xl bg-purple-600 text-white font-black text-[10px] tracking-[0.3em] hover:bg-purple-500 transition-all shadow-xl flex items-center justify-center gap-2">
-                  <Edit3 size={14}/> EDITAR PERFIL
-                </button>
-              </div>
             </div>
+
+            {/* CONTENIDO PRINCIPAL (GRID) */}
+            <main className="w-full py-6 grid lg:grid-cols-12 gap-10 relative z-10 box-border">
+              
+              {/* COLUMNA IZQUIERDA */}
+              <div className="lg:col-span-4 space-y-8 min-w-0 box-border">
+                
+                {/* ESTADO ACADÉMICO */}
+                <div className="bg-[#050505] border border-white/5 rounded-2xl p-6 space-y-6 shadow-xl box-border">
+                  <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black border-l-2 border-purple-500 pl-4">Estatus Academy</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl box-border">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Zap size={14} className={isGenericoDone ? "text-purple-400 flex-shrink-0" : "text-gray-600 flex-shrink-0"} />
+                        <span className="text-[9px] font-black tracking-widest text-white truncate">NIVELACIÓN INGRESO</span>
+                      </div>
+                      {!isGenericoDone ? (
+                        <button onClick={() => navigate('/academy-test/Generico')} className="text-[8px] font-black text-purple-400 hover:underline flex-shrink-0 ml-2">RENDIR</button>
+                      ) : (
+                        <span className="text-[8px] font-black text-green-400 flex-shrink-0 ml-2">APROBADO</span>
+                      )}
+                    </div>
+
+                    {profile.job && (
+                      <div className="flex items-center justify-between bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl box-border">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Award size={14} className={isProfessionalTestDone ? "text-purple-400 flex-shrink-0" : "text-gray-600 flex-shrink-0"} />
+                          <span className="text-[9px] font-black tracking-widest text-white truncate">TEST PROFESIONAL</span>
+                        </div>
+                        {!isProfessionalTestDone ? (
+                          <button onClick={() => navigate(`/academy-test/${encodeURIComponent(profile.job)}`)} className="text-[8px] font-black text-purple-400 hover:underline flex-shrink-0 ml-2">RENDIR</button>
+                        ) : (
+                          <span className="text-[8px] font-black text-green-400 flex-shrink-0 ml-2">APROBADO</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <button onClick={() => navigate('/academy')} className="w-full py-3 bg-white/5 hover:bg-white/15 border border-white/10 rounded-2xl text-[9px] font-black tracking-[0.3em] text-gray-300 transition-all flex items-center justify-center gap-2 box-border">
+                    <GraduationCap size={14}/> IR A CLASSCODE ACADEMY
+                  </button>
+                </div>
+
+                {/* BANDEJA DE MENSAJES */}
+                <div className="bg-[#050505] border border-white/5 rounded-2xl p-6 space-y-6 shadow-xl box-border">
+                  <div className="flex justify-between items-center border-l-2 border-purple-500 pl-4">
+                    <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black flex items-center gap-2"><MessageSquare size={12}/> Mensajes</h3>
+                    <span className="text-[9px] text-purple-400 font-black">{messages.length}</span>
+                  </div>
+                  <div className="space-y-3 max-h-[240px] overflow-y-auto no-scrollbar">
+                    {messages.length === 0 ? (
+                      <div className="text-center py-6 text-[8px] text-gray-600 uppercase font-black tracking-widest">No hay chats activos</div>
+                    ) : messages.map(chat => (
+                      <div key={chat.id} onClick={() => navigate(`/chat/${chat.id}`)} className="flex justify-between items-center p-3.5 bg-white/[0.03] border border-white/10 hover:border-purple-500/30 rounded-2xl transition-all cursor-pointer box-border">
+                         <div className="flex items-center gap-3 min-w-0">
+                            {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-8 h-8 rounded-full object-cover border border-white/10 flex-shrink-0" alt="" /> : <div className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center flex-shrink-0"><User size={14}/></div>}
+                            <div className="min-w-0">
+                               <p className="text-[9px] font-black text-white uppercase tracking-wider truncate">{chat.clientName || "CLIENTE"}</p>
+                               <p className="text-[7px] text-gray-400 font-bold uppercase mt-0.5">Ver chat</p>
+                            </div>
+                         </div>
+                         <ArrowRight size={12} className="text-gray-500 flex-shrink-0 ml-2" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-[#050505] border border-white/5 rounded-2xl p-6 shadow-xl box-border">
+                   <button onClick={() => {
+                     navigator.clipboard.writeText(`https://www.classcode.com.ar/profile/${auth.currentUser?.uid}`);
+                     alert("¡Enlace de perfil copiado al portapapeles!");
+                   }} className="w-full group flex items-center justify-center gap-3 text-[9px] font-black tracking-[0.3em] text-gray-400 hover:text-white transition-all uppercase py-2 box-border">
+                      <Share2 size={16} /> Compartir Perfil Público
+                   </button>
+                </div>
+              </div>
+
+              {/* COLUMNA DERECHA */}
+              <div className="lg:col-span-8 space-y-12 min-w-0 box-border">
+                <section className="bg-[#050505] border border-white/5 rounded-2xl p-6 md:p-8 space-y-8 shadow-xl box-border">
+                  <div className="flex justify-between items-center border-l-2 border-purple-500 pl-4">
+                    <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black">Portfolio — Galería de Fotos</h3>
+                    <span className="text-[9px] text-purple-400 font-mono">{Array.from({ length: 10 }, (_, i) => profile[`photo${i + 1}`]).filter(Boolean).length}/10 FOTOS</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
+                      <div key={num} className="aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black group relative shadow-xl flex items-center justify-center box-border">
+                        {profile[`photo${num}`] ? (
+                          <>
+                            <img src={profile[`photo${num}`]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="" />
+                            <button onClick={async () => {
+                              const updates = { [`photo${num}`]: '' };
+                              setProfile(prev => ({ ...prev, ...updates }));
+                              await persistProfile(updates);
+                            }} className="absolute top-2 right-2 p-2 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 text-red-400 transition-all border border-white/10"><X size={12} /></button>
+                          </>
+                        ) : (
+                          <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition-all p-4 text-center">
+                            <Upload size={20} className="text-gray-600 mb-2" />
+                            <span className="text-[7px] font-black tracking-widest text-gray-500">SUBIR FOTO {num}</span>
+                            <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, `photo${num}`)} className="hidden" />
+                          </label>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </div>
+            </main>
           </div>
         </div>
 
-        {/* CONTENIDO PRINCIPAL */}
-        <main className="w-full max-w-full py-6 grid lg:grid-cols-12 gap-10 relative z-10 box-border">
-          
-          {/* COLUMNA IZQUIERDA */}
-          <div className="lg:col-span-4 space-y-8 min-w-0 box-border">
-            
-            {/* ESTADO ACADÉMICO */}
-            <div className="bg-[#050505] border border-white/5 rounded-2xl p-6 space-y-6 shadow-xl box-border">
-              <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black border-l-2 border-purple-500 pl-4">Estatus Academy</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl box-border">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Zap size={14} className={isGenericoDone ? "text-purple-400 flex-shrink-0" : "text-gray-600 flex-shrink-0"} />
-                    <span className="text-[9px] font-black tracking-widest text-white truncate">NIVELACIÓN INGRESO</span>
-                  </div>
-                  {!isGenericoDone ? (
-                    <button onClick={() => navigate('/academy-test/Generico')} className="text-[8px] font-black text-purple-400 hover:underline flex-shrink-0 ml-2">RENDIR</button>
-                  ) : (
-                    <span className="text-[8px] font-black text-green-400 flex-shrink-0 ml-2">APROBADO</span>
-                  )}
-                </div>
-
-                {profile.job && (
-                  <div className="flex items-center justify-between bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl box-border">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Award size={14} className={isProfessionalTestDone ? "text-purple-400 flex-shrink-0" : "text-gray-600 flex-shrink-0"} />
-                      <span className="text-[9px] font-black tracking-widest text-white truncate">TEST PROFESIONAL</span>
-                    </div>
-                    {!isProfessionalTestDone ? (
-                      <button onClick={() => navigate(`/academy-test/${encodeURIComponent(profile.job)}`)} className="text-[8px] font-black text-purple-400 hover:underline flex-shrink-0 ml-2">RENDIR</button>
-                    ) : (
-                      <span className="text-[8px] font-black text-green-400 flex-shrink-0 ml-2">APROBADO</span>
-                    )}
-                  </div>
-                )}
-              </div>
-              <button onClick={() => navigate('/academy')} className="w-full py-3 bg-white/5 hover:bg-white/15 border border-white/10 rounded-2xl text-[9px] font-black tracking-[0.3em] text-gray-300 transition-all flex items-center justify-center gap-2 box-border">
-                <GraduationCap size={14}/> IR A CLASSCODE ACADEMY
-              </button>
-            </div>
-
-            {/* BANDEJA DE MENSAJES */}
-            <div className="bg-[#050505] border border-white/5 rounded-2xl p-6 space-y-6 shadow-xl box-border">
-              <div className="flex justify-between items-center border-l-2 border-purple-500 pl-4">
-                <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black flex items-center gap-2"><MessageSquare size={12}/> Mensajes</h3>
-                <span className="text-[9px] text-purple-400 font-black">{messages.length}</span>
-              </div>
-              <div className="space-y-3 max-h-[240px] overflow-y-auto no-scrollbar">
-                {messages.length === 0 ? (
-                  <div className="text-center py-6 text-[8px] text-gray-600 uppercase font-black tracking-widest">No hay chats activos</div>
-                ) : messages.map(chat => (
-                  <div key={chat.id} onClick={() => navigate(`/chat/${chat.id}`)} className="flex justify-between items-center p-3.5 bg-white/[0.03] border border-white/10 hover:border-purple-500/30 rounded-2xl transition-all cursor-pointer box-border">
-                     <div className="flex items-center gap-3 min-w-0">
-                        {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-8 h-8 rounded-full object-cover border border-white/10 flex-shrink-0" alt="" /> : <div className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center flex-shrink-0"><User size={14}/></div>}
-                        <div className="min-w-0">
-                           <p className="text-[9px] font-black text-white uppercase tracking-wider truncate">{chat.clientName || "CLIENTE"}</p>
-                           <p className="text-[7px] text-gray-400 font-bold uppercase mt-0.5">Ver chat</p>
-                        </div>
-                     </div>
-                     <ArrowRight size={12} className="text-gray-500 flex-shrink-0 ml-2" />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-[#050505] border border-white/5 rounded-2xl p-6 shadow-xl box-border">
-               <button onClick={() => {
-                 navigator.clipboard.writeText(`https://www.classcode.com.ar/profile/${auth.currentUser?.uid}`);
-                 alert("¡Enlace de perfil copiado al portapapeles!");
-               }} className="w-full group flex items-center justify-center gap-3 text-[9px] font-black tracking-[0.3em] text-gray-400 hover:text-white transition-all uppercase py-2 box-border">
-                  <Share2 size={16} /> Compartir Perfil Público
-               </button>
-            </div>
+        {/* FOOTER CORREGIDO DENTRO DEL CONTENEDOR FLEX */}
+        <footer className="w-full bg-black py-16 px-6 border-t border-white/5 text-center relative z-10 box-border font-['Poppins'] mt-auto">
+          <div className="max-w-[1400px] mx-auto box-border">
+            <h2 className="text-white text-2xl md:text-3xl font-normal tracking-[0.1em] uppercase mb-3 opacity-30">CLASSCODE</h2>
+            <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-gray-600 opacity-30">© 2026 — TODOS LOS DERECHOS RESERVADOS</p>
           </div>
-
-          {/* COLUMNA DERECHA */}
-          <div className="lg:col-span-8 space-y-12 min-w-0 box-border">
-            <section className="bg-[#050505] border border-white/5 rounded-2xl p-6 md:p-8 space-y-8 shadow-xl box-border">
-              <div className="flex justify-between items-center border-l-2 border-purple-500 pl-4">
-                <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black">Portfolio — Galería de Fotos</h3>
-                <span className="text-[9px] text-purple-400 font-mono">{Array.from({ length: 10 }, (_, i) => profile[`photo${i + 1}`]).filter(Boolean).length}/10 FOTOS</span>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
-                  <div key={num} className="aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black group relative shadow-xl flex items-center justify-center box-border">
-                    {profile[`photo${num}`] ? (
-                      <>
-                        <img src={profile[`photo${num}`]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="" />
-                        <button onClick={async () => {
-                          const updates = { [`photo${num}`]: '' };
-                          setProfile(prev => ({ ...prev, ...updates }));
-                          await persistProfile(updates);
-                        }} className="absolute top-2 right-2 p-2 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 text-red-400 transition-all border border-white/10"><X size={12} /></button>
-                      </>
-                    ) : (
-                      <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition-all p-4 text-center">
-                        <Upload size={20} className="text-gray-600 mb-2" />
-                        <span className="text-[7px] font-black tracking-widest text-gray-500">SUBIR FOTO {num}</span>
-                        <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, `photo${num}`)} className="hidden" />
-                      </label>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
-        </main>
+        </footer>
       </div>
 
       {/* MODAL EDITAR PERFIL */}
@@ -498,13 +512,6 @@ export default function Dashboard() {
       )}
 
       <CustomModal isOpen={modal.isOpen} onClose={() => setModal({ ...modal, isOpen: false })} title={modal.title} message={modal.message} type={modal.type} />
-      
-      <footer className="bg-black py-20 px-6 border-t border-white/5 text-center relative z-10 w-full box-border font-['Poppins']">
-        <div className="max-w-[1440px] mx-auto box-border">
-          <h2 className="text-white text-3xl font-normal tracking-[0.1em] uppercase mb-4 opacity-30">CLASSCODE</h2>
-          <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-gray-600 opacity-30">© 2026 — TODOS LOS DERECHOS RESERVADOS</p>
-        </div>
-      </footer>
     </div>
   );
 }
