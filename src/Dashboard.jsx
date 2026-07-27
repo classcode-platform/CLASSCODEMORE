@@ -180,10 +180,10 @@ export default function Dashboard() {
   if (loading) return <div className="min-h-screen bg-[#070709] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-black font-['Poppins']">CARGANDO DASHBOARD...</div>;
 
   return (
-    <div className="min-h-screen w-screen max-w-full bg-[#070709] text-white font-['Open_Sans'] flex flex-col relative overflow-x-hidden uppercase selection:bg-white selection:text-black box-border">
+    <div className="min-h-screen w-full max-w-[100vw] bg-[#070709] text-white font-['Open_Sans'] flex flex-col relative overflow-x-hidden uppercase selection:bg-white selection:text-black box-border">
       
       {/* TOPBAR MOBILE */}
-      <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-[#070709]/90 backdrop-blur-xl border-b border-white/5 z-[90] px-4 py-4 flex justify-between items-center font-['Poppins'] box-border">
+      <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-[#070709]/95 backdrop-blur-xl border-b border-white/5 z-[90] px-4 py-4 flex justify-between items-center font-['Poppins'] box-border">
         <div onClick={() => navigate('/home')} className="text-lg tracking-[0.05em] uppercase cursor-pointer truncate">CLASSCODE</div>
         <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 focus:outline-none flex-shrink-0"><Menu size={22} /></button>
       </header>
@@ -241,10 +241,10 @@ export default function Dashboard() {
         
         {/* SECCIÓN ESTILO FACEBOOK (BANNER SHOWREEL + HEADER) */}
         <div className="w-full bg-[#070709] border-b border-white/5 mt-14 md:mt-0 box-border overflow-x-hidden">
-          <div className="w-full max-w-[1200px] mx-auto box-border">
+          <div className="w-full max-w-[1200px] mx-auto box-border px-4 md:px-12">
             
             {/* Banner / Showreel Container */}
-            <div className="w-full h-[180px] md:h-[260px] bg-black relative overflow-hidden group box-border">
+            <div className="w-full h-[180px] md:h-[260px] bg-black relative overflow-hidden group box-border rounded-2xl md:rounded-3xl border border-white/10 mt-4">
               {profile.videoLink ? (
                 <video 
                   src={profile.videoLink} 
@@ -268,7 +268,7 @@ export default function Dashboard() {
             </div>
 
             {/* Perfil Header */}
-            <div className="px-4 md:px-12 pb-8 relative -mt-12 md:-mt-20 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 z-20 box-border w-full max-w-full">
+            <div className="pb-8 relative -mt-10 md:-mt-16 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 z-20 box-border w-full max-w-full">
               <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left w-full md:w-auto min-w-0">
                 
                 {/* Foto de Perfil */}
@@ -424,8 +424,8 @@ export default function Dashboard() {
 
       {/* MODAL EDITAR PERFIL */}
       {isEditingProfile && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 box-border">
-          <div className="bg-[#0c0c0e] w-full max-w-lg p-6 md:p-12 rounded-[3rem] border border-white/10 relative shadow-2xl uppercase max-h-[90vh] flex flex-col box-border">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 box-border overflow-x-hidden">
+          <div className="bg-[#0c0c0e] w-full max-w-lg p-6 md:p-12 rounded-[2.5rem] border border-white/10 relative shadow-2xl uppercase max-h-[90vh] flex flex-col box-border">
             <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors"><X size={22} /></button>
             <h3 className="text-[11px] uppercase tracking-[0.5em] font-black text-white mb-8 text-center font-['Poppins']">Editar Perfil Profesional</h3>
             
