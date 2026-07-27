@@ -60,6 +60,9 @@ export default function ClientProfile() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
   
+  // Estado formulario rápido de evento (para reemplazar el modal anterior que no te gustaba y usar input tipo fecha)
+  const [newEventForm, setNewEventForm] = useState({ title: '', category: 'EVENTO', date: '', location: '' });
+
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
   const [profile, setProfile] = useState({ name: '', location: '', interests: '', photoURL: '' });
@@ -206,6 +209,30 @@ export default function ClientProfile() {
     }
   };
 
+  // Guardar nuevo evento directamente con tipo fecha
+  const handleCreateNewEventSubmit = async (e) => {
+    e.preventDefault();
+    if (!auth.currentUser || !newEventForm.title.trim()) return;
+
+    try {
+      await addDoc(collection(db, "events_organizer"), {
+        userId: auth.currentUser.uid,
+        title: newEventForm.title.toUpperCase(),
+        category: newEventForm.category.toUpperCase(),
+        date: newEventForm.date, // Formato YYYY-MM-DD del input type="date"
+        location: newEventForm.location.toUpperCase(),
+        status: 'PLANIFICACION',
+        createdAt: serverTimestamp()
+      });
+      setIsCreatingEvent(false);
+      setNewEventForm({ title: '', category: 'EVENTO', date: '', location: '' });
+      setModal({ isOpen: true, title: "EVENTO CREADO", message: "EL PROYECTO SE HA CREADO EXITOSAMENTE.", type: "success" });
+    } catch (error) {
+      console.error("Error al crear evento:", error);
+      setModal({ isOpen: true, title: "ERROR", message: "NO SE PUDO CREAR EL EVENTO.", type: "warning" });
+    }
+  };
+
   const confirmDelete = (id, e) => {
     if (e) e.stopPropagation();
     setModal({
@@ -294,7 +321,7 @@ export default function ClientProfile() {
         />
       </div>
 
-      {/* HEADER MOBILE GLASS (Menos luminoso: bg-white/[0.03] y blur menor) */}
+      {/* HEADER MOBILE GLASS */}
       <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-white/[0.03] backdrop-blur-md border-b border-white/10 z-[100] px-8 py-5 flex justify-between items-center shadow-xl">
         <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer text-white">
           CLASSCODE
@@ -343,7 +370,7 @@ export default function ClientProfile() {
         )}
       </AnimatePresence>
 
-      {/* SIDEBAR DESKTOP GLASS (Translúcido, menos luminoso con bg-white/[0.025] y backdrop-blur-md) */}
+      {/* SIDEBAR DESKTOP GLASS */}
       <aside className="hidden md:flex w-72 bg-white/[0.025] backdrop-blur-md border-r border-white/10 flex-col p-8 fixed h-full z-50 box-border shadow-2xl">
         <header className="mb-10 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">
@@ -355,7 +382,6 @@ export default function ClientProfile() {
         </header>
         
         <div className="mb-10 text-left">
-          {/* Botón discreto en armonía con el resto de la página */}
           <button onClick={handleSwitchToTalent} className="w-full flex items-center justify-between bg-white/[0.04] backdrop-blur-md border border-white/10 p-4 rounded-xl group hover:bg-white/[0.08] transition-all cursor-pointer shadow-lg">
             <div className="flex items-center gap-3 text-left leading-none">
               <div className="p-2.5 bg-purple-500/15 rounded-lg text-purple-300 border border-purple-500/30">
@@ -386,7 +412,7 @@ export default function ClientProfile() {
       {/* CONTENIDO PRINCIPAL */}
       <main className="flex-1 md:ml-72 p-6 md:p-12 mt-16 md:mt-0 relative z-10 w-full max-w-[1400px] mx-auto space-y-8 box-border">
         
-        {/* HEADER DE PERFIL EN GLASS REAL (Menos luminoso) */}
+        {/* HEADER DE PERFIL EN GLASS REAL */}
         <header className="flex justify-between items-center bg-white/[0.03] backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-2xl box-border">
           <div className="flex items-center gap-5">
             <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl border border-white/20 overflow-hidden bg-white/5 flex items-center justify-center flex-shrink-0 shadow-inner">
@@ -413,7 +439,6 @@ export default function ClientProfile() {
             </div>
           </div>
           
-          {/* Botón discreto en armonía con la página */}
           <button onClick={() => setIsCreatingEvent(true)} className="px-5 py-3 bg-white/[0.04] backdrop-blur-md border border-white/15 text-white rounded-xl text-[9px] font-black flex items-center gap-2 hover:bg-white/[0.08] transition-all tracking-widest font-['Poppins'] cursor-pointer shadow-xl flex-shrink-0">
             <Plus size={14} className="text-purple-400"/> NUEVO EVENTO
           </button>
@@ -484,7 +509,7 @@ export default function ClientProfile() {
           )}
         </section>
 
-        {/* SECCIÓN DE MENSAJERÍA INTEGRADA (Sin auto-scroll automático gracias a la eliminación del useRef auto-scroll) */}
+        {/* SECCIÓN DE MENSAJERÍA INTEGRADA */}
         <section className="space-y-6 pt-4">
           <div className="flex justify-between items-center border-l-2 border-purple-500 pl-4">
             <h3 className="text-[10px] text-white/70 uppercase tracking-[0.4em] font-black">mensajería directa</h3>
@@ -607,12 +632,72 @@ export default function ClientProfile() {
         )}
       </AnimatePresence>
 
-      {/* MODAL CREAR EVENTO */}
+      {/* MODAL CREAR EVENTO CON INPUT TIPO FECHA NATIVO */}
       <AnimatePresence>
         {isCreatingEvent && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[250] flex items-center justify-center p-4 uppercase">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-              <EventOrganizer onClose={() => setIsCreatingEvent(false)} />
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-[#0b0c10]/90 backdrop-blur-xl w-full max-w-lg p-6 md:p-8 rounded-2xl border border-white/15 relative shadow-2xl space-y-6"
+            >
+              <button onClick={() => setIsCreatingEvent(false)} className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
+              
+              <h3 className="text-[11px] font-['Poppins'] text-white tracking-[0.3em] font-black border-b border-white/10 pb-4">NUEVO PROYECTO / EVENTO</h3>
+
+              <form onSubmit={handleCreateNewEventSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[8px] text-white/80 tracking-widest font-black">Título del Evento</label>
+                  <input 
+                    type="text" 
+                    value={newEventForm.title} 
+                    onChange={(e) => setNewEventForm({ ...newEventForm, title: e.target.value })} 
+                    placeholder="EJ: CUMPLEAÑOS / BODA" 
+                    className="w-full bg-white/[0.04] backdrop-blur-md border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors shadow-inner uppercase placeholder-white/30" 
+                    required 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[8px] text-white/80 tracking-widest font-black">Categoría</label>
+                  <input 
+                    type="text" 
+                    value={newEventForm.category} 
+                    onChange={(e) => setNewEventForm({ ...newEventForm, category: e.target.value })} 
+                    placeholder="EJ: SOCIAL / CORPORATIVO" 
+                    className="w-full bg-white/[0.04] backdrop-blur-md border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors shadow-inner uppercase placeholder-white/30" 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[8px] text-white/80 tracking-widest font-black">Fecha del Evento</label>
+                  <input 
+                    type="date" 
+                    value={newEventForm.date} 
+                    onChange={(e) => setNewEventForm({ ...newEventForm, date: e.target.value })} 
+                    className="w-full bg-white/[0.04] backdrop-blur-md border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors shadow-inner cursor-pointer" 
+                    required 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[8px] text-white/80 tracking-widest font-black">Ubicación / Salón</label>
+                  <input 
+                    type="text" 
+                    value={newEventForm.location} 
+                    onChange={(e) => setNewEventForm({ ...newEventForm, location: e.target.value })} 
+                    placeholder="EJ: SALÓN LA PLATA" 
+                    className="w-full bg-white/[0.04] backdrop-blur-md border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors shadow-inner uppercase placeholder-white/30" 
+                  />
+                </div>
+
+                <div className="pt-4 flex justify-end gap-3">
+                  <button type="button" onClick={() => setIsCreatingEvent(false)} className="px-5 py-3 bg-white/[0.04] backdrop-blur-md border border-white/15 rounded-xl text-[9px] font-black tracking-widest hover:bg-white/[0.08] transition-all cursor-pointer text-white shadow-lg">
+                    Cancelar
+                  </button>
+                  <button type="submit" className="px-6 py-3 bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 text-white rounded-xl text-[9px] font-black tracking-widest transition-all cursor-pointer flex items-center gap-2 shadow-xl">
+                    <Save size={14} className="text-purple-400" /> Crear Evento
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}
@@ -663,7 +748,7 @@ export default function ClientProfile() {
         )}
       </AnimatePresence>
 
-      <CustomModal isOpen={modal.isOpen} onClose={() => setModal({ ...modal, isOpen: false })} onConfirm={modal.onConfirm} title={modal.title} message={modal.message} type={modal.type} />
+      <CustomModal isOpen={modal.isOpen} onClose={() => setModal({ ...modal, isOpen: externalModalState => externalModalState })} onConfirm={modal.onConfirm} title={modal.title} message={modal.message} type={modal.type} />
     </div>
   );
 }
