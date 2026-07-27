@@ -86,7 +86,6 @@ export default function Dashboard() {
       if (user) {
         const mainDocRef = doc(db, "professionals", user.uid);
         
-        // 1. Asegurar creación del documento principal si no existe
         const mainSnap = await getDoc(mainDocRef);
         if (!mainSnap.exists()) {
           const defaultNewProfile = {
@@ -97,7 +96,6 @@ export default function Dashboard() {
           await setDoc(mainDocRef, defaultNewProfile, { merge: true });
         }
 
-        // 2. Escuchar en tiempo real tanto el doc principal como los secundarios por query de uid
         const unsubMain = onSnapshot(mainDocRef, (mainDoc) => {
           const mainData = mainDoc.exists() ? { id: mainDoc.id, ...mainDoc.data() } : null;
           
@@ -107,7 +105,6 @@ export default function Dashboard() {
             if (mainData) list.push(mainData);
 
             snapshot.docs.forEach(docSnap => {
-              // Evitar duplicar el principal si ya entró por la consulta
               if (docSnap.id !== user.uid) {
                 list.push({ id: docSnap.id, ...docSnap.data() });
               }
@@ -115,7 +112,6 @@ export default function Dashboard() {
 
             setProfiles(list);
 
-            // Mantener perfil activo coherente
             setActiveProfileId(prevId => {
               if (prevId && list.some(p => p.id === prevId)) {
                 return prevId;
@@ -148,7 +144,6 @@ export default function Dashboard() {
     };
   }, [navigate]);
 
-  // Sincronizar el estado local `profile` cuando cambia el `activeProfileId` o la lista de perfiles
   useEffect(() => {
     if (activeProfileId && profiles.length > 0) {
       const targetProfile = profiles.find(p => p.id === activeProfileId) || profiles[0];
@@ -372,6 +367,7 @@ export default function Dashboard() {
                 <span className="text-[9px] text-gray-500 font-black tracking-widest uppercase flex-shrink-0">TUS PERFILES:</span>
                 {profiles.map((p) => {
                   const isActive = p.id === activeProfileId;
+                  const labelName = p.job ? p.job.toUpperCase() : (p.id === auth.currentUser?.uid ? 'ESCÉNICO' : 'FOTOGRAFÍA');
                   return (
                     <button
                       key={p.id}
@@ -383,7 +379,7 @@ export default function Dashboard() {
                       }`}
                     >
                       <User size={12} />
-                      {p.id === auth.currentUser?.uid ? 'PERFIL ANTIGUO (PRINCIPAL)' : (p.job ? `${p.job}` : 'PERFIL NUEVO')}
+                      {labelName}
                     </button>
                   );
                 })}
