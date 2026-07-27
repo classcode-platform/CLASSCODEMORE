@@ -6,10 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, GraduationCap, PlayCircle, 
   Upload, X, Eye, Menu, Zap, CheckCircle2, 
-  LayoutDashboard, LogOut, Bell, RefreshCcw, User, MessageSquare, Edit3, Camera, Award
+  LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, Briefcase
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
-import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -20,6 +19,7 @@ export default function Dashboard() {
   
   const [profile, setProfile] = useState({
     name: '', job: '', specialty: '', location: '', bio: '', instagram: '', videoLink: '', 
+    coverPhoto: '', 
     photo1: '', photo2: '', photo3: '', photo4: '', photo5: '', 
     photo6: '', photo7: '', photo8: '', photo9: '', photo10: '',
     academyPoints: 0, verified: false, score: 0,
@@ -27,7 +27,7 @@ export default function Dashboard() {
   });
 
   const [uploadingStatus, setUploadingStatus] = useState({
-    video: false, profile: false,
+    video: false, profile: false, cover: false,
     ...Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`photo${i + 1}`, false]))
   });
 
@@ -181,33 +181,28 @@ export default function Dashboard() {
     } finally { setUploadingStatus(prev => ({ ...prev, video: false })); }
   };
 
-  if (loading) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-black font-['Poppins']">CARGANDO ESTUDIO...</div>;
+  if (loading) return <div className="min-h-screen bg-[#070709] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-black font-['Poppins']">CARGANDO PERFIL...</div>;
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-['Open_Sans'] flex overflow-x-hidden uppercase antialiased relative selection:bg-white selection:text-black">
-      {/* BACKGROUND AMBIENT GLOWS */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-purple-950/20 rounded-full blur-[140px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-indigo-950/15 rounded-full blur-[140px]" />
-      </div>
-
+    <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] flex overflow-x-hidden uppercase antialiased relative selection:bg-purple-500 selection:text-white">
+      
       {/* TOPBAR MOBILE */}
-      <header className="md:hidden fixed top-0 left-0 right-0 bg-[#0a0a0ae6] backdrop-blur-2xl border-b border-white/10 z-[90] px-6 py-4 flex justify-between items-center">
-        <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer">CLASSCODE</div>
-        <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 focus:outline-none"><Menu size={24} /></button>
+      <header className="md:hidden fixed top-0 left-0 right-0 bg-[#0c0c0fe6] backdrop-blur-xl border-b border-white/10 z-[90] px-6 py-4 flex justify-between items-center">
+        <div onClick={() => navigate('/home')} className="text-[16px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer">CLASSCODE</div>
+        <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 focus:outline-none"><Menu size={22} /></button>
       </header>
 
-      {/* SIDEBAR DESKTOP - ESTILO HOME */}
-      <aside className="hidden md:flex w-72 bg-[#080808]/80 backdrop-blur-3xl border-r border-white/10 flex-col p-8 fixed h-full z-50">
+      {/* SIDEBAR DESKTOP */}
+      <aside className="hidden md:flex w-72 bg-[#0a0a0d] border-r border-white/10 flex-col p-8 fixed h-full z-50">
         <header className="mb-10 text-left">
           <div onClick={() => navigate('/home')} className="text-[20px] font-['Poppins'] font-normal tracking-[0.05em] cursor-pointer uppercase text-white">CLASSCODE</div>
-          <p className="text-purple-400 text-[9px] font-bold tracking-[0.3em] mt-1 uppercase">Talent Studio</p>
+          <p className="text-purple-400 text-[9px] font-bold tracking-[0.3em] mt-1 uppercase">Talent Profile</p>
         </header>
         
         <div className="mb-8 text-left">
-          <button onClick={handleSwitchToClient} className="w-full flex items-center justify-between bg-white/[0.04] border border-white/10 p-3.5 rounded-2xl group hover:bg-white/[0.08] transition-all">
+          <button onClick={handleSwitchToClient} className="w-full flex items-center justify-between bg-white/[0.04] border border-white/10 p-3.5 rounded-xl group hover:bg-white/[0.08] transition-all">
             <div className="flex items-center gap-3 text-left">
-              <div className="p-2 bg-purple-500/20 rounded-xl text-purple-400"><RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" /></div>
+              <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400"><RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" /></div>
               <div>
                 <p className="text-[6px] font-black text-gray-400 tracking-[0.2em]">MODO</p>
                 <p className="text-[9px] font-black text-white tracking-widest uppercase mt-0.5">EXPERIENCE</p>
@@ -226,11 +221,11 @@ export default function Dashboard() {
 
       {/* MENU MOBILE SIDEBAR OVERLAY */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-[#050505] z-[300] flex flex-col p-6 text-left md:hidden overflow-y-auto">
+        <div className="fixed inset-0 bg-[#070709] z-[300] flex flex-col p-6 text-left md:hidden overflow-y-auto">
           <div className="flex justify-between items-center mb-10">
             <div>
               <div onClick={() => { navigate('/home'); setIsMobileMenuOpen(false); }} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white cursor-pointer">CLASSCODE</div>
-              <p className="text-purple-400 text-[9px] font-bold tracking-[0.3em] mt-1 uppercase">Talent Studio</p>
+              <p className="text-purple-400 text-[9px] font-bold tracking-[0.3em] mt-1 uppercase">Talent Profile</p>
             </div>
             <button onClick={() => setIsMobileMenuOpen(false)} className="text-white p-2.5 bg-white/10 rounded-full"><X size={20} /></button>
           </div>
@@ -245,166 +240,184 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* MAIN CONTENT - ESTILO VISUAL EDITORIAL MÁS RICO */}
-      <main className="flex-1 md:ml-72 p-6 md:p-12 mt-16 md:mt-0 space-y-10 relative z-10 w-full max-w-[1500px] mx-auto">
+      {/* MAIN CONTENT - ESTILO PERFIL TIPO RED SOCIAL (FACEBOOK STYLE CON SHOWREEL DE PORTADA) */}
+      <main className="flex-1 md:ml-72 pb-24 mt-14 md:mt-0 w-full max-w-[1400px] mx-auto">
         
-        {/* HERO CARD DE IDENTIDAD (DISEÑO TIPO PORTADA) */}
-        <section className="relative bg-[#101012] border border-white/10 rounded-[2.5rem] p-6 md:p-10 overflow-hidden shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
+        {/* SECCIÓN DE PORTADA (SHOWREEL) Y CABECERA DE PERFIL */}
+        <div className="relative bg-[#121217] border-b border-white/10 shadow-2xl">
           
-          <div className="flex items-center gap-6 relative z-10 w-full md:w-auto">
-            <div className="relative group w-20 h-20 md:w-24 md:h-24 flex-shrink-0">
-               <div className="w-full h-full rounded-2xl border-2 border-white/10 overflow-hidden bg-black shadow-inner">
-                 {profile.photo1 ? <img src={profile.photo1} className="w-full h-full object-cover" alt="" /> : <User size={32} className="m-auto mt-6 text-gray-600"/>}
-                 {uploadingStatus.photo1 && <div className="absolute inset-0 bg-black/80 flex items-center justify-center text-[8px] tracking-widest text-purple-400">SUBIENDO</div>}
-               </div>
-               <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 rounded-2xl cursor-pointer transition-all">
-                  <Camera size={20} className="text-white"/>
-                  <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'photo1')} className="hidden" />
-               </label>
-            </div>
+          {/* PORTADA QUE ES EL SHOWREEL */}
+          <div className="h-56 md:h-96 w-full bg-black relative overflow-hidden group">
+            {profile.videoLink ? (
+              <video src={profile.videoLink} controls className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-r from-purple-950/40 via-black to-indigo-950/40 flex flex-col items-center justify-center p-4">
+                <PlayCircle size={48} strokeWidth={1} className="text-white/40 mb-2"/>
+                <span className="text-[8px] font-black tracking-[0.4em] text-gray-400">SUBE TU SHOWREEL PARA DESTACARLO COMO PORTADA</span>
+              </div>
+            )}
+            <label className="absolute top-4 right-4 bg-black/80 hover:bg-black text-white px-4 py-2.5 rounded-xl text-[8px] font-black tracking-widest cursor-pointer border border-white/10 transition-all flex items-center gap-2 shadow-xl z-20">
+              <Upload size={14} /> {profile.videoLink ? 'CAMBIAR SHOWREEL' : 'SUBIR SHOWREEL'}
+              <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
+            </label>
+          </div>
 
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-[18px] md:text-[24px] font-['Poppins'] font-normal tracking-[0.05em] text-white">{profile.name || 'NUEVO TALENTO'}</h1>
-                <div className={`px-2.5 py-0.5 rounded-full border text-[7px] font-black tracking-widest ${isProfileVisible ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
-                  {isProfileVisible ? 'PUBLICADO' : 'OCULTO'}
+          {/* CONTENEDOR DE LA INFO PRINCIPAL DEBAJO DE LA PORTADA */}
+          <div className="max-w-[1200px] mx-auto px-6 md:px-12 pb-6 relative">
+            <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 -mt-16 md:-mt-20">
+              
+              {/* FOTO DE PERFIL SUPUESTA */}
+              <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left z-20">
+                <div className="relative group w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-[#121217] overflow-hidden bg-black shadow-2xl flex-shrink-0">
+                  {profile.photo1 ? <img src={profile.photo1} className="w-full h-full object-cover" alt="" /> : <User size={50} className="m-auto mt-10 text-gray-600"/>}
+                  <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 cursor-pointer transition-all">
+                    <Camera size={24} className="text-white"/>
+                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'photo1')} className="hidden" />
+                  </label>
+                </div>
+
+                <div className="space-y-1.5 pt-2 md:pt-0">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                    <h1 className="text-[20px] md:text-[26px] font-['Poppins'] font-normal tracking-[0.05em] text-white">{profile.name || 'NUEVO TALENTO'}</h1>
+                    <div className={`px-2.5 py-0.5 rounded-full border text-[7px] font-black tracking-widest ${isProfileVisible ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
+                      {isProfileVisible ? 'PUBLICADO' : 'OCULTO'}
+                    </div>
+                  </div>
+                  <p className="text-[10px] md:text-[12px] text-purple-400 font-bold tracking-[0.3em] uppercase">{profile.job || 'ASIGNAR RUBRO'}</p>
+                  <div className="flex items-center justify-center md:justify-start gap-4 text-[8px] text-gray-400 font-bold tracking-wider pt-1">
+                    {profile.location && <span className="flex items-center gap-1"><MapPin size={12} className="text-purple-400"/> {profile.location}</span>}
+                    <span className="flex items-center gap-1"><Briefcase size={12} className="text-purple-400"/> {calculateTotalScore(profile)} PTS ÉLITE</span>
+                  </div>
                 </div>
               </div>
-              <p className="text-[9px] md:text-[11px] text-purple-400 font-bold tracking-[0.3em] uppercase">{profile.job || 'ASIGNAR RUBRO'}</p>
-              <p className="text-[8px] text-gray-400 tracking-wider">{profile.location || 'UBICACIÓN NO ESPECIFICADA'}</p>
+
+              {/* BOTÓN EDITAR PERFIL */}
+              <button onClick={() => setIsEditingProfile(true)} className="flex items-center gap-2 bg-white text-black hover:bg-purple-200 px-6 py-3 rounded-xl font-black text-[9px] tracking-widest transition-all shadow-xl z-20">
+                <Edit3 size={14}/> EDITAR PERFIL
+              </button>
+
             </div>
-          </div>
-
-          <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 border-white/10 relative z-10">
-             <div className="text-left md:text-right pr-4">
-                <p className="text-[16px] font-black text-white tracking-tighter">{calculateTotalScore(profile)} PTS</p>
-                <p className="text-[7px] text-purple-400 font-black tracking-widest mt-0.5">REPUTACIÓN ÉLITE</p>
-             </div>
-             <button onClick={() => setIsEditingProfile(true)} className="flex items-center gap-2 bg-white text-black hover:bg-purple-200 px-5 py-3 rounded-xl font-black text-[9px] tracking-widest transition-all shadow-lg">
-               <Edit3 size={14}/> EDITAR PERFIL
-             </button>
-          </div>
-        </section>
-
-        {/* GRID PRINCIPAL: ACADEMY & MENSAJES */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* ESTATUS DE CARRERA */}
-          <div className="bg-[#101012] border border-white/10 rounded-[2.5rem] p-8 space-y-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
-             <div className="absolute top-0 right-0 p-6 opacity-5"><Award size={120} /></div>
-             <div>
-               <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase mb-6">Estatus Académico</h3>
-               <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                    <div className={`p-3 rounded-xl ${isGenericoDone ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>
-                       {isGenericoDone ? <CheckCircle2 size={20}/> : <Zap size={20} fill="currentColor"/>}
-                    </div>
-                    <div>
-                       <p className="text-[10px] font-black uppercase tracking-wider">Nivelación Ingreso</p>
-                       <p className="text-[7px] text-gray-400 font-bold mt-1">{isGenericoDone ? 'VERIFICADO' : 'PENDIENTE DE TEST'}</p>
-                    </div>
-                    {!isGenericoDone && (
-                      <button onClick={() => navigate('/academy-test/Generico')} className="ml-auto bg-amber-500/20 border border-amber-500/40 text-amber-400 p-2.5 rounded-xl hover:bg-amber-500 hover:text-black transition-all"><ArrowRight size={16}/></button>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                    <div className={`p-3 rounded-xl ${isProfessionalTestDone ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-white/5 text-gray-500 border border-white/5'}`}><Award size={20}/></div>
-                    <div>
-                       <p className="text-[10px] font-black uppercase tracking-wider">Especialista</p>
-                       <p className="text-[7px] text-gray-400 font-bold mt-1">{isProfessionalTestDone ? 'CERTIFICADO ÉLITE' : profile.job ? 'TEST DISPONIBLE' : 'SELECCIONAR RUBRO'}</p>
-                    </div>
-                    {(!isProfessionalTestDone && profile.job) && (
-                       <button onClick={() => navigate(`/academy-test/${encodeURIComponent(profile.job)}`)} className="ml-auto bg-purple-600/30 border border-purple-500/40 text-purple-300 p-2.5 rounded-xl hover:bg-purple-600 hover:text-white transition-all"><Zap size={16} fill="currentColor"/></button>
-                    )}
-                  </div>
-               </div>
-            </div>
-            <button onClick={() => navigate('/academy')} className="w-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[9px] font-black tracking-[0.2em] transition-all flex items-center justify-center gap-2">
-              <GraduationCap size={16}/> IR A CLASSCODE ACADEMY
-            </button>
-          </div>
-
-          {/* MENSAJES */}
-          <div className="lg:col-span-2 bg-[#101012] border border-white/10 rounded-[2.5rem] p-8 space-y-6 shadow-xl flex flex-col">
-             <div className="flex justify-between items-center border-b border-white/10 pb-4">
-               <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase flex items-center gap-2"><MessageSquare size={14}/> Bandeja de Mensajes</h3>
-               <span className="text-[8px] text-purple-400 font-black tracking-widest">{messages.length} CHATS</span>
-             </div>
-             <div className="space-y-3 max-h-[220px] overflow-y-auto no-scrollbar pr-1">
-                {messages.length === 0 ? (
-                  <div className="text-center py-12 text-[8px] text-gray-600 uppercase font-black tracking-widest">Sin conversaciones activas en este momento</div>
-                ) : messages.map(chat => (
-                  <div key={chat.id} onClick={() => navigate(`/chat/${chat.id}`)} className="flex justify-between items-center p-4 bg-white/[0.02] border border-white/5 hover:border-purple-500/40 rounded-2xl group transition-all cursor-pointer">
-                     <div className="flex items-center gap-4">
-                        {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-10 h-10 rounded-xl object-cover border border-white/10" alt="" /> : <div className="w-10 h-10 rounded-xl bg-white/5 text-gray-400 flex items-center justify-center"><User size={16}/></div>}
-                        <div>
-                           <p className="text-[10px] font-black text-white uppercase tracking-wider">{chat.clientName || "CLIENTE"}</p>
-                           <p className="text-[7px] text-purple-400 font-bold uppercase mt-0.5">Mensaje directo</p>
-                        </div>
-                     </div>
-                     <ArrowRight size={14} className="text-gray-600 group-hover:text-purple-400 transition-all" />
-                  </div>
-                ))}
-             </div>
           </div>
         </div>
 
-        {/* SHOWREEL & PORTFOLIO VISUAL */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
+        {/* CUERPO DEL PERFIL (ESTILO MURO / GRID DE RED SOCIAL) */}
+        <div className="max-w-[1200px] mx-auto px-6 md:px-12 pt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* SHOWREEL */}
-          <div className="bg-[#101012] border border-white/10 rounded-[2.5rem] p-6 space-y-4 shadow-xl flex flex-col justify-between">
-            <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase">Showreel Principal</h3>
-            <div className="aspect-[9/16] max-h-[400px] w-full bg-black rounded-2xl overflow-hidden border border-white/10 relative flex items-center justify-center group mx-auto">
-               {profile.videoLink ? <video src={profile.videoLink} controls className="w-full h-full object-cover" /> : (
-                 <div className="text-center opacity-40 group-hover:opacity-80 transition-opacity"><PlayCircle size={48} strokeWidth={1} className="text-white mx-auto"/><p className="text-[7px] font-black uppercase tracking-[0.4em] mt-3">CARGAR VIDEO REEL</p></div>
-               )}
-               <input type="file" accept="video/*" onChange={handleVideoUpload} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
+          {/* COLUMNA IZQUIERDA: ACADEMY & INFO PERSONAL */}
+          <div className="space-y-6">
+            
+            {/* BIO / PRESENTACIÓN */}
+            <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-4 shadow-xl">
+              <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase border-b border-white/10 pb-3">Sobre Mí</h3>
+              <p className="text-[10px] text-gray-300 leading-relaxed font-['Open_Sans']">
+                {profile.bio || "Agregá una biografía a tu perfil desde el botón 'Editar perfil' para que los clientes conozcan tu experiencia y trayectoria."}
+              </p>
             </div>
+
+            {/* ESTATUS ACADÉMICO */}
+            <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-4 shadow-xl">
+               <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase border-b border-white/10 pb-3">Estatus Académico</h3>
+               <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                    <div className={`p-2.5 rounded-lg ${isGenericoDone ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>
+                       {isGenericoDone ? <CheckCircle2 size={16}/> : <Zap size={16} fill="currentColor"/>}
+                    </div>
+                    <div>
+                       <p className="text-[9px] font-black uppercase tracking-wider">Nivelación Ingreso</p>
+                       <p className="text-[7px] text-gray-400 font-bold mt-0.5">{isGenericoDone ? 'VERIFICADO' : 'PENDIENTE'}</p>
+                    </div>
+                    {!isGenericoDone && (
+                      <button onClick={() => navigate('/academy-test/Generico')} className="ml-auto bg-amber-500/20 border border-amber-500/40 text-amber-400 p-2 rounded-lg hover:bg-amber-500 hover:text-black transition-all"><ArrowRight size={14}/></button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                    <div className={`p-2.5 rounded-lg ${isProfessionalTestDone ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-white/5 text-gray-500 border border-white/5'}`}><Award size={16}/></div>
+                    <div>
+                       <p className="text-[9px] font-black uppercase tracking-wider">Especialista</p>
+                       <p className="text-[7px] text-gray-400 font-bold mt-0.5">{isProfessionalTestDone ? 'CERTIFICADO ÉLITE' : profile.job ? 'DISPONIBLE' : 'SIN RUBRO'}</p>
+                    </div>
+                    {(!isProfessionalTestDone && profile.job) && (
+                       <button onClick={() => navigate(`/academy-test/${encodeURIComponent(profile.job)}`)} className="ml-auto bg-purple-600/30 border border-purple-500/40 text-purple-300 p-2 rounded-lg hover:bg-purple-600 hover:text-white transition-all"><Zap size={14} fill="currentColor"/></button>
+                    )}
+                  </div>
+               </div>
+               <button onClick={() => navigate('/academy')} className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[8px] font-black tracking-[0.2em] transition-all flex items-center justify-center gap-2 mt-2">
+                 <GraduationCap size={14}/> ACADEMY
+               </button>
+            </div>
+
+            {/* MENSAJES DIRECTOS */}
+            <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-4 shadow-xl">
+               <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                 <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase flex items-center gap-2"><MessageSquare size={12}/> Mensajes</h3>
+                 <span className="text-[8px] text-purple-400 font-black tracking-widest">{messages.length}</span>
+               </div>
+               <div className="space-y-2 max-h-[200px] overflow-y-auto no-scrollbar pr-1">
+                  {messages.length === 0 ? (
+                    <div className="text-center py-6 text-[8px] text-gray-600 uppercase font-black tracking-widest">Sin chats activos</div>
+                  ) : messages.map(chat => (
+                    <div key={chat.id} onClick={() => navigate(`/chat/${chat.id}`)} className="flex justify-between items-center p-3 bg-white/[0.02] border border-white/5 hover:border-purple-500/40 rounded-xl group transition-all cursor-pointer">
+                       <div className="flex items-center gap-3">
+                          {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-8 h-8 rounded-lg object-cover border border-white/10" alt="" /> : <div className="w-8 h-8 rounded-lg bg-white/5 text-gray-400 flex items-center justify-center"><User size={14}/></div>}
+                          <div>
+                             <p className="text-[9px] font-black text-white uppercase tracking-wider">{chat.clientName || "CLIENTE"}</p>
+                             <p className="text-[7px] text-purple-400 font-bold uppercase mt-0.5">Mensaje</p>
+                          </div>
+                       </div>
+                       <ArrowRight size={12} className="text-gray-600 group-hover:text-purple-400 transition-all" />
+                    </div>
+                  ))}
+               </div>
+            </div>
+
           </div>
 
-          {/* PORTFOLIO GRID ESTILO EDITORIAL */}
-          <div className="lg:col-span-2 bg-[#101012] border border-white/10 rounded-[2.5rem] p-8 space-y-6 shadow-xl">
-            <div className="flex justify-between items-center border-b border-white/10 pb-4">
-              <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase">Galería Portfolio (Hasta 10 Slots)</h3>
-              <span className="text-[8px] text-purple-400 font-black tracking-widest">{Array.from({ length: 10 }, (_, i) => profile[`photo${i + 1}`]).filter(Boolean).length} / 10 CARGADAS</span>
-            </div>
+          {/* COLUMNA DERECHA: PORTFOLIO DE FOTOS */}
+          <div className="lg:col-span-2 space-y-6">
             
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
-                <div key={num} className="relative aspect-square bg-black/60 border border-white/10 rounded-2xl overflow-hidden group transition-all hover:border-purple-500/50 shadow-lg">
-                  {profile[`photo${num}`] ? (
-                    <>
-                      <img src={profile[`photo${num}`]} className="w-full h-full object-cover" alt="" />
-                      <button onClick={async () => {
-                        const updates = { [`photo${num}`]: '' };
-                        setProfile(prev => ({ ...prev, ...updates }));
-                        await persistProfile(updates);
-                      }} className="absolute top-2 right-2 p-1.5 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 text-red-400 transition-all"><X size={10} /></button>
-                    </>
-                  ) : (
-                    <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-500/5 transition-all">
-                      <Upload size={16} className="text-gray-500 mb-1"/><span className="text-[6px] font-black text-gray-500 tracking-wider">SLOT {num}</span>
-                      <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, `photo${num}`)} className="hidden" />
-                    </label>
-                  )}
-                </div>
-              ))}
+            {/* PORTFOLIO GRID DE FOTOS */}
+            <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-4 shadow-xl">
+              <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase">Galería de Fotos ({Array.from({ length: 10 }, (_, i) => profile[`photo${i + 1}`]).filter(Boolean).length}/10)</h3>
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
+                  <div key={num} className="relative aspect-square bg-black/60 border border-white/10 rounded-xl overflow-hidden group transition-all hover:border-purple-500/50 shadow-lg">
+                    {profile[`photo${num}`] ? (
+                      <>
+                        <img src={profile[`photo${num}`]} className="w-full h-full object-cover" alt="" />
+                        <button onClick={async () => {
+                          const updates = { [`photo${num}`]: '' };
+                          setProfile(prev => ({ ...prev, ...updates }));
+                          await persistProfile(updates);
+                        }} className="absolute top-2 right-2 p-1.5 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 text-red-400 transition-all"><X size={10} /></button>
+                      </>
+                    ) : (
+                      <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-500/5 transition-all">
+                        <Upload size={16} className="text-gray-500 mb-1"/><span className="text-[6px] font-black text-gray-500 tracking-wider">SLOT {num}</span>
+                        <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, `photo${num}`)} className="hidden" />
+                      </label>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
+
           </div>
+
         </div>
       </main>
 
-      {/* MODAL EDIT PROFILE - NATIVO SEGURO SIN PANTALLA NEGRA */}
+      {/* MODAL EDIT PROFILE - SEGURO, AISLADO Y SIN PANTALLAS NEGRAS */}
       {isEditingProfile && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 md:p-6 bg-black/90 backdrop-blur-md overflow-y-auto">
-          <div className="bg-[#121215] border border-white/15 rounded-[2.5rem] p-6 md:p-10 max-w-lg w-full space-y-6 shadow-2xl relative my-auto uppercase">
-            <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full"><X size={20} /></button>
-            <h3 className="text-[12px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/10 pb-4 font-bold text-left">Editar Identidad Profesional</h3>
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 md:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
+          <div className="bg-[#141419] border border-white/15 rounded-3xl p-6 md:p-8 max-w-lg w-full space-y-6 shadow-2xl relative my-auto uppercase">
+            <button onClick={() => setIsEditingProfile(false)} className="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full"><X size={20} /></button>
+            <h3 className="text-[12px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/10 pb-3 font-bold text-left">Editar Perfil Profesional</h3>
             
-            <div className="space-y-4 text-left max-h-[55vh] overflow-y-auto pr-2 no-scrollbar">
+            <div className="space-y-4 text-left max-h-[55vh] overflow-y-auto pr-1 no-scrollbar">
               <div className="space-y-1.5">
                 <label className="text-[7px] text-gray-400 font-black tracking-[0.3em] pl-1">Nombre Completo / Artístico</label>
                 <input className="w-full bg-black/50 border border-white/10 p-3.5 rounded-xl text-[10px] font-bold uppercase outline-none focus:border-purple-500 text-white" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
@@ -412,7 +425,7 @@ export default function Dashboard() {
               
               <div className="space-y-2">
                 <label className="text-[7px] text-gray-400 font-black tracking-[0.3em] pl-1">Rubro Principal</label>
-                <select className="w-full bg-[#18181b] border border-white/10 p-3.5 rounded-xl text-[10px] font-bold uppercase text-white outline-none focus:border-purple-500 mb-2" 
+                <select className="w-full bg-[#18181d] border border-white/10 p-3.5 rounded-xl text-[10px] font-bold uppercase text-white outline-none focus:border-purple-500 mb-2" 
                         value={profile.job || ""} 
                         onChange={e => setProfile({...profile, job: e.target.value, specialty: ""})}>
                   <option value="">SELECCIONAR RUBRO</option>
@@ -420,7 +433,7 @@ export default function Dashboard() {
                 </select>
 
                 {profile.job && (
-                  <select className="w-full bg-[#18181b] border border-white/10 p-3.5 rounded-xl text-[10px] font-bold uppercase text-white outline-none focus:border-purple-500" 
+                  <select className="w-full bg-[#18181d] border border-white/10 p-3.5 rounded-xl text-[10px] font-bold uppercase text-white outline-none focus:border-purple-500" 
                           value={profile.specialty || ""} 
                           onChange={e => setProfile({...profile, specialty: e.target.value})}>
                     <option value="">SELECCIONAR ESPECIALIDAD</option>
@@ -431,7 +444,7 @@ export default function Dashboard() {
 
               <div className="space-y-1.5">
                 <label className="text-[7px] text-gray-400 font-black tracking-[0.3em] pl-1">Provincia / Ubicación</label>
-                <select className="w-full bg-[#18181b] border border-white/10 p-3.5 rounded-xl text-[10px] font-bold uppercase text-white outline-none focus:border-purple-500" 
+                <select className="w-full bg-[#18181d] border border-white/10 p-3.5 rounded-xl text-[10px] font-bold uppercase text-white outline-none focus:border-purple-500" 
                         value={profile.location || ""} 
                         onChange={e => setProfile({...profile, location: e.target.value})}>
                   <option value="">SELECCIONAR PROVINCIA</option>
@@ -440,14 +453,14 @@ export default function Dashboard() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[7px] text-gray-400 font-black tracking-[0.3em] pl-1">Biografía / Resumen</label>
+                <label className="text-[7px] text-gray-400 font-black tracking-[0.3em] pl-1">Biografía / Presentación</label>
                 <textarea className="w-full bg-black/50 border border-white/10 p-3.5 rounded-xl text-[10px] h-24 resize-none font-bold outline-none focus:border-purple-500 text-white font-['Open_Sans']" value={profile.bio} onChange={e => setProfile({...profile, bio: e.target.value})} />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-2">
-              <button onClick={() => setIsEditingProfile(false)} className="py-3.5 bg-white/5 text-gray-400 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-white/10 transition-all">DESCARTAR</button>
-              <button onClick={handleSaveProfileData} className="py-3.5 bg-purple-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-lg shadow-purple-900/40 hover:bg-purple-500 transition-all">GUARDAR</button>
+              <button onClick={() => setIsEditingProfile(false)} className="py-3 bg-white/5 text-gray-400 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-white/10 transition-all">DESCARTAR</button>
+              <button onClick={handleSaveProfileData} className="py-3 bg-purple-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-lg shadow-purple-900/40 hover:bg-purple-500 transition-all">GUARDAR</button>
             </div>
           </div>
         </div>
