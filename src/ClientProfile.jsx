@@ -304,12 +304,12 @@ export default function ClientProfile() {
                 </div>
               </button>
 
-              <nav className="flex-1 space-y-8">
-                <button onClick={() => { navigate('/client-profile'); setIsMobileMenuOpen(false); }} className="flex items-center gap-5 text-[12px] font-black tracking-widest text-purple-300 uppercase cursor-pointer">
-                  <LayoutGrid size={20}/> ORGANIZADOR
+              <nav className="flex-1 space-y-6">
+                <button onClick={() => { navigate('/client-profile'); setIsMobileMenuOpen(false); }} className="flex items-center gap-4 text-[11px] font-black tracking-widest text-purple-300 uppercase cursor-pointer w-full py-2">
+                  <LayoutGrid size={18}/> ORGANIZADOR
                 </button>
-                <button onClick={() => { navigate('/home'); setIsMobileMenuOpen(false); }} className="flex items-center gap-5 text-[12px] font-black tracking-widest text-white/70 hover:text-white uppercase cursor-pointer">
-                  <Search size={20}/> EXPLORAR
+                <button onClick={() => { navigate('/home'); setIsMobileMenuOpen(false); }} className="flex items-center gap-4 text-[11px] font-black tracking-widest text-white/70 hover:text-white uppercase cursor-pointer w-full py-2">
+                  <Search size={18}/> EXPLORAR
                 </button>
               </nav>
 
@@ -349,11 +349,11 @@ export default function ClientProfile() {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-4 text-left">
-          <button onClick={() => navigate('/client-profile')} className="flex items-center gap-4 text-purple-300 bg-white/[0.1] backdrop-blur-md border border-white/20 py-3.5 px-4 rounded-xl text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer w-full shadow-lg">
+        <nav className="flex-1 space-y-3 text-left">
+          <button onClick={() => navigate('/client-profile')} className="flex items-center gap-3 text-purple-300 py-3 px-3 text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer w-full">
             <LayoutGrid size={16} className="text-purple-300"/> ORGANIZADOR
           </button>
-          <button onClick={() => navigate('/home')} className="flex items-center gap-4 text-white/70 hover:text-white hover:bg-white/[0.06] py-3.5 px-4 rounded-xl text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer w-full">
+          <button onClick={() => navigate('/home')} className="flex items-center gap-3 text-white/70 hover:text-white py-3 px-3 text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer w-full">
             <Search size={16}/> EXPLORAR
           </button>
         </nav>
