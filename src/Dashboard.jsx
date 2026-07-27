@@ -5,10 +5,10 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, GraduationCap, Play, 
-  Upload, X, Eye, Menu, Zap, CheckCircle2, 
-  LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, Share2, Plus,
+  Upload, X, Eye, Menu, Zap, 
+  LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, Plus,
   Camera as CameraIcon, Video as VideoIcon, User as UserIcon, Theater, Smartphone, PartyPopper, 
-  Clapperboard, Sparkles, Shirt, Palette, Music, Utensils, CalendarDays, Home as HomeIcon, Layers, ArrowUpRight
+  Clapperboard, Sparkles, Shirt, Palette, Music, Utensils, CalendarDays, Home as HomeIcon
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,7 +22,6 @@ export default function Dashboard() {
   
   const [profiles, setProfiles] = useState([]);
   const [activeProfileIndex, setActiveProfileIndex] = useState(0);
-  const [copiedId, setCopiedId] = useState(null);
 
   const [profile, setProfile] = useState({
     name: '', job: '', specialty: '', location: '', bio: '', videoLink: '', 
@@ -269,30 +268,24 @@ export default function Dashboard() {
         await persistProfile(updates);
         setModal({ isOpen: true, type: 'success', title: 'SHOWREEL', message: 'Video subido y actualizado correctamente.' });
       } else {
-        console.error("Error de Cloudinary:", data);
-        setModal({ isOpen: true, type: 'warning', title: 'ERROR DE SUBIDA', message: data.error?.message || 'No se pudo subir el video. Verifica el preset de Cloudinary.' });
+        setModal({ isOpen: true, type: 'warning', title: 'ERROR DE SUBIDA', message: data.error?.message || 'No se pudo subir el video.' });
       }
     } catch (err) {
-      console.error("Error de red al subir video:", err);
       setModal({ isOpen: true, type: 'warning', title: 'ERROR DE RED', message: 'Ocurrió un error de conexión al intentar subir el video.' });
     } finally { 
       setUploadingStatus(prev => ({ ...prev, video: false })); 
     }
   };
 
-  const copyPublicLink = (profileJob) => {
-    const formattedJob = profileJob ? profileJob.toLowerCase().replace(/\s+/g, '-') : 'perfil';
+  const handleViewPublicProfile = () => {
     const userId = auth.currentUser?.uid;
-    const link = `${window.location.origin}/profile/${userId}/${formattedJob}`;
-    navigator.clipboard.writeText(link);
-    setCopiedId(profileJob);
-    setTimeout(() => setCopiedId(null), 2500);
+    const formattedJob = profile.job ? profile.job.toLowerCase().replace(/\s+/g, '-') : 'perfil';
+    navigate(`/profile/${userId}/${formattedJob}`);
   };
 
   if (loading) return <div className="min-h-screen w-full bg-[#0a0a0a] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-['Poppins'] overflow-x-hidden box-border">CARGANDO DASHBOARD...</div>;
 
   const currentJobIcon = profile.job && RUBRO_ICONS[profile.job] ? React.createElement(RUBRO_ICONS[profile.job], { size: 14, className: "text-purple-400 flex-shrink-0" }) : null;
-  const userId = auth.currentUser?.uid;
 
   return (
     <div className="min-h-screen w-full bg-[#0a0a0a] text-white font-['Open_Sans'] flex flex-col md:flex-row overflow-x-hidden uppercase antialiased relative text-left box-border m-0 p-0">
@@ -325,7 +318,7 @@ export default function Dashboard() {
               <nav className="flex-1 space-y-12">
                 <button onClick={() => { navigate('/dashboard'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-purple-500 uppercase"><LayoutDashboard size={22}/> DASHBOARD</button>
                 <button onClick={() => { navigate('/academy'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase"><GraduationCap size={22}/> ACADEMY</button>
-                <button onClick={() => { navigate(`/profile/${auth.currentUser?.uid}`); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase"><Eye size={22}/> PERFIL PÚBLICO</button>
+                <button onClick={() => { handleViewPublicProfile(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase"><Eye size={22}/> PERFIL PÚBLICO</button>
               </nav>
               <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-700 text-[10px] font-black tracking-widest uppercase mt-8"><LogOut size={20}/> SALIR</button>
             </motion.div>
@@ -336,7 +329,7 @@ export default function Dashboard() {
       <aside className="hidden md:flex w-72 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50 box-border">
         <header className="mb-12 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">CLASSCODE</div>
-          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent Dashboard</p>
+          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent</p>
         </header>
         
         <div className="mb-12 text-left">
@@ -356,7 +349,7 @@ export default function Dashboard() {
         <nav className="flex-1 space-y-8 text-left">
           <button onClick={() => navigate('/dashboard')} className="flex items-center gap-4 text-white text-[10px] font-black tracking-widest leading-none transition-all"><LayoutDashboard size={18} className="text-purple-500"/> DASHBOARD</button>
           <button onClick={() => navigate('/academy')} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all"><GraduationCap size={18}/> ACADEMY</button>
-          <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all"><Eye size={18}/> PERFIL PÚBLICO</button>
+          <button onClick={handleViewPublicProfile} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all"><Eye size={18}/> PERFIL PÚBLICO</button>
         </nav>
         <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-700 hover:text-red-500 text-[10px] font-black tracking-widest transition-all mt-auto pt-8 border-t border-white/5 leading-none"><LogOut size={18}/> CERRAR SESIÓN</button>
       </aside>
@@ -383,7 +376,7 @@ export default function Dashboard() {
             <div className="w-full bg-white/[0.02] border border-white/5 backdrop-blur-md rounded-2xl p-4 md:p-8 shadow-2xl box-border overflow-hidden">
               <div className="w-full mx-auto box-border">
                 
-                <label className="w-full h-[180px] md:h-[260px] bg-black relative overflow-hidden group block rounded-2xl border border-white/10 cursor-pointer shadow-xl">
+                <label className="w-full h-[180px] md:h-[260px] bg-black relative overflow-hidden group block rounded-2xl border border-white/15 cursor-pointer shadow-xl">
                   {profile.videoLink ? (
                     <video 
                       src={profile.videoLink} 
@@ -450,51 +443,6 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-
-            {/* SECCIÓN DE PERFILES PÚBLICOS MÚLTIPLES */}
-            <section className="space-y-6">
-              <div className="flex items-center gap-3 border-l-2 border-purple-500 pl-3">
-                <Layers size={15} className="text-purple-400" />
-                <h2 className="text-[11px] md:text-[13px] font-normal tracking-[0.3em] uppercase">MIS PERFILES PÚBLICOS ({profiles.length})</h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {profiles.map((p, index) => {
-                  const jobName = p.job || 'Especialidad';
-                  const subName = p.specialty || '';
-                  const formattedJob = jobName.toLowerCase().replace(/\s+/g, '-');
-                  const publicUrl = `/profile/${userId}/${formattedJob}`;
-                  const isCopied = copiedId === jobName;
-
-                  return (
-                    <div key={index} className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 flex flex-col justify-between space-y-6 backdrop-blur-xl group hover:border-purple-500/30 transition-all shadow-xl">
-                      <div className="space-y-2">
-                        <span className="text-[7px] font-black tracking-widest text-purple-500 uppercase">PERFIL ACTIVO #{index + 1}</span>
-                        <h3 className="text-sm md:text-base font-['Poppins'] font-normal tracking-wide text-white uppercase">{jobName}</h3>
-                        {subName && <p className="text-[9px] text-gray-500 tracking-wider uppercase">{subName}</p>}
-                      </div>
-
-                      <div className="flex items-center gap-3 pt-4 border-t border-white/5">
-                        <button 
-                          onClick={() => navigate(publicUrl)} 
-                          className="flex-grow py-3 bg-white text-black rounded-xl text-[8px] font-black tracking-[0.3em] flex items-center justify-center gap-2 hover:bg-gray-200 transition-all shadow-md uppercase cursor-pointer"
-                        >
-                          VER <ArrowUpRight size={13} strokeWidth={2.5} />
-                        </button>
-                        <button 
-                          onClick={() => copyPublicLink(jobName)} 
-                          className="px-4 py-3 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 rounded-xl text-[8px] font-black tracking-[0.2em] transition-all flex items-center gap-1.5 cursor-pointer"
-                          title="Copiar link público"
-                        >
-                          <Share2 size={13} className="text-purple-400" />
-                          {isCopied ? '¡COPIADO!' : 'COMPARTIR'}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
 
             <main className="w-full py-6 grid lg:grid-cols-12 gap-10 relative z-10 box-border">
               
