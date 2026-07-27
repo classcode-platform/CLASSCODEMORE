@@ -44,7 +44,6 @@ export default function EventDetail() {
       const tablesList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       setTables(tablesList);
       
-      // Auto-seleccionar la primera mesa por defecto si el invitado no tiene mesa asignada
       if (tablesList.length > 0 && !newGuest.table) {
         setNewGuest(prev => ({ ...prev, table: tablesList[0].name }));
       }
@@ -198,7 +197,7 @@ export default function EventDetail() {
             <Users size={14}/> INVITADOS ({guests.length} / {confirmedGuestsCount} CONFIRM.)
           </button>
           <button onClick={() => setActiveTab('tables')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg cursor-pointer ${activeTab === 'tables' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
-            <LayoutGrid size={14}/> MAPA DE MESAS ({tables.length})
+            <LayoutGrid size={14}/> PLANO GLOBAL DE SALÓN ({tables.length})
           </button>
           <button onClick={() => setActiveTab('budget')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg cursor-pointer ${activeTab === 'budget' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
             <DollarSign size={14}/> PRESUPUESTO (REAL: ${totalActual} / EST: ${totalEstimated})
@@ -250,92 +249,104 @@ export default function EventDetail() {
               </button>
             </form>
 
-            {/* MAPA VISUAL DE DISTRIBUCIÓN DE SALÓN */}
-            <div className="grid md:grid-cols-2 gap-8">
-              {tables.map(t => {
-                // Filtramos de forma exacta comparando en mayúsculas
-                const assignedGuests = guests.filter(g => g.table?.trim().toUpperCase() === t.name?.trim().toUpperCase());
-                const capacity = Number(t.capacity) || 10;
-                
-                return (
-                  <div key={t.id} className="bg-[#0c0c0e] border border-white/10 p-8 rounded-[2.5rem] space-y-6 shadow-2xl relative">
+            {/* PLANO GLOBAL DE SALÓN TIPO RADAR / MAPA INTERACTIVO */}
+            <div className="bg-[#0c0c0e] border border-white/10 rounded-[3rem] p-8 space-y-8 shadow-2xl relative overflow-hidden">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-6 gap-4">
+                <div>
+                  <span className="text-[8px] tracking-[0.3em] font-black text-gray-500 uppercase">VISTA GENERAL DE DISTRIBUCIÓN</span>
+                  <h3 className="text-xl font-['Poppins'] font-normal text-white uppercase tracking-wide">Plano de Salón y Mesas</h3>
+                </div>
+                <div className="flex items-center gap-4 text-[9px] text-gray-400 font-bold">
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-white inline-block"></span> Confirmado</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> Pendiente</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-black border border-white/20 inline-block"></span> Libre</span>
+                </div>
+              </div>
+
+              {tables.length === 0 ? (
+                <div className="py-16 text-center text-gray-500 tracking-widest text-[10px]">
+                  No hay mesas creadas todavía para mostrar en el plano global.
+                </div>
+              ) : (
+                <div className="grid lg:grid-cols-2 gap-8 py-4">
+                  {tables.map((t, tableIndex) => {
+                    const assignedGuests = guests.filter(g => g.table?.trim().toUpperCase() === t.name?.trim().toUpperCase());
+                    const capacity = Number(t.capacity) || 10;
                     
-                    {/* Cabecera de la Mesa */}
-                    <div className="flex justify-between items-center border-b border-white/10 pb-4">
-                      <div>
-                        <span className="text-[8px] tracking-[0.3em] font-black text-gray-500 uppercase">MESA / SECTOR</span>
-                        <h4 className="font-['Poppins'] text-lg font-normal text-white uppercase tracking-wide">{t.name}</h4>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-[9px] text-gray-300 bg-white/5 border border-white/10 px-3 py-1 rounded-full font-bold">
-                          {assignedGuests.length} / {capacity} SILLITAS
-                        </span>
-                        <button onClick={() => handleDelete('tables', t.id)} className="p-2.5 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all cursor-pointer">
-                          <Trash2 size={14}/>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* MAPITA VISUAL DE LA MESA REDONDA Y SUS SILLITAS */}
-                    <div className="relative w-full h-64 bg-black/60 rounded-3xl border border-white/5 flex items-center justify-center overflow-hidden p-4">
-                      
-                      {/* Centro de la mesa */}
-                      <div className="w-24 h-24 rounded-full bg-white/[0.03] border border-white/10 flex flex-col items-center justify-center text-center p-2 z-10 shadow-inner">
-                        <span className="text-[8px] text-gray-400 tracking-widest font-black">MESA</span>
-                        <span className="text-[10px] text-white font-bold truncate max-w-[80px]">{t.name}</span>
-                      </div>
-
-                      {/* Sillitas distribuidas alrededor de forma dinámica */}
-                      {Array.from({ length: capacity }).map((_, idx) => {
-                        const angle = (idx * (360 / capacity)) * (Math.PI / 180);
-                        // Radio de disposición de las sillitas desde el centro
-                        const radius = 85; 
-                        const x = Math.cos(angle) * radius;
-                        const y = Math.sin(angle) * radius;
-
-                        const guestInSeat = assignedGuests[idx];
-
-                        return (
-                          <div 
-                            key={idx}
-                            style={{ transform: `translate(${x}px, ${y}px)` }}
-                            className="absolute z-20"
-                          >
-                            <div 
-                              title={guestInSeat ? `${guestInSeat.name} (${guestInSeat.status})` : `Asiento ${idx + 1} (Libre)`}
-                              className={`w-7 h-7 rounded-full flex items-center justify-center text-[8px] font-black transition-all border shadow-lg cursor-pointer ${
-                                guestInSeat 
-                                  ? guestInSeat.status === 'CONFIRMADO' 
-                                    ? 'bg-white text-black border-white scale-110' 
-                                    : 'bg-amber-500/20 text-amber-400 border-amber-500/50 scale-110'
-                                  : 'bg-black text-gray-600 border-white/10 hover:border-white/30'
-                              }`}
-                            >
-                              {idx + 1}
-                            </div>
+                    return (
+                      <div key={t.id} className="bg-black/50 border border-white/10 rounded-[2.5rem] p-6 space-y-6 relative flex flex-col justify-between">
+                        
+                        {/* Cabecera de la mesa */}
+                        <div className="flex justify-between items-center">
+                          <div className="space-y-0.5">
+                            <span className="text-[7px] text-gray-500 font-black tracking-widest">MESA 0{tableIndex + 1}</span>
+                            <h4 className="font-['Poppins'] text-sm font-normal text-white uppercase">{t.name}</h4>
                           </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Lista detallada de invitados en esta mesa */}
-                    <div className="space-y-2 pt-2 border-t border-white/5 max-h-36 overflow-y-auto scrollbar-hide">
-                      <span className="text-[8px] text-gray-500 font-black tracking-widest uppercase">Invitados asignados:</span>
-                      {assignedGuests.length === 0 ? (
-                        <p className="text-[9px] text-gray-600 tracking-widest italic py-1">Ningún invitado en esta mesa todavía</p>
-                      ) : (
-                        assignedGuests.map(ag => (
-                          <div key={ag.id} className="text-[10px] text-gray-300 bg-white/[0.03] px-3 py-2 rounded-xl border border-white/5 flex justify-between items-center">
-                            <span className="truncate font-bold">{ag.name}</span>
-                            <span className={`text-[8px] font-black tracking-widest px-2 py-0.5 rounded-md ${ag.status === 'CONFIRMADO' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>{ag.status}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-[9px] text-gray-300 bg-white/5 border border-white/10 px-3 py-1 rounded-full font-bold">
+                              {assignedGuests.length} / {capacity} SILLITAS
+                            </span>
+                            <button onClick={() => handleDelete('tables', t.id)} className="p-2 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all cursor-pointer">
+                              <Trash2 size={13}/>
+                            </button>
                           </div>
-                        ))
-                      )}
-                    </div>
+                        </div>
 
-                  </div>
-                );
-              })}
+                        {/* MAPITA CIRCULAR DE SILLITAS */}
+                        <div className="relative w-full h-56 bg-black/40 rounded-3xl border border-white/5 flex items-center justify-center p-2">
+                          {/* Centro */}
+                          <div className="w-20 h-20 rounded-full bg-white/[0.02] border border-white/10 flex flex-col items-center justify-center text-center p-2 z-10">
+                            <span className="text-[7px] text-gray-500 font-black">SECTOR</span>
+                            <span className="text-[9px] text-white font-bold truncate max-w-[70px]">{t.name}</span>
+                          </div>
+
+                          {/* Sillitas alrededor */}
+                          {Array.from({ length: capacity }).map((_, idx) => {
+                            const angle = (idx * (360 / capacity)) * (Math.PI / 180);
+                            const radius = 75;
+                            const x = Math.cos(angle) * radius;
+                            const y = Math.sin(angle) * radius;
+
+                            const guestInSeat = assignedGuests[idx];
+
+                            return (
+                              <div key={idx} style={{ transform: `translate(${x}px, ${y}px)` }} className="absolute z-20">
+                                <div 
+                                  title={guestInSeat ? `${guestInSeat.name} (${guestInSeat.status})` : `Asiento ${idx + 1} (Libre)`}
+                                  className={`w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-black transition-all border shadow-md cursor-pointer ${
+                                    guestInSeat 
+                                      ? guestInSeat.status === 'CONFIRMADO' 
+                                        ? 'bg-white text-black border-white scale-110' 
+                                        : 'bg-amber-500/20 text-amber-400 border-amber-500/50 scale-110'
+                                      : 'bg-black text-gray-600 border-white/10 hover:border-white/30'
+                                  }`}
+                                >
+                                  {idx + 1}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Lista resumida de invitados */}
+                        <div className="space-y-1.5 pt-2 border-t border-white/5 max-h-28 overflow-y-auto scrollbar-hide">
+                          {assignedGuests.length === 0 ? (
+                            <p className="text-[8px] text-gray-600 tracking-widest italic text-center">Sin invitados en esta mesa</p>
+                          ) : (
+                            assignedGuests.map(ag => (
+                              <div key={ag.id} className="text-[9px] text-gray-300 bg-white/[0.02] px-3 py-1.5 rounded-xl border border-white/5 flex justify-between items-center">
+                                <span className="truncate font-bold">{ag.name}</span>
+                                <span className={`text-[7px] font-black tracking-widest px-2 py-0.5 rounded-md ${ag.status === 'CONFIRMADO' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>{ag.status}</span>
+                              </div>
+                            ))
+                          )}
+                        </div>
+
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         )}
