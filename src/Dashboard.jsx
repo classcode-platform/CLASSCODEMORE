@@ -60,13 +60,8 @@ export default function Dashboard() {
   const proCourseId = profile.job ? `cert_${profile.job.toLowerCase().replace(/\s/g, '')}` : null;
   const isProfessionalTestDone = proCourseId && profile.completedCourses?.includes(proCourseId);
 
-  const isProfileVisible = 
-  profile.name?.trim() && 
-  profile.job?.trim() && 
-  profile.specialty?.trim() && 
-  profile.location?.trim() && 
-  profile.photo1 && 
-  isProfessionalTestDone;
+  // VISIBILIDAD DE MÍNIMO COMPROMISO: Solo requiere Nombre y Rubro básico.
+  const isProfileVisible = Boolean(profile.name?.trim() && profile.job?.trim());
 
   const calculateTotalScore = (currentProfile) => {
     let bonus = 0;
@@ -75,7 +70,6 @@ export default function Dashboard() {
     const photoCount = Array.from({ length: 10 }, (_, i) => currentProfile[`photo${i + 1}`]).filter(Boolean).length;
     bonus += photoCount * 5; 
     if (currentProfile.videoLink) bonus += 20;
-    
     return bonus + (currentProfile.academyBaseScore || 0);
   };
 
@@ -142,7 +136,6 @@ export default function Dashboard() {
   };
 
   const handleSaveProfileData = async () => {
-    if (!profile.job) return setModal({ isOpen: true, title: 'ATENCIÓN', message: 'SELECCIONÁ CATEGORÍA.', type: 'warning' });
     await persistProfile(profile);
     setIsEditingProfile(false);
     setModal({ isOpen: true, type: 'success', title: "ÉXITO", message: "PERFIL ACTUALIZADO." });
@@ -201,8 +194,8 @@ export default function Dashboard() {
         <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[130px]" />
       </div>
 
-      {/* TOPBAR MOBILE - Z-INDEX CORREGIDO */}
-      <header className="md:hidden fixed top-0 left-0 right-0 bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-white/5 z-[90] px-6 py-5 flex justify-between items-center">
+      {/* TOPBAR MOBILE */}
+      <header className="md:hidden fixed top-0 left-0 right-0 bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/5 z-[90] px-6 py-5 flex justify-between items-center">
         <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer">CLASSCODE</div>
         <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 focus:outline-none"><Menu size={28} /></button>
       </header>
@@ -234,7 +227,7 @@ export default function Dashboard() {
         <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-700 hover:text-red-500 text-[10px] font-black tracking-widest transition-all mt-auto pt-8 border-t border-white/5 leading-none w-full"><LogOut size={18}/> CERRAR SESIÓN</button>
       </aside>
 
-      {/* MENU MOBILE SIDEBAR OVERLAY - Z-INDEX ALTO ASEGURADO */}
+      {/* MENU MOBILE SIDEBAR OVERLAY */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div 
@@ -395,10 +388,10 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* MODAL EDIT PROFILE - CORREGIDO Z-INDEX Y FONDO */}
+      {/* MODAL EDIT PROFILE - AISLADO Y CON Z-INDEX SOLIDO CONTRA PANTALLA NEGRA */}
       <AnimatePresence>
         {isEditingProfile && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[400] flex items-center justify-center p-4 md:p-6 antialiased uppercase overflow-y-auto">
+          <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 md:p-6 bg-black/9oidal backdrop-blur-md overflow-y-auto">
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-[#121214] border border-white/15 rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-12 max-w-lg w-full space-y-8 shadow-2xl text-center relative my-auto uppercase">
               <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full"><X size={22} /></button>
               <h3 className="text-[14px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/10 pb-4 text-left font-bold">Editar Identidad</h3>
@@ -436,11 +429,6 @@ export default function Dashboard() {
                     <option value="">SELECCIONAR PROVINCIA</option>
                     {PROVINCIAS.map(prov => <option key={prov} value={prov}>{prov.toUpperCase()}</option>)}
                   </select>
-                </div>
-
-                <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
-                  <label className="text-[8px] text-gray-400 font-black tracking-[0.3em]">Perfil Público (Visible)</label>
-                  <input type="checkbox" checked={profile.isVisible || false} onChange={e => setProfile({...profile, isVisible: e.target.checked})} className="toggle toggle-primary" />
                 </div>
 
                 <div className="space-y-2">
