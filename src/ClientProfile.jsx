@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import EventOrganizer from './components/EventOrganizer';
-import LiveControlPanel from './components/LiveControlPanel'; // <--- Importamos el componente
+import LiveControlPanel from './components/LiveControlPanel';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ClientProfile() {
@@ -23,9 +23,10 @@ export default function ClientProfile() {
   const [events, setEvents] = useState([]);
   const [profile, setProfile] = useState({ name: '', location: '', interests: '', photoURL: '' });
   
-  // Estado para el LiveControlPanel en lugar del modal de QR estático
+  // Estados para el manejo del LiveControlPanel modal
   const [showLivePanel, setShowLivePanel] = useState(false);
-  const [selectedEventForLive, setSelectedEventForLive] = useState(null);
+  const [selectedEventIndex, setSelectedEventIndex] = useState(0);
+  const [previewImage, setPreviewImage] = useState(null);
 
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'warning', onConfirm: null });
 
@@ -79,6 +80,38 @@ export default function ClientProfile() {
       await updateDoc(doc(db, "users", auth.currentUser.uid), { role: 'talent' });
       navigate('/dashboard');
     } catch (error) { console.error(error); }
+  };
+
+  // Funciones auxiliares para el LiveControlPanel
+  const currentEvent = events[selectedEventIndex] || events[0];
+
+  const handleTogglePause = async () => {
+    if (!currentEvent) return;
+    const newStatus = currentEvent.status === 'paused' ? 'EN_CURSO' : 'paused';
+    try {
+      await updateDoc(doc(db, "events_organizer", currentEvent.id), { status: newStatus });
+    } catch (err) { console.error(err); }
+  };
+
+  const handleConfirmFinish = () => {
+    if (!currentEvent) return;
+    setModal({
+      isOpen: true,
+      title: "FINALIZAR EVENTO",
+      message: "¿ESTÁS SEGURO DE MARCAR ESTE EVENTO COMO FINALIZADO?",
+      type: 'warning',
+      onConfirm: async () => {
+        await updateDoc(doc(db, "events_organizer", currentEvent.id), { status: 'FINALIZADO' });
+        setModal({ isOpen: false });
+      }
+    });
+  };
+
+  const handleCopyGuestLink = () => {
+    if (!currentEvent) return;
+    const link = `https://www.classcode.com.ar/guest-upload/${currentEvent.eventCode || currentEvent.id}`;
+    navigator.clipboard.writeText(link);
+    setModal({ isOpen: true, title: "GUEST LINK", message: "LINK DE SUBIDA COPIADO.", type: "success" });
   };
 
   if (loading) return <div className="min-h-screen bg-[#070709] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-['Poppins']">Sincronizando...</div>;
@@ -187,7 +220,7 @@ export default function ClientProfile() {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map((ev) => (
+              {events.map((ev, index) => (
                 <div 
                   key={ev.id} 
                   onClick={() => navigate(`/organizer/${ev.id}`)} 
@@ -229,9 +262,9 @@ export default function ClientProfile() {
                     </div>
 
                     <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
-                      {/* Al hacer clic en el botón QR, ahora abrimos el LiveControlPanel pasando el evento */}
+                      {/* Al hacer clic en el botón QR, abrimos el LiveControlPanel pasando el índice del evento */}
                       <button 
-                        onClick={(e) => { e.stopPropagation(); setSelectedEventForLive(ev); setShowLivePanel(true); }} 
+                        onClick={(e) => { e.stopPropagation(); setSelectedEventIndex(index); setShowLivePanel(true); }} 
                         className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.03] hover:bg-white/10 border border-white/10 text-[8px] font-black tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer"
                       >
                         <QrCode size={13} className="text-purple-400"/> LIVE CONTROL
@@ -262,26 +295,47 @@ export default function ClientProfile() {
         )}
       </AnimatePresence>
 
-      {/* Modal que despliega el LiveControlPanel al tocar el botón */}
+      {/* Modal que despliega el LiveControlPanel con todas las props que requiere */}
       <AnimatePresence>
-        {showLivePanel && selectedEventForLive && (
+        {showLivePanel && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 md:p-8 overflow-y-auto">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               className="bg-[#0c0c0e] w-full max-w-4xl p-6 md:p-8 rounded-[2.5rem] border border-white/10 relative shadow-2xl space-y-6 uppercase"
             >
-              <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                <div>
-                  <span className="text-[8px] tracking-[0.3em] font-black text-purple-400">CONTROL EN VIVO</span>
-                  <h3 className="text-lg font-['Poppins'] font-normal text-white">{selectedEventForLive.title}</h3>
-                </div>
-                <button onClick={() => setShowLivePanel(false)} className="text-gray-500 hover:text-white transition-colors cursor-pointer p-2"><X size={22} /></button>
-              </div>
+              <button onClick={() => setShowLivePanel(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
 
-              {/* Renderizamos el LiveControlPanel pasándole el ID del evento */}
-              <div className="max-h-[75vh] overflow-y-auto pr-2">
-                <LiveControlPanel eventId={selectedEventForLive.id} />
+              <div className="max-h-[80vh] overflow-y-auto pr-2">
+                <LiveControlPanel 
+                  currentEvent={currentEvent}
+                  events={events}
+                  selectedEventIndex={selectedEventIndex}
+                  setSelectedEventIndex={setSelectedEventIndex}
+                  onTogglePause={handleTogglePause}
+                  onConfirmFinish={handleConfirmFinish}
+                  onCopyGuestLink={handleCopyGuestLink}
+                  onShareTV={() => {
+                    const link = `https://www.classcode.com.ar/tv/${currentEvent?.id}`;
+                    navigator.clipboard.writeText(link);
+                    setModal({ isOpen: true, title: "TV LINK", message: "LINK DE TV COPIADO.", type: "success" });
+                  }}
+                  onOpenTV={() => navigate(`/tv/${currentEvent?.id}`)}
+                  onOpenCreate={() => { setShowLivePanel(false); setIsCreatingEvent(true); }}
+                  setPreviewImage={setPreviewImage}
+                />
               </div>
             </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal de previsualización de imagen */}
+      <AnimatePresence>
+        {previewImage && (
+          <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4" onClick={() => setPreviewImage(null)}>
+            <div className="relative max-w-3xl max-h-[90vh]">
+              <img src={previewImage} alt="Preview" className="max-w-full max-h-[85vh] object-contain rounded-2xl border border-white/10" />
+              <button onClick={() => setPreviewImage(null)} className="absolute -top-4 -right-4 p-2 bg-black/80 text-white rounded-full border border-white/20"><X size={18}/></button>
+            </div>
           </div>
         )}
       </AnimatePresence>
