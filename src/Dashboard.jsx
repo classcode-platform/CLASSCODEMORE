@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from './firebase'; 
 import { doc, setDoc, collection, query, where, onSnapshot, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ArrowRight, GraduationCap, PlayCircle, 
+  ArrowRight, GraduationCap, Play, 
   Upload, X, Eye, Menu, Zap, CheckCircle2, 
-  LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, Briefcase
+  LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, Share2
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 
@@ -16,19 +16,17 @@ export default function Dashboard() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState([]);
+  const scrollRef = useRef();
   
   const [profile, setProfile] = useState({
-    name: '', job: '', specialty: '', location: '', bio: '', instagram: '', videoLink: '', 
-    coverPhoto: '', 
-    photo1: '', photo2: '', photo3: '', photo4: '', photo5: '', 
-    photo6: '', photo7: '', photo8: '', photo9: '', photo10: '',
+    name: '', job: '', specialty: '', location: '', bio: '', videoLink: '', 
+    ...Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`photo${i + 1}`, ''])),
     academyPoints: 0, verified: false, score: 0,
     completedCourses: [] 
   });
 
   const [uploadingStatus, setUploadingStatus] = useState({
-    video: false, profile: false, cover: false,
-    ...Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`photo${i + 1}`, false]))
+    video: false, ...Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`photo${i + 1}`, false]))
   });
 
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'warning' });
@@ -181,30 +179,30 @@ export default function Dashboard() {
     } finally { setUploadingStatus(prev => ({ ...prev, video: false })); }
   };
 
-  if (loading) return <div className="min-h-screen bg-[#070709] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-black font-['Poppins']">CARGANDO PERFIL...</div>;
+  if (loading) return <div className="min-h-screen bg-[#070709] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-black font-['Poppins']">CARGANDO DASHBOARD...</div>;
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] flex overflow-x-hidden uppercase antialiased relative selection:bg-purple-500 selection:text-white">
+    <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] flex flex-col relative overflow-x-hidden uppercase selection:bg-white selection:text-black">
       
       {/* TOPBAR MOBILE */}
-      <header className="md:hidden fixed top-0 left-0 right-0 bg-[#0c0c0fe6] backdrop-blur-xl border-b border-white/10 z-[90] px-6 py-4 flex justify-between items-center">
-        <div onClick={() => navigate('/home')} className="text-[16px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer">CLASSCODE</div>
+      <header className="md:hidden fixed top-0 left-0 right-0 bg-[#070709]/90 backdrop-blur-xl border-b border-white/5 z-[90] px-6 py-4 flex justify-between items-center font-['Poppins']">
+        <div onClick={() => navigate('/home')} className="text-xl tracking-[0.05em] uppercase cursor-pointer">CLASSCODE</div>
         <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 focus:outline-none"><Menu size={22} /></button>
       </header>
 
       {/* SIDEBAR DESKTOP */}
-      <aside className="hidden md:flex w-72 bg-[#0a0a0d] border-r border-white/10 flex-col p-8 fixed h-full z-50">
+      <aside className="hidden md:flex w-72 bg-[#070709] border-r border-white/5 flex-col p-8 fixed h-full z-50 font-['Poppins']">
         <header className="mb-10 text-left">
-          <div onClick={() => navigate('/home')} className="text-[20px] font-['Poppins'] font-normal tracking-[0.05em] cursor-pointer uppercase text-white">CLASSCODE</div>
-          <p className="text-purple-400 text-[9px] font-bold tracking-[0.3em] mt-1 uppercase">Talent Profile</p>
+          <div onClick={() => navigate('/home')} className="text-2xl tracking-[0.05em] cursor-pointer uppercase text-white font-normal">CLASSCODE</div>
+          <p className="text-gray-400 text-[9px] font-bold tracking-[0.3em] mt-1 uppercase">Talent Dashboard</p>
         </header>
         
         <div className="mb-8 text-left">
-          <button onClick={handleSwitchToClient} className="w-full flex items-center justify-between bg-white/[0.04] border border-white/10 p-3.5 rounded-xl group hover:bg-white/[0.08] transition-all">
+          <button onClick={handleSwitchToClient} className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-3.5 rounded-2xl group hover:bg-white/10 transition-all">
             <div className="flex items-center gap-3 text-left">
-              <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400"><RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" /></div>
+              <div className="p-2 bg-white/10 rounded-xl text-white"><RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" /></div>
               <div>
-                <p className="text-[6px] font-black text-gray-400 tracking-[0.2em]">MODO</p>
+                <p className="text-[6px] font-black text-gray-500 tracking-[0.2em]">MODO</p>
                 <p className="text-[9px] font-black text-white tracking-widest uppercase mt-0.5">EXPERIENCE</p>
               </div>
             </div>
@@ -212,261 +210,300 @@ export default function Dashboard() {
         </div>
 
         <nav className="flex-1 space-y-6 text-left">
-          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-4 text-white text-[10px] font-black tracking-widest w-full"><LayoutDashboard size={16} className="text-purple-400"/> DASHBOARD</button>
+          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-4 text-white text-[10px] font-black tracking-widest w-full"><LayoutDashboard size={16} className="text-white"/> DASHBOARD</button>
           <button onClick={() => navigate('/academy')} className="flex items-center gap-4 text-gray-400 hover:text-white text-[10px] font-black tracking-widest transition-all w-full"><GraduationCap size={16}/> ACADEMY</button>
           <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="flex items-center gap-4 text-gray-400 hover:text-white text-[10px] font-black tracking-widest transition-all w-full"><Eye size={16}/> PERFIL PÚBLICO</button>
         </nav>
-        <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-500 hover:text-red-400 text-[10px] font-black tracking-widest transition-all pt-6 border-t border-white/10 w-full"><LogOut size={16}/> CERRAR SESIÓN</button>
+        <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-500 hover:text-red-400 text-[10px] font-black tracking-widest transition-all pt-6 border-t border-white/5 w-full"><LogOut size={16}/> CERRAR SESIÓN</button>
       </aside>
 
       {/* MENU MOBILE SIDEBAR OVERLAY */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-[#070709] z-[300] flex flex-col p-6 text-left md:hidden overflow-y-auto">
+        <div className="fixed inset-0 bg-[#070709] z-[300] flex flex-col p-6 text-left md:hidden overflow-y-auto font-['Poppins']">
           <div className="flex justify-between items-center mb-10">
             <div>
-              <div onClick={() => { navigate('/home'); setIsMobileMenuOpen(false); }} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white cursor-pointer">CLASSCODE</div>
-              <p className="text-purple-400 text-[9px] font-bold tracking-[0.3em] mt-1 uppercase">Talent Profile</p>
+              <div onClick={() => { navigate('/home'); setIsMobileMenuOpen(false); }} className="text-xl font-normal tracking-[0.05em] uppercase text-white cursor-pointer">CLASSCODE</div>
+              <p className="text-gray-400 text-[9px] font-bold tracking-[0.3em] mt-1 uppercase">Talent Dashboard</p>
             </div>
             <button onClick={() => setIsMobileMenuOpen(false)} className="text-white p-2.5 bg-white/10 rounded-full"><X size={20} /></button>
           </div>
 
           <nav className="flex-1 space-y-6 flex flex-col justify-center text-left">
-            <button onClick={() => { navigate('/dashboard'); setIsMobileMenuOpen(false); }} className="flex items-center gap-5 text-white text-[12px] font-black tracking-[0.2em]"><LayoutDashboard size={18} className="text-purple-400"/> DASHBOARD</button>
+            <button onClick={() => { navigate('/dashboard'); setIsMobileMenuOpen(false); }} className="flex items-center gap-5 text-white text-[12px] font-black tracking-[0.2em]"><LayoutDashboard size={18} className="text-white"/> DASHBOARD</button>
             <button onClick={() => { navigate('/academy'); setIsMobileMenuOpen(false); }} className="flex items-center gap-5 text-gray-400 hover:text-white text-[12px] font-black tracking-[0.2em]"><GraduationCap size={18}/> ACADEMY</button>
             <button onClick={() => { navigate(`/profile/${auth.currentUser?.uid}`); setIsMobileMenuOpen(false); }} className="flex items-center gap-5 text-gray-400 hover:text-white text-[12px] font-black tracking-[0.2em]"><Eye size={18}/> PERFIL PÚBLICO</button>
           </nav>
 
-          <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-5 text-gray-500 hover:text-red-400 text-[10px] font-black tracking-[0.2em] pt-6 border-t border-white/10 mt-auto"><LogOut size={16}/> CERRAR SESIÓN</button>
+          <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-5 text-gray-500 hover:text-red-400 text-[10px] font-black tracking-[0.2em] pt-6 border-t border-white/5 mt-auto"><LogOut size={16}/> CERRAR SESIÓN</button>
         </div>
       )}
 
-      {/* MAIN CONTENT - ESTILO PERFIL TIPO RED SOCIAL (FACEBOOK STYLE CON SHOWREEL DE PORTADA) */}
-      <main className="flex-1 md:ml-72 pb-24 mt-14 md:mt-0 w-full max-w-[1400px] mx-auto">
+      {/* MAIN CONTAINER (ML-72 en desktop para compensar el sidebar) */}
+      <div className="flex-1 md:ml-72 flex flex-col w-full">
         
-        {/* SECCIÓN DE PORTADA (SHOWREEL) Y CABECERA DE PERFIL */}
-        <div className="relative bg-[#121217] border-b border-white/10 shadow-2xl">
-          
-          {/* PORTADA QUE ES EL SHOWREEL */}
-          <div className="h-56 md:h-96 w-full bg-black relative overflow-hidden group">
-            {profile.videoLink ? (
-              <video src={profile.videoLink} controls className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-r from-purple-950/40 via-black to-indigo-950/40 flex flex-col items-center justify-center p-4">
-                <PlayCircle size={48} strokeWidth={1} className="text-white/40 mb-2"/>
-                <span className="text-[8px] font-black tracking-[0.4em] text-gray-400">SUBE TU SHOWREEL PARA DESTACARLO COMO PORTADA</span>
-              </div>
-            )}
-            <label className="absolute top-4 right-4 bg-black/80 hover:bg-black text-white px-4 py-2.5 rounded-xl text-[8px] font-black tracking-widest cursor-pointer border border-white/10 transition-all flex items-center gap-2 shadow-xl z-20">
-              <Upload size={14} /> {profile.videoLink ? 'CAMBIAR SHOWREEL' : 'SUBIR SHOWREEL'}
-              <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
-            </label>
+        {/* TOPBAR INTERNO / NAVEGACIÓN SUPERIOR */}
+        <nav className="p-6 md:p-10 w-full sticky top-0 z-40 bg-[#070709]/90 backdrop-blur-xl border-b border-white/5 hidden md:block">
+          <div className="max-w-[1440px] mx-auto flex justify-between items-center w-full font-['Poppins']">
+            <span className="text-gray-500 text-[9px] tracking-[0.3em] font-bold">GESTIÓN DE TALENTO</span>
+            <div className="flex items-center gap-4">
+              <span className={`px-3 py-1 rounded-full border text-[8px] font-black tracking-widest ${isProfileVisible ? 'bg-white/10 border-white/20 text-white' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
+                {isProfileVisible ? 'ESTADO: PÚBLICO' : 'ESTADO: INCOMPLETO'}
+              </span>
+            </div>
           </div>
+        </nav>
 
-          {/* CONTENEDOR DE LA INFO PRINCIPAL DEBAJO DE LA PORTADA */}
-          <div className="max-w-[1200px] mx-auto px-6 md:px-12 pb-6 relative">
-            <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 -mt-16 md:-mt-20">
+        {/* SECCIÓN ESTILO FACEBOOK LIMPIA (BANNER SHOWREEL + HEADER) */}
+        <div className="w-full bg-[#070709] border-b border-white/5 mt-14 md:mt-0">
+          <div className="max-w-[1200px] mx-auto">
+            
+            {/* Banner / Showreel Container más angosto y finito (Exacto a ProfileP) */}
+            <div className="w-full h-[180px] md:h-[260px] bg-black relative overflow-hidden group">
+              {profile.videoLink ? (
+                <video 
+                  src={profile.videoLink} 
+                  autoPlay 
+                  loop 
+                  muted 
+                  playsInline 
+                  className="w-full h-full object-cover pointer-events-none opacity-90" 
+                />
+              ) : (
+                <div className="w-full h-full bg-[#070709] flex flex-col items-center justify-center p-6 text-center border border-white/5">
+                  <Play size={28} className="text-white/20 mb-2" strokeWidth={1}/>
+                  <span className="text-[8px] tracking-[0.4em] text-gray-500 font-black">SIN SHOWREEL CARGADO</span>
+                </div>
+              )}
               
-              {/* FOTO DE PERFIL SUPUESTA */}
-              <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left z-20">
-                <div className="relative group w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-[#121217] overflow-hidden bg-black shadow-2xl flex-shrink-0">
-                  {profile.photo1 ? <img src={profile.photo1} className="w-full h-full object-cover" alt="" /> : <User size={50} className="m-auto mt-10 text-gray-600"/>}
+              <label className="absolute bottom-4 right-4 bg-black/80 hover:bg-black text-white px-4 py-2.5 rounded-xl text-[8px] font-black tracking-widest cursor-pointer border border-white/10 transition-all flex items-center gap-2 shadow-xl z-20">
+                <Upload size={14} /> {profile.videoLink ? 'CAMBIAR SHOWREEL' : 'SUBIR SHOWREEL'}
+                <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
+              </label>
+            </div>
+
+            {/* Perfil Header alineado */}
+            <div className="px-6 md:px-12 pb-8 relative -mt-14 md:-mt-20 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 z-20">
+              <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left">
+                
+                {/* Foto de Perfil con hover para cambiar */}
+                <div className="relative w-28 h-28 md:w-36 md:h-36 rounded-full border-4 border-[#070709] overflow-hidden bg-black shadow-2xl flex-shrink-0 group">
+                  {profile.photo1 ? (
+                    <img src={profile.photo1} className="w-full h-full object-cover" alt="" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-white/5 text-gray-500"><User size={40}/></div>
+                  )}
                   <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 cursor-pointer transition-all">
-                    <Camera size={24} className="text-white"/>
+                    <Camera size={20} className="text-white"/>
                     <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'photo1')} className="hidden" />
                   </label>
                 </div>
 
-                <div className="space-y-1.5 pt-2 md:pt-0">
+                <div className="space-y-2 pb-1">
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                    <h1 className="text-[20px] md:text-[26px] font-['Poppins'] font-normal tracking-[0.05em] text-white">{profile.name || 'NUEVO TALENTO'}</h1>
-                    <div className={`px-2.5 py-0.5 rounded-full border text-[7px] font-black tracking-widest ${isProfileVisible ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
-                      {isProfileVisible ? 'PUBLICADO' : 'OCULTO'}
-                    </div>
+                    <h1 className="text-2xl md:text-3xl font-['Poppins'] font-normal tracking-wide text-white">{profile.name || 'NUEVO TALENTO'}</h1>
+                    <span className="bg-white/10 text-white border border-white/20 px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1.5">
+                      <CheckCircle2 size={12}/> TALENTO
+                    </span>
                   </div>
-                  <p className="text-[10px] md:text-[12px] text-purple-400 font-bold tracking-[0.3em] uppercase">{profile.job || 'ASIGNAR RUBRO'}</p>
-                  <div className="flex items-center justify-center md:justify-start gap-4 text-[8px] text-gray-400 font-bold tracking-wider pt-1">
-                    {profile.location && <span className="flex items-center gap-1"><MapPin size={12} className="text-purple-400"/> {profile.location}</span>}
-                    <span className="flex items-center gap-1"><Briefcase size={12} className="text-purple-400"/> {calculateTotalScore(profile)} PTS ÉLITE</span>
+                  <p className="text-gray-400 text-[10px] md:text-xs tracking-[0.3em] font-bold">{profile.job || 'ASIGNAR RUBRO'}</p>
+                  <div className="flex items-center justify-center md:justify-start gap-4 text-[10px] text-gray-500 font-bold tracking-widest pt-1">
+                    {profile.location && <span className="flex items-center gap-1.5"><MapPin size={14} className="text-white"/> {profile.location}</span>}
+                    <span className="flex items-center gap-1.5"><Award size={14} className="text-white"/> {calculateTotalScore(profile)} PTS</span>
                   </div>
                 </div>
               </div>
 
-              {/* BOTÓN EDITAR PERFIL */}
-              <button onClick={() => setIsEditingProfile(true)} className="flex items-center gap-2 bg-white text-black hover:bg-purple-200 px-6 py-3 rounded-xl font-black text-[9px] tracking-widest transition-all shadow-xl z-20">
-                <Edit3 size={14}/> EDITAR PERFIL
-              </button>
-
+              {/* Botones de Acción principales */}
+              <div className="flex items-center gap-3 w-full md:w-auto justify-center pb-2">
+                <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-4 bg-white/[0.03] hover:bg-white/10 rounded-2xl border border-white/10 transition-all text-white" title="Ver Perfil Público">
+                  <Eye size={18} />
+                </button>
+                <button onClick={() => setIsEditingProfile(true)} className="flex-1 md:flex-initial px-8 py-4 rounded-2xl bg-white text-black font-black text-[10px] tracking-[0.3em] hover:bg-gray-200 transition-all shadow-xl flex items-center justify-center gap-2">
+                  <Edit3 size={14}/> EDITAR PERFIL
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* CUERPO DEL PERFIL (ESTILO MURO / GRID DE RED SOCIAL) */}
-        <div className="max-w-[1200px] mx-auto px-6 md:px-12 pt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* CONTENIDO PRINCIPAL (GRID DE DOS COLUMNAS IGUAL A PROFILE P) */}
+        <main className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 grid lg:grid-cols-12 gap-10 relative z-10 w-full">
           
-          {/* COLUMNA IZQUIERDA: ACADEMY & INFO PERSONAL */}
-          <div className="space-y-6">
+          {/* COLUMNA IZQUIERDA: CERTIFICACIONES Y MENSAJES */}
+          <div className="lg:col-span-4 space-y-8">
             
-            {/* BIO / PRESENTACIÓN */}
-            <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-4 shadow-xl">
-              <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase border-b border-white/10 pb-3">Sobre Mí</h3>
-              <p className="text-[10px] text-gray-300 leading-relaxed font-['Open_Sans']">
-                {profile.bio || "Agregá una biografía a tu perfil desde el botón 'Editar perfil' para que los clientes conozcan tu experiencia y trayectoria."}
-              </p>
+            {/* ESTADO ACADÉMICO / CERTIFICACIONES */}
+            <div className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 space-y-6 shadow-xl">
+              <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black border-l-2 border-white pl-4">Estatus Academy</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    <Zap size={14} className={isGenericoDone ? "text-white" : "text-gray-600"} />
+                    <span className="text-[9px] font-black tracking-widest text-white">NIVELACIÓN INGRESO</span>
+                  </div>
+                  {!isGenericoDone ? (
+                    <button onClick={() => navigate('/academy-test/Generico')} className="text-[8px] font-black text-purple-400 hover:underline">RENDIR</button>
+                  ) : (
+                    <span className="text-[8px] font-black text-green-400">APROBADO</span>
+                  )}
+                </div>
+
+                {profile.job && (
+                  <div className="flex items-center justify-between bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl">
+                    <div className="flex items-center gap-3">
+                      <Award size={14} className={isProfessionalTestDone ? "text-white" : "text-gray-600"} />
+                      <span className="text-[9px] font-black tracking-widest text-white">TEST PROFESIONAL</span>
+                    </div>
+                    {!isProfessionalTestDone ? (
+                      <button onClick={() => navigate(`/academy-test/${encodeURIComponent(profile.job)}`)} className="text-[8px] font-black text-purple-400 hover:underline">RENDIR</button>
+                    ) : (
+                      <span className="text-[8px] font-black text-green-400">APROBADO</span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <button onClick={() => navigate('/academy')} className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[9px] font-black tracking-[0.3em] text-gray-300 transition-all flex items-center justify-center gap-2">
+                <GraduationCap size={14}/> IR A CLASSCODE ACADEMY
+              </button>
             </div>
 
-            {/* ESTATUS ACADÉMICO */}
-            <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-4 shadow-xl">
-               <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase border-b border-white/10 pb-3">Estatus Académico</h3>
-               <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                    <div className={`p-2.5 rounded-lg ${isGenericoDone ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>
-                       {isGenericoDone ? <CheckCircle2 size={16}/> : <Zap size={16} fill="currentColor"/>}
-                    </div>
-                    <div>
-                       <p className="text-[9px] font-black uppercase tracking-wider">Nivelación Ingreso</p>
-                       <p className="text-[7px] text-gray-400 font-bold mt-0.5">{isGenericoDone ? 'VERIFICADO' : 'PENDIENTE'}</p>
-                    </div>
-                    {!isGenericoDone && (
-                      <button onClick={() => navigate('/academy-test/Generico')} className="ml-auto bg-amber-500/20 border border-amber-500/40 text-amber-400 p-2 rounded-lg hover:bg-amber-500 hover:text-black transition-all"><ArrowRight size={14}/></button>
-                    )}
+            {/* BANDEJA DE MENSAJES DIRECTOS */}
+            <div className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 space-y-6 shadow-xl">
+              <div className="flex justify-between items-center border-l-2 border-white pl-4">
+                <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black flex items-center gap-2"><MessageSquare size={12}/> Mensajes</h3>
+                <span className="text-[9px] text-white font-black">{messages.length}</span>
+              </div>
+              <div className="space-y-3 max-h-[240px] overflow-y-auto no-scrollbar">
+                {messages.length === 0 ? (
+                  <div className="text-center py-6 text-[8px] text-gray-600 uppercase font-black tracking-widest">No hay chats activos</div>
+                ) : messages.map(chat => (
+                  <div key={chat.id} onClick={() => navigate(`/chat/${chat.id}`)} className="flex justify-between items-center p-3.5 bg-white/[0.03] border border-white/10 hover:border-white/30 rounded-2xl transition-all cursor-pointer">
+                     <div className="flex items-center gap-3">
+                        {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-8 h-8 rounded-full object-cover border border-white/10" alt="" /> : <div className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center"><User size={14}/></div>}
+                        <div>
+                           <p className="text-[9px] font-black text-white uppercase tracking-wider">{chat.clientName || "CLIENTE"}</p>
+                           <p className="text-[7px] text-gray-400 font-bold uppercase mt-0.5">Ver chat</p>
+                        </div>
+                     </div>
+                     <ArrowRight size={12} className="text-gray-500" />
                   </div>
+                ))}
+              </div>
+            </div>
 
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                    <div className={`p-2.5 rounded-lg ${isProfessionalTestDone ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-white/5 text-gray-500 border border-white/5'}`}><Award size={16}/></div>
-                    <div>
-                       <p className="text-[9px] font-black uppercase tracking-wider">Especialista</p>
-                       <p className="text-[7px] text-gray-400 font-bold mt-0.5">{isProfessionalTestDone ? 'CERTIFICADO ÉLITE' : profile.job ? 'DISPONIBLE' : 'SIN RUBRO'}</p>
-                    </div>
-                    {(!isProfessionalTestDone && profile.job) && (
-                       <button onClick={() => navigate(`/academy-test/${encodeURIComponent(profile.job)}`)} className="ml-auto bg-purple-600/30 border border-purple-500/40 text-purple-300 p-2 rounded-lg hover:bg-purple-600 hover:text-white transition-all"><Zap size={14} fill="currentColor"/></button>
-                    )}
-                  </div>
-               </div>
-               <button onClick={() => navigate('/academy')} className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[8px] font-black tracking-[0.2em] transition-all flex items-center justify-center gap-2 mt-2">
-                 <GraduationCap size={14}/> ACADEMY
+            <div className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 shadow-xl">
+               <button onClick={() => {
+                 navigator.clipboard.writeText(`https://www.classcode.com.ar/profile/${auth.currentUser?.uid}`);
+                 alert("¡Enlace de perfil copiado al portapapeles!");
+               }} className="w-full group flex items-center justify-center gap-3 text-[9px] font-black tracking-[0.3em] text-gray-400 hover:text-white transition-all uppercase py-2">
+                  <Share2 size={16} /> Compartir Perfil Público
                </button>
             </div>
-
-            {/* MENSAJES DIRECTOS */}
-            <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-4 shadow-xl">
-               <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                 <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase flex items-center gap-2"><MessageSquare size={12}/> Mensajes</h3>
-                 <span className="text-[8px] text-purple-400 font-black tracking-widest">{messages.length}</span>
-               </div>
-               <div className="space-y-2 max-h-[200px] overflow-y-auto no-scrollbar pr-1">
-                  {messages.length === 0 ? (
-                    <div className="text-center py-6 text-[8px] text-gray-600 uppercase font-black tracking-widest">Sin chats activos</div>
-                  ) : messages.map(chat => (
-                    <div key={chat.id} onClick={() => navigate(`/chat/${chat.id}`)} className="flex justify-between items-center p-3 bg-white/[0.02] border border-white/5 hover:border-purple-500/40 rounded-xl group transition-all cursor-pointer">
-                       <div className="flex items-center gap-3">
-                          {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-8 h-8 rounded-lg object-cover border border-white/10" alt="" /> : <div className="w-8 h-8 rounded-lg bg-white/5 text-gray-400 flex items-center justify-center"><User size={14}/></div>}
-                          <div>
-                             <p className="text-[9px] font-black text-white uppercase tracking-wider">{chat.clientName || "CLIENTE"}</p>
-                             <p className="text-[7px] text-purple-400 font-bold uppercase mt-0.5">Mensaje</p>
-                          </div>
-                       </div>
-                       <ArrowRight size={12} className="text-gray-600 group-hover:text-purple-400 transition-all" />
-                    </div>
-                  ))}
-               </div>
-            </div>
-
           </div>
 
-          {/* COLUMNA DERECHA: PORTFOLIO DE FOTOS */}
-          <div className="lg:col-span-2 space-y-6">
-            
-            {/* PORTFOLIO GRID DE FOTOS */}
-            <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-4 shadow-xl">
-              <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                <h3 className="text-[9px] text-gray-400 font-black tracking-[0.4em] uppercase">Galería de Fotos ({Array.from({ length: 10 }, (_, i) => profile[`photo${i + 1}`]).filter(Boolean).length}/10)</h3>
+          {/* COLUMNA DERECHA: PORTFOLIO DE FOTOS (10 SLOTS EDITABLES) */}
+          <div className="lg:col-span-8 space-y-12">
+            <section className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 md:p-8 space-y-8 shadow-xl">
+              <div className="flex justify-between items-center border-l-2 border-white pl-4">
+                <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black">Portfolio — Galería de Fotos</h3>
+                <span className="text-[9px] text-gray-500 font-mono">{Array.from({ length: 10 }, (_, i) => profile[`photo${i + 1}`]).filter(Boolean).length}/10 FOTOS</span>
               </div>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
-                  <div key={num} className="relative aspect-square bg-black/60 border border-white/10 rounded-xl overflow-hidden group transition-all hover:border-purple-500/50 shadow-lg">
+                  <div key={num} className="aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black group relative shadow-xl flex items-center justify-center">
                     {profile[`photo${num}`] ? (
                       <>
-                        <img src={profile[`photo${num}`]} className="w-full h-full object-cover" alt="" />
+                        <img src={profile[`photo${num}`]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="" />
                         <button onClick={async () => {
                           const updates = { [`photo${num}`]: '' };
                           setProfile(prev => ({ ...prev, ...updates }));
                           await persistProfile(updates);
-                        }} className="absolute top-2 right-2 p-1.5 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 text-red-400 transition-all"><X size={10} /></button>
+                        }} className="absolute top-2 right-2 p-2 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 text-red-400 transition-all border border-white/10"><X size={12} /></button>
                       </>
                     ) : (
-                      <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-500/5 transition-all">
-                        <Upload size={16} className="text-gray-500 mb-1"/><span className="text-[6px] font-black text-gray-500 tracking-wider">SLOT {num}</span>
+                      <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition-all p-4 text-center">
+                        <Upload size={20} className="text-gray-600 mb-2" />
+                        <span className="text-[7px] font-black tracking-widest text-gray-500">SUBIR FOTO {num}</span>
                         <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, `photo${num}`)} className="hidden" />
                       </label>
                     )}
                   </div>
                 ))}
               </div>
-            </div>
-
+            </section>
           </div>
+        </main>
+      </div>
 
-        </div>
-      </main>
-
-      {/* MODAL EDIT PROFILE - SEGURO, AISLADO Y SIN PANTALLAS NEGRAS */}
+      {/* MODAL EDITAR PERFIL */}
       {isEditingProfile && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 md:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
-          <div className="bg-[#141419] border border-white/15 rounded-3xl p-6 md:p-8 max-w-lg w-full space-y-6 shadow-2xl relative my-auto uppercase">
-            <button onClick={() => setIsEditingProfile(false)} className="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full"><X size={20} /></button>
-            <h3 className="text-[12px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/10 pb-3 font-bold text-left">Editar Perfil Profesional</h3>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4">
+          <div className="bg-[#0c0c0e] w-full max-w-lg p-8 md:p-12 rounded-[3rem] border border-white/10 relative shadow-2xl uppercase max-h-[90vh] flex flex-col">
+            <button onClick={() => setIsEditingProfile(false)} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors"><X size={22} /></button>
+            <h3 className="text-[11px] uppercase tracking-[0.5em] font-black text-white mb-8 text-center font-['Poppins']">Editar Perfil Profesional</h3>
             
-            <div className="space-y-4 text-left max-h-[55vh] overflow-y-auto pr-1 no-scrollbar">
-              <div className="space-y-1.5">
-                <label className="text-[7px] text-gray-400 font-black tracking-[0.3em] pl-1">Nombre Completo / Artístico</label>
-                <input className="w-full bg-black/50 border border-white/10 p-3.5 rounded-xl text-[10px] font-bold uppercase outline-none focus:border-purple-500 text-white" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
+            <div className="space-y-4 font-bold overflow-y-auto pr-2 flex-1 scrollbar-hide text-left">
+              <div className="space-y-1">
+                <label className="text-[7px] text-gray-500 tracking-widest">Nombre Completo / Artístico</label>
+                <input className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
               </div>
-              
-              <div className="space-y-2">
-                <label className="text-[7px] text-gray-400 font-black tracking-[0.3em] pl-1">Rubro Principal</label>
-                <select className="w-full bg-[#18181d] border border-white/10 p-3.5 rounded-xl text-[10px] font-bold uppercase text-white outline-none focus:border-purple-500 mb-2" 
-                        value={profile.job || ""} 
-                        onChange={e => setProfile({...profile, job: e.target.value, specialty: ""})}>
-                  <option value="">SELECCIONAR RUBRO</option>
-                  {Object.keys(RUBROS).map(rubro => <option key={rubro} value={rubro}>{rubro}</option>)}
-                </select>
 
-                {profile.job && (
-                  <select className="w-full bg-[#18181d] border border-white/10 p-3.5 rounded-xl text-[10px] font-bold uppercase text-white outline-none focus:border-purple-500" 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[7px] text-gray-500 tracking-widest">Rubro Principal</label>
+                  <select className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest" 
+                          value={profile.job || ""} 
+                          onChange={e => setProfile({...profile, job: e.target.value, specialty: ""})}>
+                    <option value="">SELECCIONAR</option>
+                    {Object.keys(RUBROS).map(rubro => <option key={rubro} value={rubro}>{rubro}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[7px] text-gray-500 tracking-widest">Provincia</label>
+                  <select className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest" 
+                          value={profile.location || ""} 
+                          onChange={e => setProfile({...profile, location: e.target.value})}>
+                    <option value="">SELECCIONAR</option>
+                    {PROVINCIAS.map(prov => <option key={prov} value={prov}>{prov.toUpperCase()}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {profile.job && (
+                <div className="space-y-1">
+                  <label className="text-[7px] text-gray-500 tracking-widest">Especialidad</label>
+                  <select className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest" 
                           value={profile.specialty || ""} 
                           onChange={e => setProfile({...profile, specialty: e.target.value})}>
                     <option value="">SELECCIONAR ESPECIALIDAD</option>
                     {RUBROS[profile.job].map(spec => <option key={spec} value={spec}>{spec.toUpperCase()}</option>)}
                   </select>
-                )}
-              </div>
+                </div>
+              )}
 
-              <div className="space-y-1.5">
-                <label className="text-[7px] text-gray-400 font-black tracking-[0.3em] pl-1">Provincia / Ubicación</label>
-                <select className="w-full bg-[#18181d] border border-white/10 p-3.5 rounded-xl text-[10px] font-bold uppercase text-white outline-none focus:border-purple-500" 
-                        value={profile.location || ""} 
-                        onChange={e => setProfile({...profile, location: e.target.value})}>
-                  <option value="">SELECCIONAR PROVINCIA</option>
-                  {PROVINCIAS.map(prov => <option key={prov} value={prov}>{prov.toUpperCase()}</option>)}
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[7px] text-gray-400 font-black tracking-[0.3em] pl-1">Biografía / Presentación</label>
-                <textarea className="w-full bg-black/50 border border-white/10 p-3.5 rounded-xl text-[10px] h-24 resize-none font-bold outline-none focus:border-purple-500 text-white font-['Open_Sans']" value={profile.bio} onChange={e => setProfile({...profile, bio: e.target.value})} />
+              <div className="space-y-1">
+                <label className="text-[7px] text-gray-500 tracking-widest">Biografía / Presentación</label>
+                <textarea className="w-full bg-white/[0.03] border border-white/10 rounded-3xl p-4 text-[10px] text-white uppercase h-28 resize-none outline-none focus:border-white tracking-widest" value={profile.bio || ''} onChange={e => setProfile({...profile, bio: e.target.value})} />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <button onClick={() => setIsEditingProfile(false)} className="py-3 bg-white/5 text-gray-400 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-white/10 transition-all">DESCARTAR</button>
-              <button onClick={handleSaveProfileData} className="py-3 bg-purple-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-lg shadow-purple-900/40 hover:bg-purple-500 transition-all">GUARDAR</button>
+            <div className="grid grid-cols-2 gap-4 mt-8 pt-4 border-t border-white/5">
+              <button onClick={() => setIsEditingProfile(false)} className="py-4 rounded-2xl bg-white/5 text-gray-400 font-black text-[9px] tracking-[0.3em] uppercase hover:bg-white/10 transition-all">DESCARTAR</button>
+              <button onClick={handleSaveProfileData} className="py-4 rounded-2xl bg-white text-black font-black text-[9px] tracking-[0.3em] uppercase hover:bg-gray-200 transition-all shadow-xl">GUARDAR</button>
             </div>
           </div>
         </div>
       )}
 
       <CustomModal isOpen={modal.isOpen} onClose={() => setModal({ ...modal, isOpen: false })} title={modal.title} message={modal.message} type={modal.type} />
+      
+      <footer className="bg-black py-20 px-6 border-t border-white/5 text-center relative z-10 w-full font-['Poppins']">
+        <div className="max-w-[1440px] mx-auto">
+          <h2 className="text-white text-3xl font-normal tracking-[0.1em] uppercase mb-4 opacity-30">CLASSCODE</h2>
+          <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-gray-600 opacity-30">© 2026 — TODOS LOS DERECHOS RESERVADOS</p>
+        </div>
+      </footer>
     </div>
   );
 }
