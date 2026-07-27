@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, GraduationCap, Play, 
   Upload, X, Eye, Menu, Zap, CheckCircle2, 
-  LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, Share2, Search, QrCode
+  LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, Share2 
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -323,7 +323,7 @@ export default function Dashboard() {
                     <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-4 bg-white/[0.03] hover:bg-white/15 rounded-2xl border border-white/10 transition-all text-white" title="Ver Perfil Público">
                       <Eye size={18} />
                     </button>
-                    <button onClick={() => setIsEditingProfile(true)} className="px-6 py-4 rounded-2xl bg-purple-600 text-white font-black text-[10px] tracking-[0.3em] hover:bg-purple-500 transition-all shadow-xl flex items-center justify-center gap-2">
+                    <button onClick={() => setIsEditingProfile(true)} className="px-6 py-4 rounded-2xl bg-purple-600 text-white font-black text-[10px] tracking-[0.3em] hover:bg-purple-500 transition-all shadow-xl flex items-center justify-center gap-2 cursor-pointer">
                       <Edit3 size={14}/> EDITAR PERFIL
                     </button>
                   </div>
@@ -451,46 +451,56 @@ export default function Dashboard() {
         </footer>
       </div>
 
-      {/* MODAL EDITAR PERFIL */}
+      {/* MODAL EDITAR PERFIL CORREGIDO Y BLINDADO */}
       {isEditingProfile && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 box-border overflow-x-hidden">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 box-border overflow-x-hidden">
           <div className="bg-[#050505] w-full max-w-lg p-6 md:p-12 rounded-[2.5rem] border border-white/10 relative shadow-2xl uppercase max-h-[90vh] flex flex-col box-border">
-            <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors"><X size={22} /></button>
+            <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors cursor-pointer"><X size={22} /></button>
             <h3 className="text-[11px] uppercase tracking-[0.5em] font-black text-white mb-8 text-center font-['Poppins']">Editar Perfil Profesional</h3>
             
             <div className="space-y-4 font-bold overflow-y-auto pr-2 flex-1 scrollbar-hide text-left box-border">
               <div className="space-y-1">
                 <label className="text-[7px] text-gray-500 tracking-widest">Nombre Completo / Artístico</label>
-                <input className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-purple-500 tracking-widest box-border" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
+                <input 
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-purple-500 tracking-widest box-border" 
+                  value={profile.name || ''} 
+                  onChange={e => setProfile(prev => ({ ...prev, name: e.target.value }))} 
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[7px] text-gray-500 tracking-widest">Rubro Principal</label>
-                  <select className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-purple-500 tracking-widest box-border" 
-                          value={profile.job || ""} 
-                          onChange={e => setProfile({...profile, job: e.target.value, specialty: ""})}>
+                  <select 
+                    className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-purple-500 tracking-widest box-border cursor-pointer" 
+                    value={profile.job || ""} 
+                    onChange={e => {
+                      const selectedJob = e.target.value;
+                      setProfile(prev => ({ ...prev, job: selectedJob, specialty: "" }));
+                    }}>
                     <option value="">SELECCIONAR</option>
                     {Object.keys(RUBROS).map(rubro => <option key={rubro} value={rubro}>{rubro}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[7px] text-gray-500 tracking-widest">Provincia</label>
-                  <select className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-purple-500 tracking-widest box-border" 
-                          value={profile.location || ""} 
-                          onChange={e => setProfile({...profile, location: e.target.value})}>
+                  <select 
+                    className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-purple-500 tracking-widest box-border cursor-pointer" 
+                    value={profile.location || ""} 
+                    onChange={e => setProfile(prev => ({ ...prev, location: e.target.value }))}>
                     <option value="">SELECCIONAR</option>
                     {PROVINCIAS.map(prov => <option key={prov} value={prov}>{prov.toUpperCase()}</option>)}
                   </select>
                 </div>
               </div>
 
-              {profile.job && (
+              {profile.job && RUBROS[profile.job] && (
                 <div className="space-y-1">
                   <label className="text-[7px] text-gray-500 tracking-widest">Especialidad</label>
-                  <select className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-purple-500 tracking-widest box-border" 
-                          value={profile.specialty || ""} 
-                          onChange={e => setProfile({...profile, specialty: e.target.value})}>
+                  <select 
+                    className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-purple-500 tracking-widest box-border cursor-pointer" 
+                    value={profile.specialty || ""} 
+                    onChange={e => setProfile(prev => ({ ...prev, specialty: e.target.value }))}>
                     <option value="">SELECCIONAR ESPECIALIDAD</option>
                     {RUBROS[profile.job].map(spec => <option key={spec} value={spec}>{spec.toUpperCase()}</option>)}
                   </select>
@@ -499,13 +509,17 @@ export default function Dashboard() {
 
               <div className="space-y-1">
                 <label className="text-[7px] text-gray-500 tracking-widest">Biografía / Presentación</label>
-                <textarea className="w-full bg-white/[0.03] border border-white/10 rounded-3xl p-4 text-[10px] text-white uppercase h-28 resize-none outline-none focus:border-purple-500 tracking-widest box-border" value={profile.bio || ''} onChange={e => setProfile({...profile, bio: e.target.value})} />
+                <textarea 
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-3xl p-4 text-[10px] text-white uppercase h-28 resize-none outline-none focus:border-purple-500 tracking-widest box-border" 
+                  value={profile.bio || ''} 
+                  onChange={e => setProfile(prev => ({ ...prev, bio: e.target.value }))} 
+                />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mt-8 pt-4 border-t border-white/5">
-              <button onClick={() => setIsEditingProfile(false)} className="py-4 rounded-2xl bg-white/5 text-gray-400 font-black text-[9px] tracking-[0.3em] uppercase hover:bg-white/15 transition-all">DESCARTAR</button>
-              <button onClick={handleSaveProfileData} className="py-4 rounded-2xl bg-purple-600 text-white font-black text-[9px] tracking-[0.3em] uppercase hover:bg-purple-500 transition-all shadow-xl">GUARDAR</button>
+              <button onClick={() => setIsEditingProfile(false)} className="py-4 rounded-2xl bg-white/5 text-gray-400 font-black text-[9px] tracking-[0.3em] uppercase hover:bg-white/15 transition-all cursor-pointer">DESCARTAR</button>
+              <button onClick={handleSaveProfileData} className="py-4 rounded-2xl bg-purple-600 text-white font-black text-[9px] tracking-[0.3em] uppercase hover:bg-purple-500 transition-all shadow-xl cursor-pointer">GUARDAR</button>
             </div>
           </div>
         </div>
