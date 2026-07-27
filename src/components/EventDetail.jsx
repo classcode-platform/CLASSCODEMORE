@@ -7,7 +7,7 @@ import { ArrowLeft, Users, LayoutGrid, DollarSign, Plus, Trash2, Edit3, Image as
 
 export default function EventDetail() {
   const { eventId } = useParams();
-  const useNavigateRef = useNavigate();
+  const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [activeTab, setActiveTab] = useState('guests');
 
@@ -18,8 +18,8 @@ export default function EventDetail() {
   const [editingBudgetId, setEditingBudgetId] = useState(null);
   const [editBudgetValues, setEditBudgetValues] = useState({ concept: '', estimated: 0, actual: 0 });
 
-  const [newGuest, setNewGuest] = useState({ name: '', table: 'Mesa 1', status: 'PENDIENTE' });
-  const [newTable, setNewTable] = useState({ name: 'Mesa Principal', capacity: 10 });
+  const [newGuest, setNewGuest] = useState({ name: '', table: '', status: 'PENDIENTE' });
+  const [newTable, setNewTable] = useState({ name: '', capacity: 10 });
   const [newBudget, setNewBudget] = useState({ concept: '', estimated: '', actual: '' });
   
   const [showPhotoModal, setShowPhotoModal] = useState(false);
@@ -41,7 +41,13 @@ export default function EventDetail() {
     });
 
     const unsubTables = onSnapshot(collection(db, "events_organizer", eventId, "tables"), (snap) => {
-      setTables(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      const tablesList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setTables(tablesList);
+      
+      // Auto-seleccionar la primera mesa por defecto si el invitado no tiene mesa asignada
+      if (tablesList.length > 0 && !newGuest.table) {
+        setNewGuest(prev => ({ ...prev, table: tablesList[0].name }));
+      }
     });
 
     const unsubBudget = onSnapshot(collection(db, "events_organizer", eventId, "budget"), (snap) => {
@@ -57,21 +63,22 @@ export default function EventDetail() {
 
   const handleAddGuest = async (e) => {
     e.preventDefault();
-    if (!newGuest.name) return;
+    if (!newGuest.name || !newGuest.table) return;
     await addDoc(collection(db, "events_organizer", eventId, "guests"), {
-      name: newGuest.name.toUpperCase(),
-      table: newGuest.table,
+      name: newGuest.name.trim().toUpperCase(),
+      table: newGuest.table.trim().toUpperCase(),
       status: newGuest.status
     });
-    setNewGuest({ name: '', table: tables[0]?.name || 'Mesa 1', status: 'PENDIENTE' });
+    setNewGuest({ name: '', table: tables[0]?.name || '', status: 'PENDIENTE' });
   };
 
   const handleAddTable = async (e) => {
     e.preventDefault();
     if (!newTable.name) return;
+    const formattedTableName = newTable.name.trim().toUpperCase();
     await addDoc(collection(db, "events_organizer", eventId, "tables"), {
-      name: newTable.name.toUpperCase(),
-      capacity: Number(newTable.capacity)
+      name: formattedTableName,
+      capacity: Number(newTable.capacity) || 10
     });
     setNewTable({ name: '', capacity: 10 });
   };
@@ -143,7 +150,7 @@ export default function EventDetail() {
       {/* TOPBAR LIMPIA */}
       <nav className="w-full border-b border-white/5 bg-[#070709]/90 backdrop-blur-xl sticky top-0 z-50 px-6 py-6 flex justify-center">
         <div className="max-w-[1200px] w-full flex justify-between items-center font-['Poppins']">
-          <button onClick={() => useNavigateRef('/client-profile')} className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] tracking-[0.3em] font-bold transition-colors cursor-pointer">
+          <button onClick={() => navigate('/client-profile')} className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] tracking-[0.3em] font-bold transition-colors cursor-pointer">
             <ArrowLeft size={14}/> VOLVER
           </button>
           
@@ -191,7 +198,7 @@ export default function EventDetail() {
             <Users size={14}/> INVITADOS ({guests.length} / {confirmedGuestsCount} CONFIRM.)
           </button>
           <button onClick={() => setActiveTab('tables')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg cursor-pointer ${activeTab === 'tables' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
-            <LayoutGrid size={14}/> MESAS ({tables.length})
+            <LayoutGrid size={14}/> MAPA DE MESAS ({tables.length})
           </button>
           <button onClick={() => setActiveTab('budget')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg cursor-pointer ${activeTab === 'budget' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
             <DollarSign size={14}/> PRESUPUESTO (REAL: ${totalActual} / EST: ${totalEstimated})
@@ -206,7 +213,7 @@ export default function EventDetail() {
             <form onSubmit={handleAddGuest} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-[2rem] grid md:grid-cols-4 gap-4 font-bold items-center shadow-xl">
               <input placeholder="NOMBRE Y APELLIDO" value={newGuest.name} onChange={e => setNewGuest({...newGuest, name: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
               <select value={newGuest.table} onChange={e => setNewGuest({...newGuest, table: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest cursor-pointer">
-                {tables.length === 0 ? <option>Sin mesas creadas</option> : tables.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+                {tables.length === 0 ? <option value="">Sin mesas creadas</option> : tables.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
               </select>
               <select value={newGuest.status} onChange={e => setNewGuest({...newGuest, status: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest cursor-pointer">
                 <option value="PENDIENTE">PENDIENTE</option>
@@ -234,58 +241,98 @@ export default function EventDetail() {
         )}
 
         {activeTab === 'tables' && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             <form onSubmit={handleAddTable} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-[2rem] grid md:grid-cols-3 gap-4 font-bold items-center shadow-xl">
               <input placeholder="NOMBRE DE MESA (EJ: FAMILIA)" value={newTable.name} onChange={e => setNewTable({...newTable, name: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
-              <input type="number" placeholder="CAPACIDAD (EJ: 10)" value={newTable.capacity} onChange={e => setNewTable({...newTable, capacity: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
+              <input type="number" placeholder="CAPACIDAD DE SILLITAS (EJ: 10)" value={newTable.capacity} onChange={e => setNewTable({...newTable, capacity: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
               <button type="submit" className="py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest hover:bg-gray-200 transition-all flex items-center justify-center gap-2 cursor-pointer">
                 <Plus size={14}/> CREAR MESA
               </button>
             </form>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* MAPA VISUAL DE DISTRIBUCIÓN DE SALÓN */}
+            <div className="grid md:grid-cols-2 gap-8">
               {tables.map(t => {
-                const assignedGuests = guests.filter(g => g.table === t.name);
+                // Filtramos de forma exacta comparando en mayúsculas
+                const assignedGuests = guests.filter(g => g.table?.trim().toUpperCase() === t.name?.trim().toUpperCase());
                 const capacity = Number(t.capacity) || 10;
-                const seats = Array.from({ length: capacity }, (_, index) => assignedGuests[index] || null);
-
+                
                 return (
-                  <div key={t.id} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-3xl space-y-4 shadow-xl">
-                    <div className="flex justify-between items-center">
-                      <h4 className="font-['Poppins'] font-normal text-white text-base">{t.name}</h4>
-                      <button onClick={() => handleDelete('tables', t.id)} className="p-2 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all cursor-pointer">
-                        <Trash2 size={14}/>
-                      </button>
-                    </div>
-                    <p className="text-[9px] text-gray-400 font-bold tracking-widest">Asignados: {assignedGuests.length} / {capacity}</p>
+                  <div key={t.id} className="bg-[#0c0c0e] border border-white/10 p-8 rounded-[2.5rem] space-y-6 shadow-2xl relative">
                     
-                    {/* ESQUEMA VISUAL DE SILLITAS */}
-                    <div className="flex flex-wrap gap-2 justify-center py-2 bg-black/40 rounded-2xl border border-white/5 p-4">
-                      {seats.map((guest, idx) => (
-                        <div 
-                          key={idx} 
-                          title={guest ? `${guest.name} (${guest.status})` : `Asiento ${idx + 1} Libre`}
-                          className={`w-7 h-7 rounded-full flex items-center justify-center text-[8px] font-black transition-all border ${
-                            guest 
-                              ? guest.status === 'CONFIRMADO' 
-                                ? 'bg-white text-black border-white shadow-md' 
-                                : 'bg-amber-500/20 text-amber-400 border-amber-500/40'
-                              : 'bg-white/[0.02] text-gray-600 border-white/5 border-dashed'
-                          }`}
-                        >
-                          {idx + 1}
-                        </div>
-                      ))}
+                    {/* Cabecera de la Mesa */}
+                    <div className="flex justify-between items-center border-b border-white/10 pb-4">
+                      <div>
+                        <span className="text-[8px] tracking-[0.3em] font-black text-gray-500 uppercase">MESA / SECTOR</span>
+                        <h4 className="font-['Poppins'] text-lg font-normal text-white uppercase tracking-wide">{t.name}</h4>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-[9px] text-gray-300 bg-white/5 border border-white/10 px-3 py-1 rounded-full font-bold">
+                          {assignedGuests.length} / {capacity} SILLITAS
+                        </span>
+                        <button onClick={() => handleDelete('tables', t.id)} className="p-2.5 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all cursor-pointer">
+                          <Trash2 size={14}/>
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="space-y-2 pt-2 border-t border-white/5 max-h-40 overflow-y-auto">
-                      {assignedGuests.map(ag => (
-                        <div key={ag.id} className="text-[10px] text-gray-300 bg-white/[0.03] px-3 py-2 rounded-xl border border-white/5 flex justify-between items-center">
-                          <span className="truncate">{ag.name}</span>
-                          <span className={`text-[8px] font-black tracking-widest px-2 py-0.5 rounded-md ${ag.status === 'CONFIRMADO' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>{ag.status}</span>
-                        </div>
-                      ))}
+                    {/* MAPITA VISUAL DE LA MESA REDONDA Y SUS SILLITAS */}
+                    <div className="relative w-full h-64 bg-black/60 rounded-3xl border border-white/5 flex items-center justify-center overflow-hidden p-4">
+                      
+                      {/* Centro de la mesa */}
+                      <div className="w-24 h-24 rounded-full bg-white/[0.03] border border-white/10 flex flex-col items-center justify-center text-center p-2 z-10 shadow-inner">
+                        <span className="text-[8px] text-gray-400 tracking-widest font-black">MESA</span>
+                        <span className="text-[10px] text-white font-bold truncate max-w-[80px]">{t.name}</span>
+                      </div>
+
+                      {/* Sillitas distribuidas alrededor de forma dinámica */}
+                      {Array.from({ length: capacity }).map((_, idx) => {
+                        const angle = (idx * (360 / capacity)) * (Math.PI / 180);
+                        // Radio de disposición de las sillitas desde el centro
+                        const radius = 85; 
+                        const x = Math.cos(angle) * radius;
+                        const y = Math.sin(angle) * radius;
+
+                        const guestInSeat = assignedGuests[idx];
+
+                        return (
+                          <div 
+                            key={idx}
+                            style={{ transform: `translate(${x}px, ${y}px)` }}
+                            className="absolute z-20"
+                          >
+                            <div 
+                              title={guestInSeat ? `${guestInSeat.name} (${guestInSeat.status})` : `Asiento ${idx + 1} (Libre)`}
+                              className={`w-7 h-7 rounded-full flex items-center justify-center text-[8px] font-black transition-all border shadow-lg cursor-pointer ${
+                                guestInSeat 
+                                  ? guestInSeat.status === 'CONFIRMADO' 
+                                    ? 'bg-white text-black border-white scale-110' 
+                                    : 'bg-amber-500/20 text-amber-400 border-amber-500/50 scale-110'
+                                  : 'bg-black text-gray-600 border-white/10 hover:border-white/30'
+                              }`}
+                            >
+                              {idx + 1}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
+
+                    {/* Lista detallada de invitados en esta mesa */}
+                    <div className="space-y-2 pt-2 border-t border-white/5 max-h-36 overflow-y-auto scrollbar-hide">
+                      <span className="text-[8px] text-gray-500 font-black tracking-widest uppercase">Invitados asignados:</span>
+                      {assignedGuests.length === 0 ? (
+                        <p className="text-[9px] text-gray-600 tracking-widest italic py-1">Ningún invitado en esta mesa todavía</p>
+                      ) : (
+                        assignedGuests.map(ag => (
+                          <div key={ag.id} className="text-[10px] text-gray-300 bg-white/[0.03] px-3 py-2 rounded-xl border border-white/5 flex justify-between items-center">
+                            <span className="truncate font-bold">{ag.name}</span>
+                            <span className={`text-[8px] font-black tracking-widest px-2 py-0.5 rounded-md ${ag.status === 'CONFIRMADO' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>{ag.status}</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
                   </div>
                 );
               })}
