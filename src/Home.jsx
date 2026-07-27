@@ -273,18 +273,19 @@ export default function Home() {
                 <GraduationCap size={18} className="group-hover:scale-110 transition-transform" />
               </button>
 
+              {/* Botón Live Gallery corregido a la galería pública */}
               <button 
-                onClick={() => navigate('/results')}
+                onClick={() => navigate('/public-gallery')}
                 title="Live Gallery"
                 className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-blue-500/50 flex items-center justify-center text-blue-400 transition-all shadow-lg group"
               >
                 <PlayCircle size={18} className="group-hover:scale-110 transition-transform" />
               </button>
 
-              {/* Botón organizador linkeado a /organizer */}
+              {/* Botón El maletín organizador corregido al modo experience del ClientProfile */}
               <button 
-                onClick={() => navigate('/organizer')}
-                title="Organizador"
+                onClick={() => navigate('/client-profile?mode=experience')}
+                title="El maletín organizador"
                 className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-indigo-500/50 flex items-center justify-center text-indigo-400 transition-all shadow-lg group"
               >
                 <Briefcase size={18} className="group-hover:scale-110 transition-transform" />
