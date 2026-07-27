@@ -56,7 +56,6 @@ export default function Dashboard() {
   const isGenericoDone = profile.completedCourses?.includes('cert_generico');
   const proCourseId = profile.job ? `cert_${profile.job.toLowerCase().replace(/\s/g, '')}` : null;
   const isProfessionalTestDone = proCourseId && profile.completedCourses?.includes(proCourseId);
-  const isProfileVisible = Boolean(profile.name?.trim() && profile.job?.trim());
 
   const calculateTotalScore = (currentProfile) => {
     let bonus = 0;
@@ -181,12 +180,12 @@ export default function Dashboard() {
   if (loading) return <div className="min-h-screen bg-[#070709] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-black font-['Poppins']">CARGANDO DASHBOARD...</div>;
 
   return (
-    <div className="min-h-screen w-full max-w-[100vw] bg-[#070709] text-white font-['Open_Sans'] flex flex-col relative overflow-x-hidden uppercase selection:bg-white selection:text-black box-border">
+    <div className="min-h-screen w-screen max-w-full bg-[#070709] text-white font-['Open_Sans'] flex flex-col relative overflow-x-hidden uppercase selection:bg-white selection:text-black box-border">
       
       {/* TOPBAR MOBILE */}
-      <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-[#070709]/90 backdrop-blur-xl border-b border-white/5 z-[90] px-6 py-4 flex justify-between items-center font-['Poppins'] box-border">
-        <div onClick={() => navigate('/home')} className="text-xl tracking-[0.05em] uppercase cursor-pointer">CLASSCODE</div>
-        <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 focus:outline-none"><Menu size={22} /></button>
+      <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-[#070709]/90 backdrop-blur-xl border-b border-white/5 z-[90] px-4 py-4 flex justify-between items-center font-['Poppins'] box-border">
+        <div onClick={() => navigate('/home')} className="text-lg tracking-[0.05em] uppercase cursor-pointer truncate">CLASSCODE</div>
+        <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 focus:outline-none flex-shrink-0"><Menu size={22} /></button>
       </header>
 
       {/* SIDEBAR DESKTOP */}
@@ -238,7 +237,7 @@ export default function Dashboard() {
       )}
 
       {/* MAIN CONTAINER */}
-      <div className="flex-1 md:ml-72 flex flex-col w-full min-w-0 box-border overflow-x-hidden">
+      <div className="flex-1 md:ml-72 flex flex-col w-full min-w-0 max-w-full box-border overflow-x-hidden">
         
         {/* SECCIÓN ESTILO FACEBOOK (BANNER SHOWREEL + HEADER) */}
         <div className="w-full bg-[#070709] border-b border-white/5 mt-14 md:mt-0 box-border overflow-x-hidden">
@@ -262,14 +261,14 @@ export default function Dashboard() {
                 </div>
               )}
               
-              <label className="absolute bottom-4 right-4 bg-black/80 hover:bg-black text-white px-4 py-2.5 rounded-xl text-[8px] font-black tracking-widest cursor-pointer border border-white/10 transition-all flex items-center gap-2 shadow-xl z-20">
-                <Upload size={14} /> {profile.videoLink ? 'CAMBIAR SHOWREEL' : 'SUBIR SHOWREEL'}
+              <label className="absolute bottom-4 right-4 bg-black/80 hover:bg-black text-white px-3 py-2 rounded-xl text-[8px] font-black tracking-widest cursor-pointer border border-white/10 transition-all flex items-center gap-2 shadow-xl z-20">
+                <Upload size={14} /> {profile.videoLink ? 'CAMBIAR' : 'SUBIR'}
                 <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
               </label>
             </div>
 
             {/* Perfil Header */}
-            <div className="px-6 md:px-12 pb-8 relative -mt-14 md:-mt-20 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 z-20 box-border w-full max-w-full">
+            <div className="px-4 md:px-12 pb-8 relative -mt-12 md:-mt-20 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 z-20 box-border w-full max-w-full">
               <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left w-full md:w-auto min-w-0">
                 
                 {/* Foto de Perfil */}
@@ -287,7 +286,7 @@ export default function Dashboard() {
 
                 <div className="space-y-2 pb-1 min-w-0 flex-1 w-full">
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                    <h1 className="text-xl md:text-2xl font-['Poppins'] font-normal tracking-wide text-white truncate max-w-full">{profile.name || 'NUEVO TALENTO'}</h1>
+                    <h1 className="text-lg md:text-2xl font-['Poppins'] font-normal tracking-wide text-white truncate max-w-full">{profile.name || 'NUEVO TALENTO'}</h1>
                     <span className="bg-white/10 text-white border border-white/20 px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1.5 flex-shrink-0">
                       <CheckCircle2 size={12}/> TALENTO
                     </span>
@@ -305,7 +304,7 @@ export default function Dashboard() {
                 <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-4 bg-white/[0.03] hover:bg-white/15 rounded-2xl border border-white/10 transition-all text-white" title="Ver Perfil Público">
                   <Eye size={18} />
                 </button>
-                <button onClick={() => setIsEditingProfile(true)} className="px-8 py-4 rounded-2xl bg-white text-black font-black text-[10px] tracking-[0.3em] hover:bg-gray-200 transition-all shadow-xl flex items-center justify-center gap-2">
+                <button onClick={() => setIsEditingProfile(true)} className="px-6 py-4 rounded-2xl bg-white text-black font-black text-[10px] tracking-[0.3em] hover:bg-gray-200 transition-all shadow-xl flex items-center justify-center gap-2">
                   <Edit3 size={14}/> EDITAR PERFIL
                 </button>
               </div>
@@ -314,10 +313,10 @@ export default function Dashboard() {
         </div>
 
         {/* CONTENIDO PRINCIPAL */}
-        <main className="w-full max-w-[1200px] mx-auto px-6 md:px-12 py-12 grid lg:grid-cols-12 gap-10 relative z-10 box-border">
+        <main className="w-full max-w-[1200px] mx-auto px-4 md:px-12 py-12 grid lg:grid-cols-12 gap-10 relative z-10 box-border">
           
           {/* COLUMNA IZQUIERDA */}
-          <div className="lg:col-span-4 space-y-8 min-w-0">
+          <div className="lg:col-span-4 space-y-8 min-w-0 box-border">
             
             {/* ESTADO ACADÉMICO */}
             <div className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 space-y-6 shadow-xl box-border">
@@ -389,7 +388,7 @@ export default function Dashboard() {
           </div>
 
           {/* COLUMNA DERECHA */}
-          <div className="lg:col-span-8 space-y-12 min-w-0">
+          <div className="lg:col-span-8 space-y-12 min-w-0 box-border">
             <section className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 md:p-8 space-y-8 shadow-xl box-border">
               <div className="flex justify-between items-center border-l-2 border-white pl-4">
                 <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black">Portfolio — Galería de Fotos</h3>
@@ -426,8 +425,8 @@ export default function Dashboard() {
       {/* MODAL EDITAR PERFIL */}
       {isEditingProfile && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 box-border">
-          <div className="bg-[#0c0c0e] w-full max-w-lg p-8 md:p-12 rounded-[3rem] border border-white/10 relative shadow-2xl uppercase max-h-[90vh] flex flex-col box-border">
-            <button onClick={() => setIsEditingProfile(false)} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors"><X size={22} /></button>
+          <div className="bg-[#0c0c0e] w-full max-w-lg p-6 md:p-12 rounded-[3rem] border border-white/10 relative shadow-2xl uppercase max-h-[90vh] flex flex-col box-border">
+            <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors"><X size={22} /></button>
             <h3 className="text-[11px] uppercase tracking-[0.5em] font-black text-white mb-8 text-center font-['Poppins']">Editar Perfil Profesional</h3>
             
             <div className="space-y-4 font-bold overflow-y-auto pr-2 flex-1 scrollbar-hide text-left box-border">
