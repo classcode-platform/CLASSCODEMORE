@@ -6,19 +6,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   GraduationCap, Zap, Play, CheckCircle2, 
   BookOpen, Star, ArrowRight,
-  User, Search, X, Clock, ShieldCheck 
+  User, Search, X, ShieldCheck 
 } from 'lucide-react';
 
 export default function Academy() {
   const navigate = useNavigate();
-  const [userJob, setUserJob] = useState('');
   const [completedCourses, setCompletedCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [isPro, setIsPro] = useState(false);
 
-  // BIBLIOTECA DE CLASES CON CLOUDINARY
+  // BIBLIOTECA COMPLETA DE CLASES CON CLOUDINARY
   const videoLibrary = [
+    // FOTOGRAFÍA
     { 
       id: 'cert_fotografia_intro', 
       category: 'FOTOGRAFÍA', 
@@ -37,6 +37,7 @@ export default function Academy() {
       testPath: '/academy-test/fotografia_triangulo',
       available: true
     },
+    // ESCÉNICO
     { 
       id: 'cert_escenico_intro', 
       category: 'ESCÉNICO', 
@@ -46,6 +47,7 @@ export default function Academy() {
       testPath: '/academy-test/Escénico',
       available: true
     },
+    // MAKEUP / PELO
     { 
       id: 'cert_makeup_intro', 
       category: 'MAKEUP / PELO', 
@@ -77,14 +79,6 @@ export default function Academy() {
       const unsubscribe = onSnapshot(doc(db, "professionals", user.uid), (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          let activeJob = '';
-          if (data.profiles && Array.isArray(data.profiles) && data.profiles.length > 0) {
-            activeJob = data.profiles[0].job || data.job || '';
-          } else {
-            activeJob = data.job || '';
-          }
-
-          setUserJob(activeJob.toUpperCase());
           setCompletedCourses(data.completedCourses || []);
           setIsPro(data.isPro || false);
         }
@@ -94,9 +88,10 @@ export default function Academy() {
     }
   }, []);
 
-  const rubroVideos = videoLibrary.filter(v => v.category === userJob);
-  const otherVideos = videoLibrary.filter(v => v.category !== userJob);
   const isGenericoCompleted = completedCourses.includes('cert_generico');
+
+  // Agrupamos dinámicamente los videos por categoría para mostrarlos ordenados
+  const categoriesList = [...new Set(videoLibrary.map(v => v.category))];
 
   if (loading) return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white font-['Poppins'] tracking-[0.35em] text-[10px]">
@@ -148,21 +143,6 @@ export default function Academy() {
           </section>
         )}
         
-        {/* ESPECIALIZACIÓN DEL USUARIO */}
-        {rubroVideos.length > 0 && (
-          <section className="space-y-6">
-            <div className="flex items-center gap-3 border-l-2 border-purple-500 pl-3">
-              <BookOpen size={15} className="text-purple-400" />
-              <h2 className="text-[11px] md:text-[13px] font-normal tracking-[0.3em] uppercase">ESPECIALIZACIÓN: {userJob || 'CREATIVO'}</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8">
-              {rubroVideos.map((video) => (
-                <VideoCard key={video.id} video={video} completed={completedCourses.includes(video.id)} onClick={() => video.available && setSelectedVideo(video)} />
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* MÓDULOS GLOBALES (TEST DE ÉTICA) */}
         <section className="space-y-6">
           <div className="flex items-center gap-3 border-l-2 border-gray-700 pl-3 text-gray-400">
@@ -199,23 +179,38 @@ export default function Academy() {
           </div>
         </section>
 
-        {/* OTRAS ESPECIALIDADES (PRÓXIMAMENTE) */}
-        <section className="space-y-6 pb-20">
-          <div className="flex items-center gap-3 border-l-2 border-purple-900 pl-3 text-gray-400">
-            <Clock size={15} className="text-purple-500" />
-            <h2 className="text-[11px] md:text-[13px] font-normal tracking-[0.3em] uppercase">OTRAS ESPECIALIDADES (PRÓXIMAMENTE)</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8">
-            {otherVideos.map((video) => (
-              <VideoCard key={video.id} video={video} completed={completedCourses.includes(video.id)} onClick={() => video.available && setSelectedVideo(video)} />
-            ))}
-          </div>
-        </section>
+        {/* TODAS LAS ESPECIALIDADES ORGANIZADAS */}
+        {categoriesList.map((cat) => {
+          const catVideos = videoLibrary.filter(v => v.category === cat);
+          if (catVideos.length === 0) return null;
+          const isAvailableCat = catVideos.some(v => v.available);
+
+          return (
+            <section key={cat} className="space-y-6">
+              <div className={`flex items-center gap-3 border-l-2 pl-3 ${isAvailableCat ? 'border-purple-500 text-white' : 'border-purple-900/50 text-gray-400'}`}>
+                <BookOpen size={15} className={isAvailableCat ? 'text-purple-400' : 'text-purple-600'} />
+                <h2 className="text-[11px] md:text-[13px] font-normal tracking-[0.3em] uppercase">
+                  {cat} {!isAvailableCat && ' (PRÓXIMAMENTE)'}
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8">
+                {catVideos.map((video) => (
+                  <VideoCard 
+                    key={video.id} 
+                    video={video} 
+                    completed={completedCourses.includes(video.id)} 
+                    onClick={() => video.available && setSelectedVideo(video)} 
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        })}
       </main>
 
       <footer className="bg-black py-12 px-6 border-t border-white/5 relative z-10 w-full text-center">
         <h2 className="text-white text-2xl font-normal tracking-[0.1em] mb-3 opacity-30 uppercase font-['Poppins'] leading-none">CLASSCODE</h2>
-        <p className="text-[8px] uppercase tracking-[0.5vm] font-bold opacity-30 leading-none">© 2026 — TODOS LOS DERECHOS RESERVADOS</p>
+        <p className="text-[8px] uppercase tracking-[0.5em] font-bold opacity-30 leading-none">© 2026 — TODOS LOS DERECHOS RESERVADOS</p>
       </footer>
 
       <AnimatePresence>
