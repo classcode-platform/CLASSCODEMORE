@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { db } from "../firebase";
 import { doc, getDoc, collection, onSnapshot, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Users, LayoutGrid, DollarSign, Plus, Trash2, Edit3, Image as ImageIcon, Check, X, Calendar, MapPin, Upload } from 'lucide-react';
+import { ArrowLeft, Users, LayoutGrid, DollarSign, Plus, Trash2, Edit3, Image as ImageIcon, Check, X, Calendar, MapPin, Upload, Music, Disc } from 'lucide-react';
 
 export default function EventDetail() {
   const { eventId } = useParams();
@@ -14,6 +14,9 @@ export default function EventDetail() {
   const [guests, setGuests] = useState([]);
   const [tables, setTables] = useState([]);
   const [budgetItems, setBudgetItems] = useState([]);
+
+  // Tipo de distribución global para eventos (mesas, auditorio, campo/general)
+  const [layoutMode, setLayoutMode] = useState('tables'); // 'tables' | 'auditorium' | 'standing'
 
   const [editingBudgetId, setEditingBudgetId] = useState(null);
   const [editBudgetValues, setEditBudgetValues] = useState({ concept: '', estimated: 0, actual: 0 });
@@ -212,7 +215,7 @@ export default function EventDetail() {
             <form onSubmit={handleAddGuest} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-[2rem] grid md:grid-cols-4 gap-4 font-bold items-center shadow-xl">
               <input placeholder="NOMBRE Y APELLIDO" value={newGuest.name} onChange={e => setNewGuest({...newGuest, name: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
               <select value={newGuest.table} onChange={e => setNewGuest({...newGuest, table: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest cursor-pointer">
-                {tables.length === 0 ? <option value="">Sin mesas creadas</option> : tables.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+                {tables.length === 0 ? <option value="">Sin sectores creados</option> : tables.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
               </select>
               <select value={newGuest.status} onChange={e => setNewGuest({...newGuest, status: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest cursor-pointer">
                 <option value="PENDIENTE">PENDIENTE</option>
@@ -242,110 +245,232 @@ export default function EventDetail() {
         {activeTab === 'tables' && (
           <div className="space-y-8">
             <form onSubmit={handleAddTable} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-[2rem] grid md:grid-cols-3 gap-4 font-bold items-center shadow-xl">
-              <input placeholder="NOMBRE DE MESA (EJ: FAMILIA)" value={newTable.name} onChange={e => setNewTable({...newTable, name: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
-              <input type="number" placeholder="CAPACIDAD DE SILLITAS (EJ: 10)" value={newTable.capacity} onChange={e => setNewTable({...newTable, capacity: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
+              <input placeholder="NOMBRE DE SECTOR / MESA (EJ: VIP / MESA 1)" value={newTable.name} onChange={e => setNewTable({...newTable, name: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
+              <input type="number" placeholder="CAPACIDAD TOTAL (EJ: 50 LUGARES)" value={newTable.capacity} onChange={e => setNewTable({...newTable, capacity: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
               <button type="submit" className="py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest hover:bg-gray-200 transition-all flex items-center justify-center gap-2 cursor-pointer">
-                <Plus size={14}/> CREAR MESA
+                <Plus size={14}/> CREAR SECTOR / MESA
               </button>
             </form>
 
-            {/* PLANO GLOBAL DE SALÓN TIPO RADAR / MAPA INTERACTIVO */}
+            {/* PLANO GLOBAL DE SALÓN REDUCIDO + SELECTOR DE FORMATO DE EVENTO */}
             <div className="bg-[#0c0c0e] border border-white/10 rounded-[3rem] p-8 space-y-8 shadow-2xl relative overflow-hidden">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-6 gap-4">
                 <div>
                   <span className="text-[8px] tracking-[0.3em] font-black text-gray-500 uppercase">VISTA GENERAL DE DISTRIBUCIÓN</span>
-                  <h3 className="text-xl font-['Poppins'] font-normal text-white uppercase tracking-wide">Plano de Salón y Mesas</h3>
+                  <h3 className="text-xl font-['Poppins'] font-normal text-white uppercase tracking-wide">Plano Global del Evento</h3>
                 </div>
-                <div className="flex items-center gap-4 text-[9px] text-gray-400 font-bold">
-                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-white inline-block"></span> Confirmado</span>
-                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> Pendiente</span>
-                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-black border border-white/20 inline-block"></span> Libre</span>
+
+                {/* SELECTOR DE TIPO DE EVENTO (Recitales, Auditorio, Mesas) */}
+                <div className="flex items-center gap-2 bg-black border border-white/10 p-1.5 rounded-2xl">
+                  <button 
+                    onClick={() => setLayoutMode('tables')} 
+                    className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-widest transition-all cursor-pointer ${layoutMode === 'tables' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    MESAS / SOCIAL
+                  </button>
+                  <button 
+                    onClick={() => setLayoutMode('auditorium')} 
+                    className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-widest transition-all cursor-pointer ${layoutMode === 'auditorium' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    AUDITORIO / TEATRO
+                  </button>
+                  <button 
+                    onClick={() => setLayoutMode('standing')} 
+                    className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-widest transition-all cursor-pointer ${layoutMode === 'standing' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    RECITAL / CAMPO
+                  </button>
+                </div>
+              </div>
+
+              {/* LEYENDA */}
+              <div className="flex items-center justify-between text-[9px] text-gray-400 font-bold px-2">
+                <span className="text-gray-500 tracking-widest text-[8px]">CONFIGURACIÓN ACTUAL: {layoutMode === 'tables' ? 'DISTRIBUCIÓN POR MESAS' : layoutMode === 'auditorium' ? 'BUTACAS EN FILAS (RECITAL/CONFERENCIA)' : 'CAMPO / CAPACIDAD GENERAL'}</span>
+                <div className="flex items-center gap-4">
+                  <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-white inline-block"></span> Confirmado</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block"></span> Pendiente</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-black border border-white/20 inline-block"></span> Libre</span>
                 </div>
               </div>
 
               {tables.length === 0 ? (
                 <div className="py-16 text-center text-gray-500 tracking-widest text-[10px]">
-                  No hay mesas creadas todavía para mostrar en el plano global.
+                  No hay sectores ni mesas creadas todavía para mostrar en el plano global.
                 </div>
               ) : (
-                <div className="grid lg:grid-cols-2 gap-8 py-4">
-                  {tables.map((t, tableIndex) => {
-                    const assignedGuests = guests.filter(g => g.table?.trim().toUpperCase() === t.name?.trim().toUpperCase());
-                    const capacity = Number(t.capacity) || 10;
-                    
-                    return (
-                      <div key={t.id} className="bg-black/50 border border-white/10 rounded-[2.5rem] p-6 space-y-6 relative flex flex-col justify-between">
+                <>
+                  {/* VISTA 1: MESAS (COMPACTA - ENTRA MEDIO SALÓN EN EL ESPACIO) */}
+                  {layoutMode === 'tables' && (
+                    <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4 py-2">
+                      {tables.map((t, tableIndex) => {
+                        const assignedGuests = guests.filter(g => g.table?.trim().toUpperCase() === t.name?.trim().toUpperCase());
+                        const capacity = Number(t.capacity) || 10;
                         
-                        {/* Cabecera de la mesa */}
-                        <div className="flex justify-between items-center">
-                          <div className="space-y-0.5">
-                            <span className="text-[7px] text-gray-500 font-black tracking-widest">MESA 0{tableIndex + 1}</span>
-                            <h4 className="font-['Poppins'] text-sm font-normal text-white uppercase">{t.name}</h4>
+                        return (
+                          <div key={t.id} className="bg-black/40 border border-white/10 rounded-3xl p-5 space-y-4 relative flex flex-col justify-between hover:border-white/30 transition-all">
+                            
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-0.5">
+                                <span className="text-[7px] text-gray-500 font-black tracking-widest">MESA 0{tableIndex + 1}</span>
+                                <h4 className="font-['Poppins'] text-xs font-normal text-white uppercase truncate max-w-[120px]">{t.name}</h4>
+                              </div>
+                              <button onClick={() => handleDelete('tables', t.id)} className="p-1.5 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-lg transition-all cursor-pointer">
+                                <Trash2 size={12}/>
+                              </button>
+                            </div>
+
+                            {/* MINI MAPA CIRCULAR RESUMIDO */}
+                            <div className="relative w-full h-32 bg-black/60 rounded-2xl border border-white/5 flex items-center justify-center">
+                              <div className="w-12 h-12 rounded-full bg-white/[0.02] border border-white/10 flex flex-col items-center justify-center text-center p-1 z-10">
+                                <span className="text-[7px] text-white font-bold">{assignedGuests.length}/{capacity}</span>
+                              </div>
+
+                              {Array.from({ length: Math.min(capacity, 12) }).map((_, idx) => {
+                                const angle = (idx * (360 / Math.min(capacity, 12))) * (Math.PI / 180);
+                                const radius = 42;
+                                const x = Math.cos(angle) * radius;
+                                const y = Math.sin(angle) * radius;
+                                const guestInSeat = assignedGuests[idx];
+
+                                return (
+                                  <div key={idx} style={{ transform: `translate(${x}px, ${y}px)` }} className="absolute z-20">
+                                    <div 
+                                      title={guestInSeat ? `${guestInSeat.name} (${guestInSeat.status})` : `Asiento ${idx + 1}`}
+                                      className={`w-4 h-4 rounded-full flex items-center justify-center text-[7px] font-black transition-all border ${
+                                        guestInSeat 
+                                          ? guestInSeat.status === 'CONFIRMADO' 
+                                            ? 'bg-white text-black border-white' 
+                                            : 'bg-amber-500/20 text-amber-400 border-amber-500/50'
+                                          : 'bg-black text-gray-600 border-white/10'
+                                      }`}
+                                    >
+                                      {idx + 1}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            <div className="flex justify-between items-center text-[8px] text-gray-400 font-bold pt-1 border-t border-white/5">
+                              <span>DISPONIBLES: {capacity - assignedGuests.length}</span>
+                              <span className="text-white">{Math.round((assignedGuests.length / capacity) * 100)}% OCUPADO</span>
+                            </div>
+
                           </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-[9px] text-gray-300 bg-white/5 border border-white/10 px-3 py-1 rounded-full font-bold">
-                              {assignedGuests.length} / {capacity} SILLITAS
-                            </span>
-                            <button onClick={() => handleDelete('tables', t.id)} className="p-2 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all cursor-pointer">
-                              <Trash2 size={13}/>
-                            </button>
-                          </div>
-                        </div>
+                        );
+                      })}
+                    </div>
+                  )}
 
-                        {/* MAPITA CIRCULAR DE SILLITAS */}
-                        <div className="relative w-full h-56 bg-black/40 rounded-3xl border border-white/5 flex items-center justify-center p-2">
-                          {/* Centro */}
-                          <div className="w-20 h-20 rounded-full bg-white/[0.02] border border-white/10 flex flex-col items-center justify-center text-center p-2 z-10">
-                            <span className="text-[7px] text-gray-500 font-black">SECTOR</span>
-                            <span className="text-[9px] text-white font-bold truncate max-w-[70px]">{t.name}</span>
-                          </div>
+                  {/* VISTA 2: AUDITORIO / TEATRO (IDEAL RECITALES O CONFERENCIAS CON BUTACAS NUMERADAS) */}
+                  {layoutMode === 'auditorium' && (
+                    <div className="space-y-6 py-2">
+                      <div className="w-full bg-white/5 border border-white/10 py-3 rounded-2xl text-center text-[9px] tracking-[0.4em] font-black text-gray-400">
+                        ESCENARIO / TARIMA PRINCIPAL 🎤
+                      </div>
 
-                          {/* Sillitas alrededor */}
-                          {Array.from({ length: capacity }).map((_, idx) => {
-                            const angle = (idx * (360 / capacity)) * (Math.PI / 180);
-                            const radius = 75;
-                            const x = Math.cos(angle) * radius;
-                            const y = Math.sin(angle) * radius;
+                      <div className="grid gap-6">
+                        {tables.map((t, tableIndex) => {
+                          const assignedGuests = guests.filter(g => g.table?.trim().toUpperCase() === t.name?.trim().toUpperCase());
+                          const capacity = Number(t.capacity) || 20;
 
-                            const guestInSeat = assignedGuests[idx];
-
-                            return (
-                              <div key={idx} style={{ transform: `translate(${x}px, ${y}px)` }} className="absolute z-20">
-                                <div 
-                                  title={guestInSeat ? `${guestInSeat.name} (${guestInSeat.status})` : `Asiento ${idx + 1} (Libre)`}
-                                  className={`w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-black transition-all border shadow-md cursor-pointer ${
-                                    guestInSeat 
-                                      ? guestInSeat.status === 'CONFIRMADO' 
-                                        ? 'bg-white text-black border-white scale-110' 
-                                        : 'bg-amber-500/20 text-amber-400 border-amber-500/50 scale-110'
-                                      : 'bg-black text-gray-600 border-white/10 hover:border-white/30'
-                                  }`}
-                                >
-                                  {idx + 1}
+                          return (
+                            <div key={t.id} className="bg-black/40 border border-white/10 rounded-3xl p-6 space-y-4">
+                              <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                                <div>
+                                  <span className="text-[7px] text-gray-500 font-black tracking-widest">SECTOR FILAS 0{tableIndex + 1}</span>
+                                  <h4 className="font-['Poppins'] text-sm font-normal text-white uppercase">{t.name}</h4>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <span className="text-[9px] text-gray-300 font-bold">{assignedGuests.length} / {capacity} BUTACAS</span>
+                                  <button onClick={() => handleDelete('tables', t.id)} className="p-1.5 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-lg transition-all cursor-pointer">
+                                    <Trash2 size={12}/>
+                                  </button>
                                 </div>
                               </div>
-                            );
-                          })}
-                        </div>
 
-                        {/* Lista resumida de invitados */}
-                        <div className="space-y-1.5 pt-2 border-t border-white/5 max-h-28 overflow-y-auto scrollbar-hide">
-                          {assignedGuests.length === 0 ? (
-                            <p className="text-[8px] text-gray-600 tracking-widest italic text-center">Sin invitados en esta mesa</p>
-                          ) : (
-                            assignedGuests.map(ag => (
-                              <div key={ag.id} className="text-[9px] text-gray-300 bg-white/[0.02] px-3 py-1.5 rounded-xl border border-white/5 flex justify-between items-center">
-                                <span className="truncate font-bold">{ag.name}</span>
-                                <span className={`text-[7px] font-black tracking-widest px-2 py-0.5 rounded-md ${ag.status === 'CONFIRMADO' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>{ag.status}</span>
+                              {/* GRILLA DE BUTACAS EN FILAS */}
+                              <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto scrollbar-hide p-2 justify-center">
+                                {Array.from({ length: capacity }).map((_, idx) => {
+                                  const guestInSeat = assignedGuests[idx];
+                                  return (
+                                    <div 
+                                      key={idx}
+                                      title={guestInSeat ? `${guestInSeat.name} (${guestInSeat.status})` : `Butaca ${idx + 1}`}
+                                      className={`w-8 h-8 rounded-xl flex flex-col items-center justify-center text-[8px] font-black border transition-all cursor-pointer ${
+                                        guestInSeat 
+                                          ? guestInSeat.status === 'CONFIRMADO' 
+                                            ? 'bg-white text-black border-white' 
+                                            : 'bg-amber-500/20 text-amber-400 border-amber-500/50'
+                                          : 'bg-black/60 text-gray-500 border-white/10 hover:border-white/30'
+                                      }`}
+                                    >
+                                      <span>{idx + 1}</span>
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            ))
-                          )}
-                        </div>
-
+                            </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  )}
+
+                  {/* VISTA 3: CAMPO / RECITAL (GENERAL / STANDING) */}
+                  {layoutMode === 'standing' && (
+                    <div className="space-y-6 py-2">
+                      <div className="w-full bg-white/5 border border-white/10 py-3 rounded-2xl text-center text-[9px] tracking-[0.4em] font-black text-gray-400">
+                        ESCENARIO / CAMPO DE ACCESO 🎸
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-6">
+                        {tables.map((t) => {
+                          const assignedGuests = guests.filter(g => g.table?.trim().toUpperCase() === t.name?.trim().toUpperCase());
+                          const capacity = Number(t.capacity) || 100;
+                          const percentage = Math.min(100, Math.round((assignedGuests.length / capacity) * 100));
+
+                          return (
+                            <div key={t.id} className="bg-black/40 border border-white/10 rounded-3xl p-6 space-y-4">
+                              <div className="flex justify-between items-center">
+                                <div className="space-y-0.5">
+                                  <span className="text-[7px] text-gray-500 font-black tracking-widest">ZONA GENERAL / CAMPO</span>
+                                  <h4 className="font-['Poppins'] text-base font-normal text-white uppercase">{t.name}</h4>
+                                </div>
+                                <button onClick={() => handleDelete('tables', t.id)} className="p-1.5 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-lg transition-all cursor-pointer">
+                                  <Trash2 size={12}/>
+                                </button>
+                              </div>
+
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-[9px] font-bold text-gray-300">
+                                  <span>OCUPACIÓN: {assignedGuests.length} TICKETS</span>
+                                  <span>CAPACIDAD: {capacity}</span>
+                                </div>
+                                <div className="w-full h-3 bg-black rounded-full overflow-hidden border border-white/10">
+                                  <div className="h-full bg-white transition-all duration-500" style={{ width: `${percentage}%` }}></div>
+                                </div>
+                              </div>
+
+                              <div className="max-h-32 overflow-y-auto scrollbar-hide space-y-1 pt-2 border-t border-white/5">
+                                {assignedGuests.length === 0 ? (
+                                  <p className="text-[8px] text-gray-600 tracking-widest italic text-center">Sin asistentes en este sector</p>
+                                ) : (
+                                  assignedGuests.map(ag => (
+                                    <div key={ag.id} className="text-[9px] text-gray-300 bg-white/[0.02] px-3 py-1.5 rounded-xl border border-white/5 flex justify-between items-center">
+                                      <span className="truncate font-bold">{ag.name}</span>
+                                      <span className={`text-[7px] font-black tracking-widest px-2 py-0.5 rounded-md ${ag.status === 'CONFIRMADO' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>{ag.status}</span>
+                                    </div>
+                                  ))
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
