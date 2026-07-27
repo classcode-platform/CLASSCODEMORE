@@ -181,16 +181,16 @@ export default function Dashboard() {
   if (loading) return <div className="min-h-screen bg-[#070709] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-black font-['Poppins']">CARGANDO DASHBOARD...</div>;
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] flex flex-col relative overflow-x-hidden uppercase selection:bg-white selection:text-black">
+    <div className="min-h-screen w-full max-w-[100vw] bg-[#070709] text-white font-['Open_Sans'] flex flex-col relative overflow-x-hidden uppercase selection:bg-white selection:text-black box-border">
       
       {/* TOPBAR MOBILE */}
-      <header className="md:hidden fixed top-0 left-0 right-0 bg-[#070709]/90 backdrop-blur-xl border-b border-white/5 z-[90] px-6 py-4 flex justify-between items-center font-['Poppins']">
+      <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-[#070709]/90 backdrop-blur-xl border-b border-white/5 z-[90] px-6 py-4 flex justify-between items-center font-['Poppins'] box-border">
         <div onClick={() => navigate('/home')} className="text-xl tracking-[0.05em] uppercase cursor-pointer">CLASSCODE</div>
         <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-2 focus:outline-none"><Menu size={22} /></button>
       </header>
 
       {/* SIDEBAR DESKTOP */}
-      <aside className="hidden md:flex w-72 bg-[#070709] border-r border-white/5 flex-col p-8 fixed h-full z-50 font-['Poppins']">
+      <aside className="hidden md:flex w-72 bg-[#070709] border-r border-white/5 flex-col p-8 fixed h-full z-50 font-['Poppins'] box-border">
         <header className="mb-10 text-left">
           <div onClick={() => navigate('/home')} className="text-2xl tracking-[0.05em] cursor-pointer uppercase text-white font-normal">CLASSCODE</div>
           <p className="text-gray-400 text-[9px] font-bold tracking-[0.3em] mt-1 uppercase">Talent Dashboard</p>
@@ -218,7 +218,7 @@ export default function Dashboard() {
 
       {/* MENU MOBILE SIDEBAR OVERLAY */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-[#070709] z-[300] flex flex-col p-6 text-left md:hidden overflow-y-auto font-['Poppins']">
+        <div className="fixed inset-0 w-full h-full bg-[#070709] z-[300] flex flex-col p-6 text-left md:hidden overflow-y-auto font-['Poppins'] box-border">
           <div className="flex justify-between items-center mb-10">
             <div>
               <div onClick={() => { navigate('/home'); setIsMobileMenuOpen(false); }} className="text-xl font-normal tracking-[0.05em] uppercase text-white cursor-pointer">CLASSCODE</div>
@@ -237,15 +237,15 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* MAIN CONTAINER CON MARGEN IZQUIERDO CONTROLADO Y BOX-BORDER */}
-      <div className="flex-1 md:ml-72 flex flex-col w-full min-w-0">
+      {/* MAIN CONTAINER */}
+      <div className="flex-1 md:ml-72 flex flex-col w-full min-w-0 box-border overflow-x-hidden">
         
-        {/* SECCIÓN ESTILO FACEBOOK LIMPIA (BANNER SHOWREEL + HEADER) */}
-        <div className="w-full bg-[#070709] border-b border-white/5 mt-14 md:mt-0">
-          <div className="w-full max-w-[1200px] mx-auto">
+        {/* SECCIÓN ESTILO FACEBOOK (BANNER SHOWREEL + HEADER) */}
+        <div className="w-full bg-[#070709] border-b border-white/5 mt-14 md:mt-0 box-border overflow-x-hidden">
+          <div className="w-full max-w-[1200px] mx-auto box-border">
             
-            {/* Banner / Showreel Container controlado */}
-            <div className="w-full h-[180px] md:h-[260px] bg-black relative overflow-hidden group">
+            {/* Banner / Showreel Container */}
+            <div className="w-full h-[180px] md:h-[260px] bg-black relative overflow-hidden group box-border">
               {profile.videoLink ? (
                 <video 
                   src={profile.videoLink} 
@@ -256,7 +256,7 @@ export default function Dashboard() {
                   className="w-full h-full object-cover pointer-events-none opacity-90" 
                 />
               ) : (
-                <div className="w-full h-full bg-[#070709] flex flex-col items-center justify-center p-6 text-center border border-white/5">
+                <div className="w-full h-full bg-[#070709] flex flex-col items-center justify-center p-6 text-center border border-white/5 box-border">
                   <Play size={28} className="text-white/20 mb-2" strokeWidth={1}/>
                   <span className="text-[8px] tracking-[0.4em] text-gray-500 font-black">SIN SHOWREEL CARGADO</span>
                 </div>
@@ -268,9 +268,9 @@ export default function Dashboard() {
               </label>
             </div>
 
-            {/* Perfil Header alineado sin desbordes */}
-            <div className="px-6 md:px-12 pb-8 relative -mt-14 md:-mt-20 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 z-20">
-              <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left w-full md:w-auto">
+            {/* Perfil Header */}
+            <div className="px-6 md:px-12 pb-8 relative -mt-14 md:-mt-20 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 z-20 box-border w-full max-w-full">
+              <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left w-full md:w-auto min-w-0">
                 
                 {/* Foto de Perfil */}
                 <div className="relative w-28 h-28 md:w-36 md:h-36 rounded-full border-4 border-[#070709] overflow-hidden bg-black shadow-2xl flex-shrink-0 group">
@@ -285,7 +285,7 @@ export default function Dashboard() {
                   </label>
                 </div>
 
-                <div className="space-y-2 pb-1 min-w-0 flex-1">
+                <div className="space-y-2 pb-1 min-w-0 flex-1 w-full">
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                     <h1 className="text-xl md:text-2xl font-['Poppins'] font-normal tracking-wide text-white truncate max-w-full">{profile.name || 'NUEVO TALENTO'}</h1>
                     <span className="bg-white/10 text-white border border-white/20 px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1.5 flex-shrink-0">
@@ -313,17 +313,17 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* CONTENIDO PRINCIPAL (GRID DE DOS COLUMNAS RESPONSIVO Y SEGURO) */}
+        {/* CONTENIDO PRINCIPAL */}
         <main className="w-full max-w-[1200px] mx-auto px-6 md:px-12 py-12 grid lg:grid-cols-12 gap-10 relative z-10 box-border">
           
-          {/* COLUMNA IZQUIERDA: CERTIFICACIONES Y MENSAJES */}
+          {/* COLUMNA IZQUIERDA */}
           <div className="lg:col-span-4 space-y-8 min-w-0">
             
             {/* ESTADO ACADÉMICO */}
-            <div className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 space-y-6 shadow-xl">
+            <div className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 space-y-6 shadow-xl box-border">
               <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black border-l-2 border-white pl-4">Estatus Academy</h3>
               <div className="space-y-3">
-                <div className="flex items-center justify-between bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl">
+                <div className="flex items-center justify-between bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl box-border">
                   <div className="flex items-center gap-3 min-w-0">
                     <Zap size={14} className={isGenericoDone ? "text-white flex-shrink-0" : "text-gray-600 flex-shrink-0"} />
                     <span className="text-[9px] font-black tracking-widest text-white truncate">NIVELACIÓN INGRESO</span>
@@ -336,7 +336,7 @@ export default function Dashboard() {
                 </div>
 
                 {profile.job && (
-                  <div className="flex items-center justify-between bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl">
+                  <div className="flex items-center justify-between bg-white/[0.03] border border-white/10 px-4 py-3 rounded-2xl box-border">
                     <div className="flex items-center gap-3 min-w-0">
                       <Award size={14} className={isProfessionalTestDone ? "text-white flex-shrink-0" : "text-gray-600 flex-shrink-0"} />
                       <span className="text-[9px] font-black tracking-widest text-white truncate">TEST PROFESIONAL</span>
@@ -349,13 +349,13 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
-              <button onClick={() => navigate('/academy')} className="w-full py-3 bg-white/5 hover:bg-white/15 border border-white/10 rounded-2xl text-[9px] font-black tracking-[0.3em] text-gray-300 transition-all flex items-center justify-center gap-2">
+              <button onClick={() => navigate('/academy')} className="w-full py-3 bg-white/5 hover:bg-white/15 border border-white/10 rounded-2xl text-[9px] font-black tracking-[0.3em] text-gray-300 transition-all flex items-center justify-center gap-2 box-border">
                 <GraduationCap size={14}/> IR A CLASSCODE ACADEMY
               </button>
             </div>
 
             {/* BANDEJA DE MENSAJES */}
-            <div className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 space-y-6 shadow-xl">
+            <div className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 space-y-6 shadow-xl box-border">
               <div className="flex justify-between items-center border-l-2 border-white pl-4">
                 <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black flex items-center gap-2"><MessageSquare size={12}/> Mensajes</h3>
                 <span className="text-[9px] text-white font-black">{messages.length}</span>
@@ -364,7 +364,7 @@ export default function Dashboard() {
                 {messages.length === 0 ? (
                   <div className="text-center py-6 text-[8px] text-gray-600 uppercase font-black tracking-widest">No hay chats activos</div>
                 ) : messages.map(chat => (
-                  <div key={chat.id} onClick={() => navigate(`/chat/${chat.id}`)} className="flex justify-between items-center p-3.5 bg-white/[0.03] border border-white/10 hover:border-white/30 rounded-2xl transition-all cursor-pointer">
+                  <div key={chat.id} onClick={() => navigate(`/chat/${chat.id}`)} className="flex justify-between items-center p-3.5 bg-white/[0.03] border border-white/10 hover:border-white/30 rounded-2xl transition-all cursor-pointer box-border">
                      <div className="flex items-center gap-3 min-w-0">
                         {chat.clientPhoto ? <img src={chat.clientPhoto} className="w-8 h-8 rounded-full object-cover border border-white/10 flex-shrink-0" alt="" /> : <div className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center flex-shrink-0"><User size={14}/></div>}
                         <div className="min-w-0">
@@ -378,19 +378,19 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 shadow-xl">
+            <div className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 shadow-xl box-border">
                <button onClick={() => {
                  navigator.clipboard.writeText(`https://www.classcode.com.ar/profile/${auth.currentUser?.uid}`);
                  alert("¡Enlace de perfil copiado al portapapeles!");
-               }} className="w-full group flex items-center justify-center gap-3 text-[9px] font-black tracking-[0.3em] text-gray-400 hover:text-white transition-all uppercase py-2">
+               }} className="w-full group flex items-center justify-center gap-3 text-[9px] font-black tracking-[0.3em] text-gray-400 hover:text-white transition-all uppercase py-2 box-border">
                   <Share2 size={16} /> Compartir Perfil Público
                </button>
             </div>
           </div>
 
-          {/* COLUMNA DERECHA: PORTFOLIO DE FOTOS */}
+          {/* COLUMNA DERECHA */}
           <div className="lg:col-span-8 space-y-12 min-w-0">
-            <section className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 md:p-8 space-y-8 shadow-xl">
+            <section className="bg-[#0c0c0e] border border-white/10 rounded-3xl p-6 md:p-8 space-y-8 shadow-xl box-border">
               <div className="flex justify-between items-center border-l-2 border-white pl-4">
                 <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black">Portfolio — Galería de Fotos</h3>
                 <span className="text-[9px] text-gray-500 font-mono">{Array.from({ length: 10 }, (_, i) => profile[`photo${i + 1}`]).filter(Boolean).length}/10 FOTOS</span>
@@ -398,7 +398,7 @@ export default function Dashboard() {
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
-                  <div key={num} className="aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black group relative shadow-xl flex items-center justify-center">
+                  <div key={num} className="aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black group relative shadow-xl flex items-center justify-center box-border">
                     {profile[`photo${num}`] ? (
                       <>
                         <img src={profile[`photo${num}`]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="" />
@@ -425,21 +425,21 @@ export default function Dashboard() {
 
       {/* MODAL EDITAR PERFIL */}
       {isEditingProfile && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4">
-          <div className="bg-[#0c0c0e] w-full max-w-lg p-8 md:p-12 rounded-[3rem] border border-white/10 relative shadow-2xl uppercase max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 box-border">
+          <div className="bg-[#0c0c0e] w-full max-w-lg p-8 md:p-12 rounded-[3rem] border border-white/10 relative shadow-2xl uppercase max-h-[90vh] flex flex-col box-border">
             <button onClick={() => setIsEditingProfile(false)} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors"><X size={22} /></button>
             <h3 className="text-[11px] uppercase tracking-[0.5em] font-black text-white mb-8 text-center font-['Poppins']">Editar Perfil Profesional</h3>
             
-            <div className="space-y-4 font-bold overflow-y-auto pr-2 flex-1 scrollbar-hide text-left">
+            <div className="space-y-4 font-bold overflow-y-auto pr-2 flex-1 scrollbar-hide text-left box-border">
               <div className="space-y-1">
                 <label className="text-[7px] text-gray-500 tracking-widest">Nombre Completo / Artístico</label>
-                <input className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
+                <input className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest box-border" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[7px] text-gray-500 tracking-widest">Rubro Principal</label>
-                  <select className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest" 
+                  <select className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest box-border" 
                           value={profile.job || ""} 
                           onChange={e => setProfile({...profile, job: e.target.value, specialty: ""})}>
                     <option value="">SELECCIONAR</option>
@@ -448,7 +448,7 @@ export default function Dashboard() {
                 </div>
                 <div className="space-y-1">
                   <label className="text-[7px] text-gray-500 tracking-widest">Provincia</label>
-                  <select className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest" 
+                  <select className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest box-border" 
                           value={profile.location || ""} 
                           onChange={e => setProfile({...profile, location: e.target.value})}>
                     <option value="">SELECCIONAR</option>
@@ -460,7 +460,7 @@ export default function Dashboard() {
               {profile.job && (
                 <div className="space-y-1">
                   <label className="text-[7px] text-gray-500 tracking-widest">Especialidad</label>
-                  <select className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest" 
+                  <select className="w-full bg-[#121215] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest box-border" 
                           value={profile.specialty || ""} 
                           onChange={e => setProfile({...profile, specialty: e.target.value})}>
                     <option value="">SELECCIONAR ESPECIALIDAD</option>
@@ -471,7 +471,7 @@ export default function Dashboard() {
 
               <div className="space-y-1">
                 <label className="text-[7px] text-gray-500 tracking-widest">Biografía / Presentación</label>
-                <textarea className="w-full bg-white/[0.03] border border-white/10 rounded-3xl p-4 text-[10px] text-white uppercase h-28 resize-none outline-none focus:border-white tracking-widest" value={profile.bio || ''} onChange={e => setProfile({...profile, bio: e.target.value})} />
+                <textarea className="w-full bg-white/[0.03] border border-white/10 rounded-3xl p-4 text-[10px] text-white uppercase h-28 resize-none outline-none focus:border-white tracking-widest box-border" value={profile.bio || ''} onChange={e => setProfile({...profile, bio: e.target.value})} />
               </div>
             </div>
 
@@ -485,8 +485,8 @@ export default function Dashboard() {
 
       <CustomModal isOpen={modal.isOpen} onClose={() => setModal({ ...modal, isOpen: false })} title={modal.title} message={modal.message} type={modal.type} />
       
-      <footer className="bg-black py-20 px-6 border-t border-white/5 text-center relative z-10 w-full font-['Poppins']">
-        <div className="max-w-[1440px] mx-auto">
+      <footer className="bg-black py-20 px-6 border-t border-white/5 text-center relative z-10 w-full box-border font-['Poppins']">
+        <div className="max-w-[1440px] mx-auto box-border">
           <h2 className="text-white text-3xl font-normal tracking-[0.1em] uppercase mb-4 opacity-30">CLASSCODE</h2>
           <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-gray-600 opacity-30">© 2026 — TODOS LOS DERECHOS RESERVADOS</p>
         </div>
