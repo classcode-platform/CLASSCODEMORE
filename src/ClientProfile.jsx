@@ -77,7 +77,6 @@ export default function ClientProfile() {
   const [mensajes, setMensajes] = useState([]);
   const [nuevoMensaje, setNuevoMensaje] = useState('');
   const [cargandoChat, setCargandoChat] = useState(true);
-  const chatScrollRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -149,11 +148,6 @@ export default function ClientProfile() {
     });
     return () => unsubscribe();
   }, [navigate]);
-
-  // Auto-scroll al final del chat cuando llegan nuevos mensajes
-  useEffect(() => {
-    chatScrollRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [mensajes]);
 
   const handleEnviarMensaje = async (e) => {
     e.preventDefault();
@@ -300,8 +294,8 @@ export default function ClientProfile() {
         />
       </div>
 
-      {/* HEADER MOBILE GLASS */}
-      <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-white/[0.07] backdrop-blur-2xl border-b border-white/20 z-[100] px-8 py-5 flex justify-between items-center shadow-xl">
+      {/* HEADER MOBILE GLASS (Menos luminoso: bg-white/[0.03] y blur menor) */}
+      <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-white/[0.03] backdrop-blur-md border-b border-white/10 z-[100] px-8 py-5 flex justify-between items-center shadow-xl">
         <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer text-white">
           CLASSCODE
         </div>
@@ -315,14 +309,14 @@ export default function ClientProfile() {
         {isMobileMenuOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileMenuOpen(false)} className="fixed inset-0 bg-black/70 backdrop-blur-md z-[110] md:hidden" />
-            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-[#0b0c10]/80 backdrop-blur-3xl border-l border-white/20 z-[120] p-10 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto">
+            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-[#0b0c10]/85 backdrop-blur-xl border-l border-white/10 z-[120] p-10 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto">
               <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-10 text-white/60 hover:text-white transition-colors cursor-pointer">
                 <X size={28} />
               </button>
               
-              <button onClick={handleSwitchToTalent} className="mb-10 w-full flex items-center justify-between bg-white/[0.12] backdrop-blur-md border border-purple-400/50 p-4 rounded-xl group hover:bg-white/[0.16] transition-all cursor-pointer shadow-lg">
+              <button onClick={handleSwitchToTalent} className="mb-10 w-full flex items-center justify-between bg-white/[0.04] backdrop-blur-md border border-white/10 p-4 rounded-xl group hover:bg-white/[0.08] transition-all cursor-pointer shadow-lg">
                 <div className="flex items-center gap-4 text-left leading-none">
-                  <div className="p-2.5 bg-purple-500/20 rounded-lg text-purple-300 border border-purple-500/40">
+                  <div className="p-2.5 bg-purple-500/15 rounded-lg text-purple-300 border border-purple-500/30">
                     <RefreshCcw size={16} className="group-hover:rotate-180 transition-transform duration-700" />
                   </div>
                   <div>
@@ -349,8 +343,8 @@ export default function ClientProfile() {
         )}
       </AnimatePresence>
 
-      {/* SIDEBAR DESKTOP GLASS */}
-      <aside className="hidden md:flex w-72 bg-white/[0.04] backdrop-blur-3xl border-r border-white/20 flex-col p-8 fixed h-full z-50 box-border shadow-2xl">
+      {/* SIDEBAR DESKTOP GLASS (Translúcido, menos luminoso con bg-white/[0.025] y backdrop-blur-md) */}
+      <aside className="hidden md:flex w-72 bg-white/[0.025] backdrop-blur-md border-r border-white/10 flex-col p-8 fixed h-full z-50 box-border shadow-2xl">
         <header className="mb-10 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">
             CLASSCODE
@@ -361,9 +355,10 @@ export default function ClientProfile() {
         </header>
         
         <div className="mb-10 text-left">
-          <button onClick={handleSwitchToTalent} className="w-full flex items-center justify-between bg-white/[0.12] backdrop-blur-md border border-purple-400/50 p-4 rounded-xl group hover:bg-white/[0.16] transition-all cursor-pointer shadow-lg">
+          {/* Botón discreto en armonía con el resto de la página */}
+          <button onClick={handleSwitchToTalent} className="w-full flex items-center justify-between bg-white/[0.04] backdrop-blur-md border border-white/10 p-4 rounded-xl group hover:bg-white/[0.08] transition-all cursor-pointer shadow-lg">
             <div className="flex items-center gap-3 text-left leading-none">
-              <div className="p-2.5 bg-purple-500/20 rounded-lg text-purple-300 border border-purple-500/40">
+              <div className="p-2.5 bg-purple-500/15 rounded-lg text-purple-300 border border-purple-500/30">
                 <RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
               </div>
               <div>
@@ -383,7 +378,7 @@ export default function ClientProfile() {
           </button>
         </nav>
 
-        <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-white/50 hover:text-red-300 text-[10px] font-black tracking-widest transition-all mt-auto pt-6 border-t border-white/20 leading-none cursor-pointer">
+        <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-white/50 hover:text-red-300 text-[10px] font-black tracking-widest transition-all mt-auto pt-6 border-t border-white/10 leading-none cursor-pointer">
           <LogOut size={16}/> CERRAR SESIÓN
         </button>
       </aside>
@@ -391,10 +386,10 @@ export default function ClientProfile() {
       {/* CONTENIDO PRINCIPAL */}
       <main className="flex-1 md:ml-72 p-6 md:p-12 mt-16 md:mt-0 relative z-10 w-full max-w-[1400px] mx-auto space-y-8 box-border">
         
-        {/* HEADER DE PERFIL EN GLASS REAL */}
-        <header className="flex justify-between items-center bg-white/[0.07] backdrop-blur-3xl border border-white/25 p-6 rounded-2xl shadow-2xl box-border">
+        {/* HEADER DE PERFIL EN GLASS REAL (Menos luminoso) */}
+        <header className="flex justify-between items-center bg-white/[0.03] backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-2xl box-border">
           <div className="flex items-center gap-5">
-            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl border border-white/30 overflow-hidden bg-white/10 flex items-center justify-center flex-shrink-0 shadow-inner">
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl border border-white/20 overflow-hidden bg-white/5 flex items-center justify-center flex-shrink-0 shadow-inner">
               {profile.photoURL ? (
                 <img src={profile.photoURL} className="w-full h-full object-cover" alt="Profile" />
               ) : (
@@ -418,8 +413,9 @@ export default function ClientProfile() {
             </div>
           </div>
           
-          <button onClick={() => setIsCreatingEvent(true)} className="px-5 py-3 bg-purple-600 backdrop-blur-md border border-purple-400/50 text-white rounded-xl text-[9px] font-black flex items-center gap-2 hover:bg-purple-500 transition-all tracking-widest font-['Poppins'] cursor-pointer shadow-xl flex-shrink-0">
-            <Plus size={14}/> NUEVO EVENTO
+          {/* Botón discreto en armonía con la página */}
+          <button onClick={() => setIsCreatingEvent(true)} className="px-5 py-3 bg-white/[0.04] backdrop-blur-md border border-white/15 text-white rounded-xl text-[9px] font-black flex items-center gap-2 hover:bg-white/[0.08] transition-all tracking-widest font-['Poppins'] cursor-pointer shadow-xl flex-shrink-0">
+            <Plus size={14} className="text-purple-400"/> NUEVO EVENTO
           </button>
         </header>
 
@@ -430,33 +426,33 @@ export default function ClientProfile() {
           </div>
           
           {events.length === 0 ? (
-            <div className="py-20 text-center border border-white/25 rounded-2xl bg-white/[0.06] backdrop-blur-3xl space-y-4 shadow-2xl">
+            <div className="py-20 text-center border border-white/15 rounded-2xl bg-white/[0.025] backdrop-blur-md space-y-4 shadow-2xl">
               <Calendar size={36} className="mx-auto text-white/40" />
               <p className="text-[9px] text-white/70 tracking-[0.3em] font-black uppercase">No hay eventos registrados</p>
-              <button onClick={() => setIsCreatingEvent(true)} className="px-6 py-3.5 bg-purple-600 backdrop-blur-md border border-purple-400/50 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-purple-500 transition-all font-['Poppins'] cursor-pointer shadow-xl">
+              <button onClick={() => setIsCreatingEvent(true)} className="px-6 py-3.5 bg-white/[0.04] backdrop-blur-md border border-white/15 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-white/[0.08] transition-all font-['Poppins'] cursor-pointer shadow-xl">
                 CREAR PRIMER EVENTO
               </button>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.map((ev, index) => (
-                <div key={ev.id} onClick={() => navigate(`/organizer/${ev.id}`)} className="bg-white/[0.07] backdrop-blur-3xl border border-white/25 hover:border-purple-400/60 hover:bg-white/[0.11] rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl cursor-pointer transition-all duration-300 group box-border">
-                  <div className="relative w-full h-36 bg-black/40 overflow-hidden border-b border-white/20 flex items-center justify-center">
+                <div key={ev.id} onClick={() => navigate(`/organizer/${ev.id}`)} className="bg-white/[0.03] backdrop-blur-md border border-white/15 hover:border-purple-400/50 hover:bg-white/[0.06] rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xl cursor-pointer transition-all duration-300 group box-border">
+                  <div className="relative w-full h-36 bg-black/40 overflow-hidden border-b border-white/10 flex items-center justify-center">
                     {ev.coverImage ? (
                       <img src={ev.coverImage} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" />
                     ) : (
                       <ImageIcon size={28} className="text-white/30" />
                     )}
                     <div className="absolute top-3 left-3">
-                      <span className="text-[7px] tracking-[0.3em] font-black px-3 py-1 bg-black/60 backdrop-blur-md border border-white/25 rounded-full text-white uppercase shadow-lg">
+                      <span className="text-[7px] tracking-[0.3em] font-black px-3 py-1 bg-black/60 backdrop-blur-md border border-white/15 rounded-full text-white uppercase shadow-lg">
                         {ev.category || 'EVENTO'}
                       </span>
                     </div>
                     <div className="absolute top-3 right-3">
                       <button onClick={(e) => handleToggleStatus(ev, e)} className={`text-[7px] tracking-widest font-black px-3 py-1 rounded-full border backdrop-blur-md transition-all uppercase shadow-lg ${
-                        ev.status === 'FINALIZADO' ? 'bg-emerald-500/30 text-emerald-300 border-emerald-400/50' :
-                        ev.status === 'EN_CURSO' ? 'bg-amber-500/30 text-amber-300 border-amber-400/50' :
-                        'bg-white/20 text-white border-white/30'
+                        ev.status === 'FINALIZADO' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40' :
+                        ev.status === 'EN_CURSO' ? 'bg-amber-500/20 text-amber-300 border-amber-400/40' :
+                        'bg-white/10 text-white border-white/20'
                       }`}>
                         {ev.status}
                       </button>
@@ -473,11 +469,11 @@ export default function ClientProfile() {
                       {ev.location && <p className="flex items-center gap-2"><MapPin size={12} className="text-purple-400"/> {ev.location}</p>}
                     </div>
 
-                    <div className="pt-4 border-t border-white/20 flex items-center justify-between gap-3">
-                      <button onClick={(e) => { e.stopPropagation(); setSelectedEventIndex(index); setShowLivePanel(true); }} className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.08] backdrop-blur-md hover:bg-white/[0.15] border border-white/25 text-[8px] font-black tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer text-white shadow-lg">
+                    <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+                      <button onClick={(e) => { e.stopPropagation(); setSelectedEventIndex(index); setShowLivePanel(true); }} className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.04] backdrop-blur-md hover:bg-white/[0.08] border border-white/15 text-[8px] font-black tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer text-white shadow-lg">
                         <QrCode size={13} className="text-purple-400"/> LIVE CONTROL
                       </button>
-                      <button onClick={(e) => confirmDelete(ev.id, e)} className="p-2.5 bg-white/[0.08] backdrop-blur-md hover:bg-red-500/30 hover:text-red-300 border border-white/25 rounded-xl transition-all text-white/80 cursor-pointer shadow-lg">
+                      <button onClick={(e) => confirmDelete(ev.id, e)} className="p-2.5 bg-white/[0.04] backdrop-blur-md hover:bg-red-500/20 hover:text-red-300 border border-white/15 rounded-xl transition-all text-white/80 cursor-pointer shadow-lg">
                         <Trash2 size={14}/>
                       </button>
                     </div>
@@ -488,14 +484,14 @@ export default function ClientProfile() {
           )}
         </section>
 
-        {/* SECCIÓN DE MENSAJERÍA INTEGRADA */}
+        {/* SECCIÓN DE MENSAJERÍA INTEGRADA (Sin auto-scroll automático gracias a la eliminación del useRef auto-scroll) */}
         <section className="space-y-6 pt-4">
           <div className="flex justify-between items-center border-l-2 border-purple-500 pl-4">
             <h3 className="text-[10px] text-white/70 uppercase tracking-[0.4em] font-black">mensajería directa</h3>
           </div>
 
-          <div className="bg-white/[0.07] backdrop-blur-3xl border border-white/25 rounded-2xl p-6 flex flex-col h-[480px] shadow-2xl box-border">
-            <div className="flex items-center gap-3 pb-4 border-b border-white/20">
+          <div className="bg-white/[0.03] backdrop-blur-md border border-white/15 rounded-2xl p-6 flex flex-col h-[480px] shadow-2xl box-border">
+            <div className="flex items-center gap-3 pb-4 border-b border-white/10">
               <MessageSquare className="w-5 h-5 text-purple-400" />
               <h3 className="text-[11px] font-['Poppins'] font-bold text-white tracking-widest uppercase">Chat de Soporte y Gestión</h3>
             </div>
@@ -517,8 +513,8 @@ export default function ClientProfile() {
                     <div key={msg.id} className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}>
                       <div className={`max-w-[75%] px-4 py-3 rounded-2xl text-[10px] shadow-lg ${
                         esMio 
-                          ? 'bg-purple-600 text-white rounded-br-none border border-purple-400/40' 
-                          : 'bg-white/[0.08] text-white/90 rounded-bl-none border border-white/20 backdrop-blur-md'
+                          ? 'bg-purple-600/80 text-white rounded-br-none border border-purple-400/40 backdrop-blur-md' 
+                          : 'bg-white/[0.04] text-white/90 rounded-bl-none border border-white/15 backdrop-blur-md'
                       }`}>
                         <p className="tracking-wider leading-relaxed">{msg.text}</p>
                       </div>
@@ -526,20 +522,19 @@ export default function ClientProfile() {
                   );
                 })
               )}
-              <div ref={chatScrollRef} />
             </div>
 
             {/* Input de Envío */}
-            <form onSubmit={handleEnviarMensaje} className="mt-4 flex gap-3 pt-4 border-t border-white/20">
+            <form onSubmit={handleEnviarMensaje} className="mt-4 flex gap-3 pt-4 border-t border-white/10">
               <input
                 type="text"
                 value={nuevoMensaje}
                 onChange={(e) => setNuevoMensaje(e.target.value)}
                 placeholder="ESCRIBE UN MENSAJE..."
-                className="flex-1 bg-white/[0.05] backdrop-blur-md border border-white/25 rounded-xl px-4 py-3 text-[10px] text-white placeholder-white/40 focus:outline-none focus:border-purple-400 uppercase shadow-inner transition-colors"
+                className="flex-1 bg-white/[0.03] backdrop-blur-md border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white placeholder-white/40 focus:outline-none focus:border-purple-400 uppercase shadow-inner transition-colors"
               />
-              <button type="submit" className="bg-purple-600 hover:bg-purple-500 border border-purple-400/50 text-white px-5 rounded-xl transition-all flex items-center justify-center cursor-pointer shadow-xl">
-                <Send className="w-4 h-4" />
+              <button type="submit" className="bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 text-white px-5 rounded-xl transition-all flex items-center justify-center cursor-pointer shadow-xl">
+                <Send className="w-4 h-4 text-purple-400" />
               </button>
             </form>
           </div>
@@ -552,21 +547,21 @@ export default function ClientProfile() {
         {isEditingProfile && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[250] flex items-center justify-center p-4 uppercase">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0b0c10]/85 backdrop-blur-3xl w-full max-w-lg p-6 md:p-8 rounded-2xl border border-white/25 relative shadow-2xl space-y-6"
+              className="bg-[#0b0c10]/90 backdrop-blur-xl w-full max-w-lg p-6 md:p-8 rounded-2xl border border-white/15 relative shadow-2xl space-y-6"
             >
               <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
               
-              <h3 className="text-[11px] font-['Poppins'] text-white tracking-[0.3em] font-black border-b border-white/20 pb-4">Editar Perfil</h3>
+              <h3 className="text-[11px] font-['Poppins'] text-white tracking-[0.3em] font-black border-b border-white/10 pb-4">Editar Perfil</h3>
 
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-[8px] text-white/80 tracking-widest font-black">Nombre / Organizador</label>
-                  <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full bg-white/[0.08] backdrop-blur-md border border-white/25 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors shadow-inner" required />
+                  <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full bg-white/[0.04] backdrop-blur-md border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors shadow-inner" required />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[8px] text-white/80 tracking-widest font-black">Provincia</label>
-                  <select value={editForm.province} onChange={handleProvinceChange} className="w-full bg-[#121318] border border-white/25 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner">
+                  <select value={editForm.province} onChange={handleProvinceChange} className="w-full bg-[#121318] border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner">
                     {ARGENTINE_PROVINCES.map((prov) => (
                       <option key={prov.name} value={prov.name} className="bg-[#121318] text-white">{prov.name}</option>
                     ))}
@@ -575,7 +570,7 @@ export default function ClientProfile() {
 
                 <div className="space-y-2">
                   <label className="text-[8px] text-white/80 tracking-widest font-black">Localidad / Zona</label>
-                  <select value={editForm.locality} onChange={(e) => setEditForm({ ...editForm, locality: e.target.value })} className="w-full bg-[#121318] border border-white/25 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner">
+                  <select value={editForm.locality} onChange={(e) => setEditForm({ ...editForm, locality: e.target.value })} className="w-full bg-[#121318] border border-white/15 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner">
                     {selectedProvinceObj.localities.map((loc) => (
                       <option key={loc} value={loc} className="bg-[#121318] text-white">{loc}</option>
                     ))}
@@ -585,13 +580,13 @@ export default function ClientProfile() {
                 <div className="space-y-2">
                   <label className="text-[8px] text-white/80 tracking-widest font-black">Subir Foto de Perfil</label>
                   <div className="flex items-center gap-4">
-                    <label className="flex-1 flex items-center justify-center gap-2 bg-white/[0.08] backdrop-blur-md border border-dashed border-white/35 hover:border-purple-400 rounded-xl px-4 py-3 text-[9px] text-white/90 cursor-pointer transition-colors shadow-inner">
+                    <label className="flex-1 flex items-center justify-center gap-2 bg-white/[0.04] backdrop-blur-md border border-dashed border-white/25 hover:border-purple-400 rounded-xl px-4 py-3 text-[9px] text-white/90 cursor-pointer transition-colors shadow-inner">
                       <Upload size={14} className="text-purple-400" />
                       <span>{editForm.photoURL ? "Cambiar imagen..." : "Seleccionar archivo..."}</span>
                       <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                     </label>
                     {editForm.photoURL && (
-                      <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/30 flex-shrink-0 bg-black/50 shadow-inner">
+                      <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/20 flex-shrink-0 bg-black/50 shadow-inner">
                         <img src={editForm.photoURL} alt="Preview" className="w-full h-full object-cover" />
                       </div>
                     )}
@@ -599,11 +594,11 @@ export default function ClientProfile() {
                 </div>
 
                 <div className="pt-4 flex justify-end gap-3">
-                  <button type="button" onClick={() => setIsEditingProfile(false)} className="px-5 py-3 bg-white/[0.08] backdrop-blur-md border border-white/25 rounded-xl text-[9px] font-black tracking-widest hover:bg-white/[0.15] transition-all cursor-pointer text-white shadow-lg">
+                  <button type="button" onClick={() => setIsEditingProfile(false)} className="px-5 py-3 bg-white/[0.04] backdrop-blur-md border border-white/15 rounded-xl text-[9px] font-black tracking-widest hover:bg-white/[0.08] transition-all cursor-pointer text-white shadow-lg">
                     Cancelar
                   </button>
-                  <button type="submit" className="px-6 py-3 bg-purple-600 border border-purple-400/50 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-purple-500 transition-all cursor-pointer flex items-center gap-2 shadow-xl">
-                    <Save size={14} /> Guardar Cambios
+                  <button type="submit" className="px-6 py-3 bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 text-white rounded-xl text-[9px] font-black tracking-widest transition-all cursor-pointer flex items-center gap-2 shadow-xl">
+                    <Save size={14} className="text-purple-400" /> Guardar Cambios
                   </button>
                 </div>
               </form>
@@ -628,7 +623,7 @@ export default function ClientProfile() {
         {showLivePanel && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 md:p-8 overflow-y-auto">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0b0c10]/85 backdrop-blur-3xl w-full max-w-4xl p-6 md:p-8 rounded-2xl border border-white/25 relative shadow-2xl space-y-6 uppercase"
+              className="bg-[#0b0c10]/90 backdrop-blur-xl w-full max-w-4xl p-6 md:p-8 rounded-2xl border border-white/15 relative shadow-2xl space-y-6 uppercase"
             >
               <button onClick={() => setShowLivePanel(false)} className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
 
@@ -661,8 +656,8 @@ export default function ClientProfile() {
         {previewImage && (
           <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/80 backdrop-blur-lg p-4" onClick={() => setPreviewImage(null)}>
             <div className="relative max-w-3xl max-h-[90vh]">
-              <img src={previewImage} alt="Preview" className="max-w-full max-h-[85vh] object-contain rounded-xl border border-white/30 shadow-2xl" />
-              <button onClick={() => setPreviewImage(null)} className="absolute -top-4 -right-4 p-2 bg-black/90 text-white rounded-full border border-white/30 shadow-xl"><X size={18}/></button>
+              <img src={previewImage} alt="Preview" className="max-w-full max-h-[85vh] object-contain rounded-xl border border-white/20 shadow-2xl" />
+              <button onClick={() => setPreviewImage(null)} className="absolute -top-4 -right-4 p-2 bg-black/90 text-white rounded-full border border-white/20 shadow-xl"><X size={18}/></button>
             </div>
           </div>
         )}
