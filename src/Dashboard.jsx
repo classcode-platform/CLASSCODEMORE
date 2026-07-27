@@ -189,10 +189,10 @@ export default function Dashboard() {
       </header>
 
       {/* SIDEBAR DESKTOP */}
-      <aside className="hidden md:flex w-72 bg-[#070709] border-r border-white/5 flex-col p-8 fixed h-full z-50 font-['Poppins'] box-border">
+      <aside className="hidden md:flex w-72 bg-[#070709] border-r border-white/5 flex-col p-8 fixed top-0 left-0 h-full z-50 font-['Poppins'] box-border">
         <header className="mb-10 text-left">
           <div onClick={() => navigate('/home')} className="text-2xl tracking-[0.05em] cursor-pointer uppercase text-white font-normal">CLASSCODE</div>
-          <p className="text-gray-400 text-[9px] font-bold tracking-[0.3em] mt-1 uppercase">Talent Dashboard</p>
+          <p className="text-gray-400 text-[9px] font-bold tracking-[0.3em] mt-1 uppercase">Talent</p>
         </header>
         
         <div className="mb-8 text-left">
@@ -221,7 +221,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-center mb-10">
             <div>
               <div onClick={() => { navigate('/home'); setIsMobileMenuOpen(false); }} className="text-xl font-normal tracking-[0.05em] uppercase text-white cursor-pointer">CLASSCODE</div>
-              <p className="text-gray-400 text-[9px] font-bold tracking-[0.3em] mt-1 uppercase">Talent Dashboard</p>
+              <p className="text-gray-400 text-[9px] font-bold tracking-[0.3em] mt-1 uppercase">Talent</p>
             </div>
             <button onClick={() => setIsMobileMenuOpen(false)} className="text-white p-2.5 bg-white/10 rounded-full"><X size={20} /></button>
           </div>
@@ -237,7 +237,7 @@ export default function Dashboard() {
       )}
 
       {/* MAIN CONTAINER */}
-      <div className="flex-1 md:ml-72 flex flex-col w-full min-w-0 max-w-full box-border overflow-x-hidden">
+      <div className="w-full md:pl-72 flex flex-col min-w-0 max-w-full box-border overflow-x-hidden">
         
         {/* SECCIÓN ESTILO FACEBOOK (BANNER SHOWREEL + HEADER) */}
         <div className="w-full bg-[#070709] border-b border-white/5 mt-14 md:mt-0 box-border overflow-x-hidden">
