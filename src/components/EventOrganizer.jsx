@@ -248,8 +248,9 @@ export default function EventOrganizer() {
                       </div>
 
                       <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-2">
+                        {/* Al hacer clic en QR, ahora entra directamente al panel de control de ese evento (LiveControlPanel unificado) */}
                         <button 
-                          onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); setShowQrModal(true); }} 
+                          onClick={(e) => { e.stopPropagation(); setActiveEventId(ev.id); setSelectedEvent(ev); setShowQrModal(true); }} 
                           className="flex-1 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] cursor-pointer backdrop-blur-md"
                         >
                           <QrCode size={14}/> QR
@@ -268,7 +269,7 @@ export default function EventOrganizer() {
             )}
           </>
         ) : (
-          /* VISTA 2: PANEL DE CONTROL EN VIVO DEL EVENTO */
+          /* VISTA 2: PANEL DE CONTROL EN VIVO DEL EVENTO (LIVECONTROL-PANEL INTEGRADO) */
           currentEvent && (
             <div className="space-y-10">
               <div className="bg-white/[0.03] border border-white/10 p-6 md:p-8 rounded-[2.5rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col md:flex-row justify-between items-start md:items-center gap-6 backdrop-blur-xl">
@@ -431,7 +432,7 @@ export default function EventOrganizer() {
         )}
       </AnimatePresence>
 
-      {/* Modal QR Unificado */}
+      {/* Modal QR Unificado con el Panel de Control */}
       <AnimatePresence>
         {showQrModal && selectedEvent && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4">
