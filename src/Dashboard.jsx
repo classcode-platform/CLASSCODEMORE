@@ -325,7 +325,7 @@ export default function Dashboard() {
       <aside className="hidden md:flex w-72 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50 box-border">
         <header className="mb-12 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">CLASSCODE</div>
-          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent</p>
+          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent Dashboard</p>
         </header>
         
         <div className="mb-12 text-left">
@@ -372,7 +372,7 @@ export default function Dashboard() {
             <div className="w-full bg-white/[0.02] border border-white/5 backdrop-blur-md rounded-2xl p-4 md:p-8 mb-8 shadow-2xl box-border overflow-hidden">
               <div className="w-full mx-auto box-border">
                 
-                <div className="w-full h-[180px] md:h-[260px] bg-black relative overflow-hidden group box-border rounded-2xl border border-white/10">
+                <label className="w-full h-[180px] md:h-[260px] bg-black relative overflow-hidden group block rounded-2xl border border-white/10 cursor-pointer shadow-xl">
                   {profile.videoLink ? (
                     <video 
                       src={profile.videoLink} 
@@ -391,11 +391,12 @@ export default function Dashboard() {
                     </div>
                   )}
                   
-                  <label className="absolute bottom-4 right-4 bg-black/80 hover:bg-black text-white px-3 py-2 rounded-xl text-[8px] font-black tracking-widest cursor-pointer border border-white/10 transition-all flex items-center gap-2 shadow-xl z-20">
+                  <div className="absolute bottom-4 right-4 bg-black/80 hover:bg-black text-white px-3 py-2 rounded-xl text-[8px] font-black tracking-widest border border-white/10 transition-all flex items-center gap-2 shadow-xl z-20">
                     <Upload size={14} /> {uploadingStatus.video ? 'SUBIENDO...' : (profile.videoLink ? 'CAMBIAR' : 'SUBIR')}
-                    <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
-                  </label>
-                </div>
+                  </div>
+                  
+                  <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
+                </label>
 
                 <div className="pb-4 relative -mt-10 md:-mt-16 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 z-20 box-border w-full">
                   <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left w-full md:w-auto min-w-0">
@@ -431,10 +432,10 @@ export default function Dashboard() {
                   </div>
 
                   <div className="flex items-center gap-3 w-full md:w-auto justify-center pb-2 flex-shrink-0">
-                    <button onClick={handleAddNewProfile} className="px-4 py-4 rounded-2xl bg-white/[0.03] hover:bg-white/15 border border-white/10 transition-all text-white flex items-center gap-2 text-[9px] font-black tracking-widest" title="Crear otro perfil profesional">
+                    <button onClick={handleAddNewProfile} className="px-4 py-4 rounded-2xl bg-white/[0.03] hover:bg-white/15 border border-white/10 transition-all text-white flex items-center gap-2 text-[9px] font-black tracking-widest cursor-pointer" title="Crear otro perfil profesional">
                       <Plus size={16} /> <span className="hidden md:inline">NUEVO PERFIL</span>
                     </button>
-                    <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-4 bg-white/[0.03] hover:bg-white/15 rounded-2xl border border-white/10 transition-all text-white" title="Ver Perfil Público">
+                    <button onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)} className="p-4 bg-white/[0.03] hover:bg-white/15 rounded-2xl border border-white/10 transition-all text-white cursor-pointer" title="Ver Perfil Público">
                       <Eye size={18} />
                     </button>
                     <button onClick={() => setIsEditingProfile(true)} className="px-6 py-4 rounded-2xl bg-purple-600 text-white font-black text-[10px] tracking-[0.3em] hover:bg-purple-500 transition-all shadow-xl flex items-center justify-center gap-2 cursor-pointer">
@@ -458,7 +459,7 @@ export default function Dashboard() {
                         <span className="text-[9px] font-black tracking-widest text-white truncate">NIVELACIÓN INGRESO</span>
                       </div>
                       {!isGenericoDone ? (
-                        <button onClick={() => navigate('/academy-test/Generico')} className="text-[8px] font-black text-purple-400 hover:underline flex-shrink-0 ml-2">RENDIR</button>
+                        <button onClick={() => navigate('/academy-test/Generico')} className="text-[8px] font-black text-purple-400 hover:underline flex-shrink-0 ml-2 cursor-pointer">RENDIR</button>
                       ) : (
                         <span className="text-[8px] font-black text-green-400 flex-shrink-0 ml-2">APROBADO</span>
                       )}
@@ -471,14 +472,14 @@ export default function Dashboard() {
                           <span className="text-[9px] font-black tracking-widest text-white truncate">TEST PROFESIONAL</span>
                         </div>
                         {!isProfessionalTestDone ? (
-                          <button onClick={() => navigate(`/academy-test/${encodeURIComponent(profile.job)}`)} className="text-[8px] font-black text-purple-400 hover:underline flex-shrink-0 ml-2">RENDIR</button>
+                          <button onClick={() => navigate(`/academy-test/${encodeURIComponent(profile.job)}`)} className="text-[8px] font-black text-purple-400 hover:underline flex-shrink-0 ml-2 cursor-pointer">RENDIR</button>
                         ) : (
                           <span className="text-[8px] font-black text-green-400 flex-shrink-0 ml-2">APROBADO</span>
                         )}
                       </div>
                     )}
                   </div>
-                  <button onClick={() => navigate('/academy')} className="w-full py-3 bg-white/5 hover:bg-white/15 border border-white/10 rounded-2xl text-[9px] font-black tracking-[0.3em] text-gray-300 transition-all flex items-center justify-center gap-2 box-border">
+                  <button onClick={() => navigate('/academy')} className="w-full py-3 bg-white/5 hover:bg-white/15 border border-white/10 rounded-2xl text-[9px] font-black tracking-[0.3em] text-gray-300 transition-all flex items-center justify-center gap-2 box-border cursor-pointer">
                     <GraduationCap size={14}/> IR A CLASSCODE ACADEMY
                   </button>
                 </div>
@@ -510,7 +511,7 @@ export default function Dashboard() {
                    <button onClick={() => {
                      navigator.clipboard.writeText(`https://www.classcode.com.ar/profile/${auth.currentUser?.uid}`);
                      alert("¡Enlace de perfil copiado al portapapeles!");
-                   }} className="w-full group flex items-center justify-center gap-3 text-[9px] font-black tracking-[0.3em] text-gray-400 hover:text-white transition-all uppercase py-2 box-border">
+                   }} className="w-full group flex items-center justify-center gap-3 text-[9px] font-black tracking-[0.3em] text-gray-400 hover:text-white transition-all uppercase py-2 box-border cursor-pointer">
                       <Share2 size={16} /> Compartir Perfil Público
                    </button>
                 </div>
@@ -533,7 +534,7 @@ export default function Dashboard() {
                               const updates = { [`photo${num}`]: '' };
                               setProfile(prev => ({ ...prev, ...updates }));
                               await persistProfile(updates);
-                            }} className="absolute top-2 right-2 p-2 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 text-red-400 transition-all border border-white/10"><X size={12} /></button>
+                            }} className="absolute top-2 right-2 p-2 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 text-red-400 transition-all border border-white/10 cursor-pointer"><X size={12} /></button>
                           </>
                         ) : (
                           <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition-all p-4 text-center">
