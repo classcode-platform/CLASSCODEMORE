@@ -5,11 +5,10 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search, LogOut, User, Calendar, MapPin, 
-  Trash2, Plus, Edit3, LayoutGrid, ImageIcon, X, ArrowLeft, Sliders
+  Trash2, Plus, Edit3, LayoutGrid, ImageIcon, X, ArrowLeft, Sliders, ChevronRight, QrCode
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import EventOrganizer from './components/EventOrganizer';
-import LiveControlPanel from './components/LiveControlPanel';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ClientProfile() {
@@ -17,19 +16,21 @@ export default function ClientProfile() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
   
-  const [profileMode, setProfileMode] = useState('events'); 
+  // Switch de Modos: 'experience' o 'talent'
+  const [profileMode, setProfileMode] = useState('experience'); 
   const [loading, setLoading] = useState(true);
   
   const [events, setEvents] = useState([]);
-  const [selectedEventIndex, setSelectedEventIndex] = useState(null); 
   const [profile, setProfile] = useState({ name: '', location: '', interests: '', photoURL: '' });
-  const [previewImage, setPreviewImage] = useState(null);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [selectedEventForQr, setSelectedEventForQr] = useState(null);
 
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'warning', onConfirm: null });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
+        // Cargar datos del perfil de usuario
         onSnapshot(doc(db, "users", user.uid), (docSnap) => {
           if (docSnap.exists()) {
             setProfile(prev => ({ ...prev, ...docSnap.data() }));
@@ -37,8 +38,11 @@ export default function ClientProfile() {
           setLoading(false);
         });
 
-        onSnapshot(query(collection(db, "events"), where("clientId", "==", user.uid)), (snap) => {
+        // Consulta unificada a 'events_organizer' para el contador y grilla real
+        const qEvents = query(collection(db, "events_organizer"), where("userId", "==", user.uid));
+        onSnapshot(qEvents, (snap) => {
           const fetchedEvents = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          fetchedEvents.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
           setEvents(fetchedEvents);
         });
       } else { 
@@ -48,50 +52,6 @@ export default function ClientProfile() {
     return () => unsubscribe();
   }, [navigate]);
 
-  const currentEvent = selectedEventIndex !== null ? events[selectedEventIndex] : null;
-
-  const handleEventCreated = (newEvent) => {
-    setIsCreatingEvent(false);
-    setModal({ isOpen: true, title: "ÉXITO", message: `SISTEMA CREADO: ${newEvent.eventCode}`, type: "success" });
-  };
-
-  const copyGuestLink = () => {
-    if (!currentEvent) return;
-    navigator.clipboard.writeText(`https://www.classcode.com.ar/guest-upload/${currentEvent.eventCode || currentEvent.id}`);
-    setModal({ isOpen: true, title: "GUEST LINK", message: "LINK DE SUBIDA COPIADO.", type: "success" });
-  };
-
-  const handleShareTV = () => {
-    if (!currentEvent) return;
-    navigator.clipboard.writeText(`https://www.classcode.com.ar/live-gallery/${currentEvent.eventCode || currentEvent.id}`);
-    setModal({ isOpen: true, title: "LIVE GALLERY", message: "LINK DE PROYECCIÓN COPIADO.", type: "success" });
-  };
-
-  const handleOpenTV = () => {
-    if (!currentEvent) return;
-    navigate(`/live-gallery/${currentEvent.eventCode || currentEvent.id}`);
-  };
-
-  const togglePause = async () => {
-    if (!currentEvent) return;
-    const newStatus = currentEvent.status === 'paused' ? 'active' : 'paused';
-    await updateDoc(doc(db, "events", currentEvent.id), { status: newStatus });
-  };
-  
-  const confirmFinish = () => {
-    if (!currentEvent) return;
-    setModal({
-      isOpen: true,
-      title: "APAGAR SISTEMA",
-      message: "¿TERMINAR RECEPCIÓN DE FOTOS? LOS INVITADOS YA NO PODRÁN SUBIR CONTENIDO.",
-      type: 'warning',
-      onConfirm: async () => {
-        await updateDoc(doc(db, "events", currentEvent.id), { status: 'finished' });
-        setModal({ isOpen: false });
-      }
-    });
-  };
-
   const confirmDelete = (id, e) => {
     if (e) e.stopPropagation();
     setModal({
@@ -100,14 +60,18 @@ export default function ClientProfile() {
       message: "¿ESTÁS SEGURO? ESTA ACCIÓN ELIMINARÁ EL PROYECTO Y SU CONTENIDO PERMANENTEMENTE.",
       type: 'warning',
       onConfirm: async () => {
-        await deleteDoc(doc(db, "events", id));
-        if (selectedEventIndex !== null) {
-          setSelectedEventIndex(null);
-          setProfileMode('events');
-        }
+        await deleteDoc(doc(db, "events_organizer", id));
         setModal({ isOpen: false });
       }
     });
+  };
+
+  const handleToggleStatus = async (ev, e) => {
+    if (e) e.stopPropagation();
+    const nextStatus = ev.status === 'PLANIFICACION' ? 'EN_CURSO' : ev.status === 'EN_CURSO' ? 'FINALIZADO' : 'PLANIFICACION';
+    try {
+      await updateDoc(doc(db, "events_organizer", ev.id), { status: nextStatus });
+    } catch (err) { console.error(err); }
   };
 
   if (loading) return <div className="min-h-screen bg-[#070709] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-['Poppins']">Sincronizando...</div>;
@@ -115,29 +79,35 @@ export default function ClientProfile() {
   return (
     <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] flex overflow-x-hidden uppercase antialiased relative text-left">
       
-      {/* Sidebar de Navegación del Perfil */}
+      {/* Sidebar de Navegación con Switch de Modos */}
       <aside className="hidden md:flex w-72 bg-[#070709]/90 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50">
-        <header className="mb-12 text-left leading-none">
+        <header className="mb-10 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[20px] font-['Poppins'] tracking-[0.05em] cursor-pointer text-white">CLASSCODE</div>
-          <p className="text-gray-400 text-[8px] tracking-[0.3em] mt-2">Experience</p>
+          
+          {/* SWITCH TALENT / EXPERIENCE */}
+          <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 mt-6">
+            <button 
+              onClick={() => setProfileMode('experience')}
+              className={`flex-1 py-1.5 rounded-lg text-[8px] font-black tracking-widest transition-all ${profileMode === 'experience' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
+            >
+              EXPERIENCE
+            </button>
+            <button 
+              onClick={() => setProfileMode('talent')}
+              className={`flex-1 py-1.5 rounded-lg text-[8px] font-black tracking-widest transition-all ${profileMode === 'talent' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
+            >
+              TALENT
+            </button>
+          </div>
         </header>
 
         <nav className="flex-1 space-y-6 text-left font-['Poppins']">
           <button 
-            onClick={() => { setProfileMode('events'); setSelectedEventIndex(null); }} 
-            className={`flex items-center gap-4 text-[10px] tracking-widest transition-all ${profileMode === 'events' ? 'text-white' : 'text-gray-400'}`}
+            onClick={() => setProfileMode('experience')} 
+            className={`flex items-center gap-4 text-[10px] tracking-widest transition-all ${profileMode === 'experience' ? 'text-white' : 'text-gray-400'}`}
           >
-            <LayoutGrid size={18}/> ORGANIZADOR
+            <LayoutGrid size={18}/> ORGANIZADOR ({events.length})
           </button>
-
-          {currentEvent && (
-            <button 
-              onClick={() => setProfileMode('detail')} 
-              className={`flex items-center gap-4 text-[10px] tracking-widest transition-all ${profileMode === 'detail' ? 'text-white' : 'text-gray-400'}`}
-            >
-              <Sliders size={18}/> LIVE CONTROL
-            </button>
-          )}
           
           <button onClick={() => navigate('/home')} className="flex items-center gap-4 text-gray-400 hover:text-white text-[10px] tracking-widest transition-all">
             <Search size={18}/> EXPLORAR
@@ -163,7 +133,7 @@ export default function ClientProfile() {
                 <h2 className="text-[14px] md:text-[16px] font-['Poppins'] text-white">{profile.name || 'ORGANIZADOR'}</h2>
                 <button onClick={() => setIsEditingProfile(true)} className="text-gray-500 hover:text-white transition-colors"><Edit3 size={14} /></button>
               </div>
-              <p className="text-[8px] text-gray-400 tracking-[0.3em] mt-1.5">{profile.location || 'BUENOS AIRES'}</p>
+              <p className="text-[8px] text-gray-400 tracking-[0.3em] mt-1.5">MODO: {profileMode.toUpperCase()}</p>
             </div>
           </div>
           
@@ -172,10 +142,10 @@ export default function ClientProfile() {
           </button>
         </header>
 
-        {/* MODO 1: VISTA DE ORGANIZADOR (PRINCIPAL) */}
-        {profileMode === 'events' && (
+        {/* VISTA SEGÚN EL MODO SELECCIONADO */}
+        {profileMode === 'experience' ? (
           <section className="space-y-6">
-            <h3 className="text-[10px] text-gray-400 tracking-[0.4em]">Panel de Organización ({events.length})</h3>
+            <h3 className="text-[10px] text-gray-400 tracking-[0.4em]">Panel Experience ({events.length})</h3>
             
             {events.length === 0 ? (
               <div className="py-20 text-center border border-white/5 rounded-3xl bg-[#0c0c0e] space-y-4">
@@ -187,31 +157,60 @@ export default function ClientProfile() {
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {events.map((ev, idx) => (
+                {events.map((ev) => (
                   <div 
                     key={ev.id} 
-                    onClick={() => { setSelectedEventIndex(idx); setProfileMode('detail'); }} 
+                    onClick={() => navigate(`/organizer/${ev.id}`)} 
                     className="bg-[#0c0c0e] border border-white/10 hover:border-white/30 rounded-3xl overflow-hidden flex flex-col justify-between shadow-xl cursor-pointer transition-all group"
                   >
                     <div className="relative w-full h-36 bg-black/40 overflow-hidden border-b border-white/5 flex items-center justify-center">
-                      <ImageIcon size={24} className="text-white/20" />
+                      {ev.coverImage ? (
+                        <img src={ev.coverImage} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" />
+                      ) : (
+                        <ImageIcon size={24} className="text-white/20" />
+                      )}
                       <div className="absolute top-3 left-3">
                         <span className="text-[7px] tracking-[0.3em] px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-gray-300">
                           {ev.category || 'EVENTO'}
                         </span>
                       </div>
+                      <div className="absolute top-3 right-3">
+                        <button 
+                          onClick={(e) => handleToggleStatus(ev, e)} 
+                          className={`text-[7px] tracking-widest font-black px-2.5 py-1 rounded-full border backdrop-blur-md transition-all ${
+                            ev.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                            ev.status === 'EN_CURSO' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
+                            'bg-black/60 text-gray-300 border-white/10'
+                          }`}
+                        >
+                          {ev.status}
+                        </button>
+                      </div>
                     </div>
 
                     <div className="p-6 space-y-4">
-                      <h4 className="text-sm font-['Poppins'] text-white group-hover:text-gray-200">{ev.eventName || ev.title}</h4>
+                      <h4 className="text-sm font-['Poppins'] text-white group-hover:text-gray-200 flex items-center justify-between">
+                        {ev.title}
+                        <ChevronRight size={16} className="text-white/40 group-hover:translate-x-1 transition-transform" />
+                      </h4>
                       <div className="space-y-1 text-[9px] text-gray-400">
                         {ev.date && <p className="flex items-center gap-2"><Calendar size={12}/> {ev.date}</p>}
                         {ev.location && <p className="flex items-center gap-2"><MapPin size={12}/> {ev.location}</p>}
                       </div>
 
-                      <div className="pt-3 border-t border-white/5 flex items-center justify-between">
-                        <span className="text-[8px] text-emerald-400 tracking-widest">VER DETALLE / LIVE</span>
-                        <button onClick={(e) => confirmDelete(ev.id, e)} className="p-2 text-gray-500 hover:text-red-400 transition-colors"><Trash2 size={14}/></button>
+                      <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setSelectedEventForQr(ev); setShowQrModal(true); }} 
+                          className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.03] hover:bg-white/10 border border-white/10 text-[8px] font-black tracking-widest flex items-center justify-center gap-2 transition-all"
+                        >
+                          <QrCode size={13}/> QR
+                        </button>
+                        <button 
+                          onClick={(e) => confirmDelete(ev.id, e)} 
+                          className="p-2.5 bg-white/[0.03] hover:bg-red-500/25 hover:text-red-400 border border-white/10 rounded-xl transition-all text-gray-500"
+                        >
+                          <Trash2 size={14}/>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -219,57 +218,60 @@ export default function ClientProfile() {
               </div>
             )}
           </section>
-        )}
-
-        {/* MODO 2: DETALLE DEL EVENTO Y PANEL LIVE CONTROL */}
-        {profileMode === 'detail' && currentEvent && (
-          <div className="space-y-6">
-            <button 
-              onClick={() => { setProfileMode('events'); setSelectedEventIndex(null); }}
-              className="flex items-center gap-2 text-[9px] text-gray-400 hover:text-white tracking-widest transition-colors font-['Poppins']"
-            >
-              <ArrowLeft size={14}/> VOLVER A ORGANIZADOR
-            </button>
-
-            <LiveControlPanel 
-              currentEvent={currentEvent}
-              events={events}
-              selectedEventIndex={selectedEventIndex}
-              setSelectedEventIndex={setSelectedEventIndex}
-              onTogglePause={togglePause}
-              onConfirmFinish={confirmFinish}
-              onCopyGuestLink={copyGuestLink}
-              onShareTV={handleShareTV}
-              onOpenTV={handleOpenTV}
-              onOpenCreate={() => setIsCreatingEvent(true)}
-              setPreviewImage={setPreviewImage}
-            />
-          </div>
+        ) : (
+          <section className="space-y-6">
+            <h3 className="text-[10px] text-gray-400 tracking-[0.4em]">Panel Talent</h3>
+            <div className="py-20 text-center border border-white/5 rounded-3xl bg-[#0c0c0e] space-y-4">
+              <User size={32} className="mx-auto text-white/20" />
+              <p className="text-[9px] text-gray-500 tracking-[0.3em]">Vista Talent Activa</p>
+            </div>
+          </section>
         )}
 
       </main>
 
-      {/* Organizador y Creador de Eventos (Modal con QR y logica de alta) */}
+      {/* Modal Creador de Eventos */}
       <AnimatePresence>
         {isCreatingEvent && (
           <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[250] flex items-center justify-center p-4 uppercase">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-              <EventOrganizer 
-                onClose={() => setIsCreatingEvent(false)} 
-                onEventCreated={handleEventCreated} 
-              />
+              <EventOrganizer onClose={() => setIsCreatingEvent(false)} />
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* Visor de Imágenes en Pantalla Completa */}
+      {/* Modal QR */}
       <AnimatePresence>
-        {previewImage && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPreviewImage(null)} className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out">
-            <button className="absolute top-8 right-8 text-white/50 hover:text-white p-2"><X size={28}/></button>
-            <motion.img initial={{ scale: 0.9 }} animate={{ scale: 1 }} src={previewImage} className="max-w-full max-h-[85vh] rounded-2xl border border-white/10 object-contain" onClick={(e) => e.stopPropagation()} />
-          </motion.div>
+        {showQrModal && selectedEventForQr && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+              className="bg-[#0c0c0e] w-full max-w-sm p-8 rounded-[3rem] border border-white/10 relative shadow-2xl text-center space-y-6"
+            >
+              <button onClick={() => setShowQrModal(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
+              
+              <div className="space-y-2">
+                <span className="text-[8px] tracking-[0.3em] font-black text-gray-400">QR INVITADOS</span>
+                <h3 className="text-xl font-['Poppins'] font-normal text-white">{selectedEventForQr.title}</h3>
+              </div>
+
+              <div className="w-48 h-48 mx-auto bg-white p-3 rounded-2xl flex items-center justify-center shadow-xl">
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://www.classcode.com.ar/guest/${selectedEventForQr.id}`} 
+                  alt="QR Invitados" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              <button onClick={() => {
+                navigator.clipboard.writeText(`https://www.classcode.com.ar/guest/${selectedEventForQr.id}`);
+                setModal({ isOpen: true, title: "GUEST LINK", message: "LINK DE SUBIDA COPIADO.", type: "success" });
+                setShowQrModal(false);
+              }} className="w-full py-3.5 rounded-xl bg-white text-black font-black text-[9px] tracking-widest uppercase hover:bg-gray-200 transition-all font-['Poppins']">
+                COPIAR LINK
+              </button>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

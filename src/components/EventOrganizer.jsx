@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { db, auth } from "../firebase";
 import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Plus, Calendar, MapPin, QrCode, Trash2, X, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, MapPin, QrCode, Trash2, X, ChevronRight, Image as ImageIcon, Play, Pause, Square, Copy, ExternalLink } from 'lucide-react';
+import CustomModal from './CustomModal';
 
 const MACRO_CATEGORIES = [
   "CAMPAÑA",
@@ -20,7 +21,13 @@ export default function EventOrganizer() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  
+  // Estado para manejar el evento activo seleccionado para el Panel de Control
+  const [activeEventId, setActiveEventId] = useState(null);
+  const [photos, setPhotos] = useState([]);
+  const [previewImage, setPreviewImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'warning', onConfirm: null });
 
   const [formData, setFormData] = useState({
     title: '',
@@ -57,6 +64,22 @@ export default function EventOrganizer() {
 
     return () => unsubscribe();
   }, [clientId]);
+
+  // Cargar fotos cuando se selecciona un evento para el panel de control
+  useEffect(() => {
+    if (!activeEventId) return;
+    const qPhotos = query(collection(db, "photos"), where("eventId", "==", activeEventId));
+    const unsubscribePhotos = onSnapshot(qPhotos, (snapshot) => {
+      const fetchedPhotos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setPhotos(fetchedPhotos);
+    }, (error) => {
+      console.error("Error al cargar fotos:", error);
+    });
+
+    return () => unsubscribePhotos();
+  }, [activeEventId]);
+
+  const currentEvent = events.find(ev => ev.id === activeEventId);
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
@@ -96,30 +119,53 @@ export default function EventOrganizer() {
 
   const handleDeleteEvent = async (id, e) => {
     e.stopPropagation();
-    if (!confirm("¿Eliminar este evento?")) return;
+    setModal({
+      isOpen: true,
+      title: "ELIMINAR PROYECTO",
+      message: "¿ESTÁS SEGURO? ESTA ACCIÓN ELIMINARÁ EL PROYECTO Y SU CONTENIDO PERMANENTEMENTE.",
+      type: 'warning',
+      onConfirm: async () => {
+        await deleteDoc(doc(db, "events_organizer", id));
+        if (activeEventId === id) setActiveEventId(null);
+        setModal({ isOpen: false });
+      }
+    });
+  };
+
+  const handleToggleStatus = async (ev, e) => {
+    if (e) e.stopPropagation();
+    const nextStatus = ev.status === 'PLANIFICACION' ? 'EN_CURSO' : ev.status === 'EN_CURSO' ? 'FINALIZADO' : 'PLANIFICACION';
     try {
-      await deleteDoc(doc(db, "events_organizer", id));
+      await updateDoc(doc(db, "events_organizer", ev.id), { status: nextStatus });
     } catch (err) { console.error(err); }
   };
 
-  const handleToggleStatus = async (event, e) => {
-    e.stopPropagation();
-    const nextStatus = event.status === 'PLANIFICACION' ? 'EN_CURSO' : event.status === 'EN_CURSO' ? 'FINALIZADO' : 'PLANIFICACION';
-    try {
-      await updateDoc(doc(db, "events_organizer", event.id), { status: nextStatus });
-    } catch (err) { console.error(err); }
+  const copyGuestLink = (id) => {
+    navigator.clipboard.writeText(`https://www.classcode.com.ar/guest/${id}`);
+    setModal({ isOpen: true, title: "GUEST LINK", message: "LINK DE SUBIDA COPIADO.", type: "success" });
+  };
+
+  const handleShareTV = (id) => {
+    navigator.clipboard.writeText(`https://www.classcode.com.ar/live-gallery/${id}`);
+    setModal({ isOpen: true, title: "LIVE GALLERY", message: "LINK DE PROYECCIÓN COPIADO.", type: "success" });
   };
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] antialiased flex flex-col relative uppercase selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] antialiased flex flex-col relative uppercase selection:bg-white selection:text-black text-left">
       
       <nav className="p-6 md:p-10 w-full sticky top-0 z-50 bg-[#070709]/90 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-[1440px] mx-auto flex justify-between items-center w-full">
           <button 
-            onClick={() => navigate('/client-profile')} 
+            onClick={() => {
+              if (activeEventId) {
+                setActiveEventId(null);
+              } else {
+                navigate('/client-profile');
+              }
+            }} 
             className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-bold font-['Poppins'] transition-colors"
           >
-            <ArrowLeft size={14}/> VOLVER
+            <ArrowLeft size={14}/> {activeEventId ? 'VOLVER A LISTADO' : 'VOLVER'}
           </button>
           
           <div className="font-['Poppins']">
@@ -133,85 +179,195 @@ export default function EventOrganizer() {
       </nav>
 
       <main className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 flex-1 w-full space-y-10">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-['Poppins'] font-normal tracking-wide text-white">ORGANIZADOR</h1>
-        </div>
+        
+        {/* SI NO HAY EVENTO SELECCIONADO: MOSTRAR GRILLA DE EVENTOS */}
+        {!activeEventId ? (
+          <>
+            <div className="flex flex-col gap-1">
+              <h1 className="text-xl font-['Poppins'] font-normal tracking-wide text-white">ORGANIZADOR ({events.length})</h1>
+            </div>
 
-        {events.length === 0 ? (
-          <div className="py-24 text-center border border-white/5 rounded-3xl bg-[#0c0c0e] space-y-4">
-            <Calendar size={32} className="mx-auto text-white/20" />
-            <p className="text-[10px] text-gray-500 font-bold tracking-[0.3em]">No hay eventos registrados</p>
-            <button onClick={() => setShowCreateModal(true)} className="px-6 py-3 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest">
-              CREAR EVENTO
-            </button>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((ev) => (
-              <motion.div 
-                key={ev.id} 
-                initial={{ opacity: 0, y: 10 }} 
-                animate={{ opacity: 1, y: 0 }}
-                onClick={() => navigate(`/organizer/${ev.id}`)}
-                className="bg-[#0c0c0e] border border-white/10 hover:border-white/30 rounded-3xl overflow-hidden flex flex-col justify-between shadow-xl cursor-pointer transition-all group"
-              >
-                <div className="relative w-full h-40 bg-black/40 overflow-hidden border-b border-white/5">
-                  {ev.coverImage ? (
-                    <img src={ev.coverImage} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-white/[0.02] to-white/[0.06]">
-                      <ImageIcon size={20} className="text-white/20" />
+            {events.length === 0 ? (
+              <div className="py-24 text-center border border-white/5 rounded-3xl bg-[#0c0c0e] space-y-4">
+                <Calendar size={32} className="mx-auto text-white/20" />
+                <p className="text-[10px] text-gray-500 font-bold tracking-[0.3em]">No hay eventos registrados</p>
+                <button onClick={() => setShowCreateModal(true)} className="px-6 py-3 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest font-['Poppins']">
+                  CREAR EVENTO
+                </button>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {events.map((ev) => (
+                  <motion.div 
+                    key={ev.id} 
+                    initial={{ opacity: 0, y: 10 }} 
+                    animate={{ opacity: 1, y: 0 }}
+                    onClick={() => setActiveEventId(ev.id)}
+                    className="bg-[#0c0c0e] border border-white/10 hover:border-white/30 rounded-3xl overflow-hidden flex flex-col justify-between shadow-xl cursor-pointer transition-all group"
+                  >
+                    <div className="relative w-full h-40 bg-black/40 overflow-hidden border-b border-white/5 flex items-center justify-center">
+                      {ev.coverImage ? (
+                        <img src={ev.coverImage} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" />
+                      ) : (
+                        <ImageIcon size={20} className="text-white/20" />
+                      )}
+                      <div className="absolute top-3 left-3">
+                        <span className="text-[8px] tracking-[0.3em] font-black px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-gray-300">
+                          {ev.category}
+                        </span>
+                      </div>
+                      <div className="absolute top-3 right-3">
+                        <button 
+                          onClick={(e) => handleToggleStatus(ev, e)} 
+                          className={`text-[8px] tracking-widest font-black px-2.5 py-1 rounded-full border backdrop-blur-md transition-all ${
+                            ev.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                            ev.status === 'EN_CURSO' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
+                            'bg-black/60 text-gray-300 border-white/10'
+                          }`}
+                        >
+                          {ev.status}
+                        </button>
+                      </div>
                     </div>
-                  )}
-                  <div className="absolute top-3 left-3">
-                    <span className="text-[8px] tracking-[0.3em] font-black px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-gray-300">
-                      {ev.category}
+
+                    <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                      <div className="space-y-3">
+                        <h3 className="text-lg font-['Poppins'] font-normal tracking-wide text-white group-hover:text-gray-200 flex items-center justify-between">
+                          {ev.title}
+                          <ChevronRight size={16} className="text-white/40 group-hover:translate-x-1 transition-transform" />
+                        </h3>
+                        <div className="space-y-1.5 text-[10px] text-gray-400 font-bold tracking-wider">
+                          {ev.date && <p className="flex items-center gap-2"><Calendar size={13} className="text-white"/> {ev.date}</p>}
+                          {ev.location && <p className="flex items-center gap-2"><MapPin size={13} className="text-white"/> {ev.location}</p>}
+                        </div>
+                      </div>
+
+                      <div className="pt-4 border-t border-white/5 flex items-center justify-between gap-2">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); setShowQrModal(true); }} 
+                          className="flex-1 py-3 px-4 rounded-xl bg-white/[0.03] hover:bg-white/10 border border-white/10 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins']"
+                        >
+                          <QrCode size={14}/> QR
+                        </button>
+                        <button 
+                          onClick={(e) => handleDeleteEvent(ev.id, e)} 
+                          className="p-3 bg-white/[0.03] hover:bg-red-500/20 hover:text-red-400 border border-white/10 rounded-xl transition-all"
+                        >
+                          <Trash2 size={16}/>
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          /* SI HAY UN EVENTO SELECCIONADO: MOSTRAR LIVE CONTROL PANEL INTEGRADO */
+          currentEvent && (
+            <div className="space-y-10">
+              {/* Banner de Estado y Controles */}
+              <div className="bg-[#0c0c0e] border border-white/10 p-6 md:p-8 rounded-[2.5rem] shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[8px] tracking-[0.3em] font-black px-3 py-1 bg-white/5 border border-white/10 rounded-full text-gray-300">
+                      {currentEvent.category || 'EVENTO'}
+                    </span>
+                    <span className={`text-[8px] tracking-widest font-black px-3 py-1 rounded-full border ${
+                      currentEvent.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                      currentEvent.status === 'EN_CURSO' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
+                      'bg-black/60 text-gray-300 border-white/10'
+                    }`}>
+                      {currentEvent.status}
                     </span>
                   </div>
-                  <div className="absolute top-3 right-3">
-                    <button 
-                      onClick={(e) => handleToggleStatus(ev, e)} 
-                      className={`text-[8px] tracking-widest font-black px-2.5 py-1 rounded-full border backdrop-blur-md transition-all ${
-                        ev.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
-                        ev.status === 'EN_CURSO' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
-                        'bg-black/60 text-gray-300 border-white/10'
-                      }`}
-                    >
-                      {ev.status}
-                    </button>
+                  <h1 className="text-xl md:text-2xl font-['Poppins'] font-normal text-white">{currentEvent.title}</h1>
+                  <div className="flex flex-wrap items-center gap-6 text-[10px] text-gray-400 font-bold tracking-wider">
+                    {currentEvent.date && <p className="flex items-center gap-2"><Calendar size={13} className="text-white"/> {currentEvent.date}</p>}
+                    {currentEvent.location && <p className="flex items-center gap-2"><MapPin size={13} className="text-white"/> {currentEvent.location}</p>}
                   </div>
                 </div>
 
-                <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
-                  <div className="space-y-3">
-                    <h3 className="text-lg font-['Poppins'] font-normal tracking-wide text-white group-hover:text-gray-200 flex items-center justify-between">
-                      {ev.title}
-                      <ChevronRight size={16} className="text-white/40 group-hover:translate-x-1 transition-transform" />
-                    </h3>
-                    <div className="space-y-1.5 text-[10px] text-gray-400 font-bold tracking-wider">
-                      {ev.date && <p className="flex items-center gap-2"><Calendar size={13} className="text-white"/> {ev.date}</p>}
-                      {ev.location && <p className="flex items-center gap-2"><MapPin size={13} className="text-white"/> {ev.location}</p>}
-                    </div>
-                  </div>
+                {/* Botonera de Control en Vivo */}
+                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                  <button 
+                    onClick={() => handleToggleStatus(currentEvent)} 
+                    className={`flex-1 md:flex-none px-5 py-3 rounded-xl border text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins'] ${
+                      currentEvent.status === 'EN_CURSO' 
+                        ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20' 
+                        : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {currentEvent.status === 'EN_CURSO' ? <Pause size={14}/> : <Play size={14}/>}
+                    {currentEvent.status === 'EN_CURSO' ? 'PAUSAR' : 'INICIAR'}
+                  </button>
 
-                  <div className="pt-4 border-t border-white/5 flex items-center justify-between gap-2">
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); setShowQrModal(true); }} 
-                      className="flex-1 py-3 px-4 rounded-xl bg-white/[0.03] hover:bg-white/10 border border-white/10 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all"
-                    >
-                      <QrCode size={14}/> QR
-                    </button>
-                    <button 
-                      onClick={(e) => handleDeleteEvent(ev.id, e)} 
-                      className="p-3 bg-white/[0.03] hover:bg-red-500/20 hover:text-red-400 border border-white/10 rounded-xl transition-all"
-                    >
-                      <Trash2 size={16}/>
-                    </button>
-                  </div>
+                  <button 
+                    onClick={() => {
+                      setModal({
+                        isOpen: true,
+                        title: "APAGAR SISTEMA",
+                        message: "¿TERMINAR RECEPCIÓN DE FOTOS? LOS INVITADOS YA NO PODRÁN SUBIR CONTENIDO.",
+                        type: 'warning',
+                        onConfirm: async () => {
+                          await updateDoc(doc(db, "events_organizer", currentEvent.id), { status: 'FINALIZADO' });
+                          setModal({ isOpen: false });
+                        }
+                      });
+                    }} 
+                    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins']"
+                  >
+                    <Square size={14}/> APAGAR
+                  </button>
+
+                  <button 
+                    onClick={() => copyGuestLink(currentEvent.id)} 
+                    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins']"
+                  >
+                    <Copy size={14}/> GUEST LINK
+                  </button>
+
+                  <button 
+                    onClick={() => handleShareTV(currentEvent.id)} 
+                    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-white text-black hover:bg-gray-200 text-[9px] font-black tracking-widest flex items-center justify-center gap-2 transition-all font-['Poppins']"
+                  >
+                    <ExternalLink size={14}/> PROYECTAR
+                  </button>
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              </div>
+
+              {/* Grilla de Fotos en Vivo */}
+              <div className="space-y-6">
+                <h3 className="text-[10px] text-gray-400 tracking-[0.4em] font-bold">CONTENIDO SUBIDO ({photos.length})</h3>
+
+                {photos.length === 0 ? (
+                  <div className="py-24 text-center border border-white/5 rounded-3xl bg-[#0c0c0e] space-y-4">
+                    <ImageIcon size={32} className="mx-auto text-white/20" />
+                    <p className="text-[9px] text-gray-500 tracking-[0.3em] font-bold">No hay fotos recibidas todavía</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {photos.map((photo) => (
+                      <div 
+                        key={photo.id} 
+                        onClick={() => setPreviewImage(photo.url || photo.imageURL)}
+                        className="relative aspect-square bg-[#0c0c0e] border border-white/10 hover:border-white/30 rounded-2xl overflow-hidden cursor-pointer group shadow-lg"
+                      >
+                        <img 
+                          src={photo.url || photo.imageURL} 
+                          alt="Upload" 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <span className="text-[8px] tracking-widest font-black px-3 py-1.5 bg-black/80 border border-white/20 rounded-xl">VER</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )
         )}
       </main>
 
@@ -252,7 +408,7 @@ export default function EventOrganizer() {
                   className="w-full bg-white/[0.03] border border-white/10 rounded-3xl p-4 text-[10px] text-white uppercase h-24 resize-none outline-none focus:border-white tracking-widest" 
                 />
 
-                <button type="submit" disabled={loading} className="w-full py-4 rounded-2xl bg-white text-black font-black text-[10px] tracking-[0.4em] uppercase hover:bg-gray-200 transition-all">
+                <button type="submit" disabled={loading} className="w-full py-4 rounded-2xl bg-white text-black font-black text-[10px] tracking-[0.4em] uppercase hover:bg-gray-200 transition-all font-['Poppins']">
                   {loading ? 'GUARDANDO...' : 'CREAR'}
                 </button>
               </form>
@@ -283,16 +439,25 @@ export default function EventOrganizer() {
                 />
               </div>
 
-              <button onClick={() => {
-                navigator.clipboard.writeText(`https://www.classcode.com.ar/guest/${selectedEvent.id}`);
-                alert("¡Link copiado!");
-              }} className="w-full py-3.5 rounded-xl bg-white text-black font-black text-[9px] tracking-widest uppercase hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
+              <button onClick={() => { copyGuestLink(selectedEvent.id); setShowQrModal(false); }} className="w-full py-3.5 rounded-xl bg-white text-black font-black text-[9px] tracking-widest uppercase hover:bg-gray-200 transition-all font-['Poppins']">
                 COPIAR LINK
               </button>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
+
+      {/* Visor de Imágenes en Pantalla Completa */}
+      <AnimatePresence>
+        {previewImage && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPreviewImage(null)} className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out">
+            <button className="absolute top-8 right-8 text-white/50 hover:text-white p-2"><X size={28}/></button>
+            <motion.img initial={{ scale: 0.9 }} animate={{ scale: 1 }} src={previewImage} className="max-w-full max-h-[85vh] rounded-2xl border border-white/10 object-contain" onClick={(e) => e.stopPropagation()} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <CustomModal isOpen={modal.isOpen} onClose={() => setModal({ ...modal, isOpen: false })} onConfirm={modal.onConfirm} title={modal.title} message={modal.message} type={modal.type} />
     </div>
   );
 }
