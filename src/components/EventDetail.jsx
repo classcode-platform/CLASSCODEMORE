@@ -100,7 +100,6 @@ export default function EventDetail() {
     }
   };
 
-  // Manejo de subida de imagen local desde el ordenador (Base64)
   const handleImageFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -141,7 +140,7 @@ export default function EventDetail() {
   return (
     <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] antialiased flex flex-col items-center uppercase selection:bg-white selection:text-black">
       
-      {/* TOPBAR CENTRALIZADA */}
+      {/* TOPBAR LIMPIA SIN ACADEMY */}
       <nav className="w-full border-b border-white/5 bg-[#070709]/90 backdrop-blur-xl sticky top-0 z-50 px-6 py-6 flex justify-center">
         <div className="max-w-[1200px] w-full flex justify-between items-center font-['Poppins']">
           <button onClick={() => navigate('/organizer')} className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] tracking-[0.3em] font-bold transition-colors">
@@ -149,43 +148,43 @@ export default function EventDetail() {
           </button>
           
           <div className="flex flex-col items-center">
-            <span className="text-xl md:text-2xl font-semibold tracking-[0.05em] text-white">CLASSCODE</span>
-            <span className="text-[8px] font-light tracking-[0.35em] text-gray-400 self-end -mt-1">Academy</span>
+            <span className="text-base font-normal tracking-[0.05em] text-white uppercase">CLASSCODE</span>
           </div>
 
           <span className="text-[8px] tracking-widest px-3 py-1 bg-white/5 border border-white/10 rounded-full text-gray-300">{event.category}</span>
         </div>
       </nav>
 
-      {/* BANNER / PORTADA CENTRALIZADA */}
+      {/* PORTADA CON VISIBILIDAD OPTIMIZADA */}
       <div className="w-full max-w-[1200px] px-6 mt-8">
-        <div className="relative w-full h-64 md:h-80 bg-[#0c0c0e] border border-white/10 rounded-[2.5rem] overflow-hidden group shadow-2xl">
+        <div className="relative w-full min-h-[280px] bg-[#0c0c0e] border border-white/10 rounded-[2.5rem] overflow-hidden group shadow-2xl flex flex-col justify-end">
           {event.coverImage ? (
-            <img src={event.coverImage} alt={event.title} className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" />
+            <img src={event.coverImage} alt={event.title} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-700 pointer-events-none" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-white/[0.02] to-white/[0.06]">
+            <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-gradient-to-r from-white/[0.02] to-white/[0.06]">
               <span className="text-[9px] text-gray-500 tracking-[0.3em] font-bold">SIN IMAGEN DE PORTADA</span>
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-transparent to-black/30 flex items-end p-8 md:p-12">
-            <div className="w-full flex justify-between items-end">
-              <div className="space-y-2">
-                <span className="text-[8px] font-black tracking-[0.3em] text-gray-400">PANEL DE CONTROL</span>
-                <h1 className="text-2xl md:text-4xl font-['Poppins'] font-normal text-white">{event.title}</h1>
-                <div className="flex gap-4 text-[10px] text-gray-300 font-bold pt-1">
-                  {event.date && <span className="flex items-center gap-1.5"><Calendar size={13}/> {event.date}</span>}
-                  {event.location && <span className="flex items-center gap-1.5"><MapPin size={13}/> {event.location}</span>}
-                </div>
+          
+          <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-[#070709]/60 to-transparent pointer-events-none"></div>
+
+          <div className="relative z-10 p-8 md:p-12 w-full flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div className="space-y-3 max-w-2xl">
+              <span className="inline-block text-[9px] font-black tracking-[0.3em] text-gray-300 bg-black/40 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">PANEL DE CONTROL</span>
+              <h1 className="text-2xl md:text-4xl font-['Poppins'] font-normal text-white leading-tight">{event.title}</h1>
+              <div className="flex flex-wrap gap-4 text-[10px] text-gray-300 font-bold pt-1">
+                {event.date && <span className="flex items-center gap-1.5"><Calendar size={13}/> {event.date}</span>}
+                {event.location && <span className="flex items-center gap-1.5"><MapPin size={13}/> {event.location}</span>}
               </div>
-              <button onClick={() => setShowPhotoModal(true)} className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-[9px] font-black tracking-widest flex items-center gap-2 backdrop-blur-md transition-all">
-                <ImageIcon size={14}/> EDITAR PORTADA
-              </button>
             </div>
+            
+            <button onClick={() => setShowPhotoModal(true)} className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-[9px] font-black tracking-widest flex items-center gap-2 backdrop-blur-md transition-all shrink-0">
+              <ImageIcon size={14}/> EDITAR PORTADA
+            </button>
           </div>
         </div>
       </div>
 
-      {/* PESTAÑAS DE NAVEGACIÓN INTERNA CENTRADAS */}
       <div className="w-full max-w-[1200px] px-6 mt-8">
         <div className="flex gap-4 overflow-x-auto scrollbar-hide font-['Poppins'] justify-start md:justify-center">
           <button onClick={() => setActiveTab('guests')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg ${activeTab === 'guests' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
@@ -200,10 +199,8 @@ export default function EventDetail() {
         </div>
       </div>
 
-      {/* CONTENEDOR PRINCIPAL */}
       <main className="w-full max-w-[1200px] px-6 py-8 flex-1 space-y-8">
         
-        {/* VISTA 1: INVITADOS */}
         {activeTab === 'guests' && (
           <div className="space-y-6">
             <form onSubmit={handleAddGuest} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-[2rem] grid md:grid-cols-4 gap-4 font-bold items-center shadow-xl">
@@ -225,7 +222,7 @@ export default function EventDetail() {
                 <div key={g.id} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-3xl flex justify-between items-center shadow-xl">
                   <div className="space-y-1">
                     <h4 className="font-['Poppins'] font-normal text-white text-sm">{g.name}</h4>
-                    <p className="text-[9px] text-gray-400 font-bold tracking-widest">📍 {g.table} — <span className={g.status === 'CONFIRMADO' ? 'text-green-400' : 'text-amber-400'}>{g.status}</span></p>
+                    <p className="text-[9px] text-gray-400 font-bold tracking-widest">{g.table} — <span className={g.status === 'CONFIRMADO' ? 'text-green-400' : 'text-amber-400'}>{g.status}</span></p>
                   </div>
                   <button onClick={() => handleDelete('guests', g.id)} className="p-2.5 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all">
                     <Trash2 size={14}/>
@@ -236,7 +233,6 @@ export default function EventDetail() {
           </div>
         )}
 
-        {/* VISTA 2: MESAS */}
         {activeTab === 'tables' && (
           <div className="space-y-6">
             <form onSubmit={handleAddTable} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-[2rem] grid md:grid-cols-3 gap-4 font-bold items-center shadow-xl">
@@ -261,9 +257,9 @@ export default function EventDetail() {
                     <p className="text-[9px] text-gray-400 font-bold tracking-widest">Asignados: {assignedGuests.length} / {t.capacity}</p>
                     <div className="space-y-2 pt-2 border-t border-white/5 max-h-40 overflow-y-auto">
                       {assignedGuests.map(ag => (
-                        <div key={ag.id} className="text-[10px] text-gray-300 bg-white/[0.03] px-3 py-2 rounded-xl border border-white/5 flex justify-between">
+                        <div key={ag.id} className="text-[10px] text-gray-300 bg-white/[0.03] px-3 py-2 rounded-xl border border-white/5 flex justify-between items-center">
                           <span>{ag.name}</span>
-                          <span className={ag.status === 'CONFIRMADO' ? 'text-green-400' : 'text-amber-400'}>●</span>
+                          <span className={`text-[8px] font-black tracking-widest px-2 py-0.5 rounded-md ${ag.status === 'CONFIRMADO' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>{ag.status}</span>
                         </div>
                       ))}
                     </div>
@@ -274,7 +270,6 @@ export default function EventDetail() {
           </div>
         )}
 
-        {/* VISTA 3: PRESUPUESTO */}
         {activeTab === 'budget' && (
           <div className="space-y-6">
             <form onSubmit={handleAddBudget} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-[2rem] grid md:grid-cols-4 gap-4 font-bold items-center shadow-xl">
@@ -340,7 +335,6 @@ export default function EventDetail() {
 
       </main>
 
-      {/* MODAL PARA CAMBIAR FOTO DE PORTADA (DESDE ORDENADOR O URL) */}
       <AnimatePresence>
         {showPhotoModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4">

@@ -56,7 +56,7 @@ export default function EventOrganizer() {
     }
 
     if (!auth.currentUser) {
-      alert("Debes iniciar sesión para crear un proyecto.");
+      alert("Debes iniciar sesión para crear un evento.");
       return;
     }
 
@@ -85,7 +85,7 @@ export default function EventOrganizer() {
 
   const handleDeleteEvent = async (id, e) => {
     e.stopPropagation();
-    if (!confirm("¿Eliminar este proyecto?")) return;
+    if (!confirm("¿Eliminar este evento?")) return;
     try {
       await deleteDoc(doc(db, "events_organizer", id));
     } catch (err) { console.error(err); }
@@ -122,16 +122,15 @@ export default function EventOrganizer() {
       {/* CONTENIDO PRINCIPAL */}
       <main className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 flex-1 w-full space-y-10">
         <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-['Poppins'] font-normal tracking-wide text-white">PROYECTOS</h1>
-          <span className="text-[9px] font-light tracking-[0.3em] text-gray-500">organizador</span>
+          <h1 className="text-xl font-['Poppins'] font-normal tracking-wide text-white">ORGANIZADOR</h1>
         </div>
 
         {events.length === 0 ? (
           <div className="py-24 text-center border border-white/5 rounded-3xl bg-[#0c0c0e] space-y-4">
             <Calendar size={32} className="mx-auto text-white/20" />
-            <p className="text-[10px] text-gray-500 font-bold tracking-[0.3em]">No hay proyectos registrados</p>
+            <p className="text-[10px] text-gray-500 font-bold tracking-[0.3em]">No hay eventos registrados</p>
             <button onClick={() => setShowCreateModal(true)} className="px-6 py-3 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest">
-              CREAR PROYECTO
+              CREAR EVENTO
             </button>
           </div>
         ) : (
@@ -213,7 +212,7 @@ export default function EventOrganizer() {
               className="bg-[#0c0c0e] w-full max-w-lg p-10 rounded-[3rem] border border-white/10 relative shadow-2xl space-y-6"
             >
               <button onClick={() => setShowCreateModal(false)} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors"><X size={22} /></button>
-              <h3 className="text-[11px] uppercase tracking-[0.4em] font-black text-center font-['Poppins']">Nuevo Proyecto</h3>
+              <h3 className="text-[11px] uppercase tracking-[0.4em] font-black text-center font-['Poppins']">Nuevo Evento</h3>
               
               <form onSubmit={handleCreateEvent} className="space-y-4 font-bold">
                 <div className="space-y-2">
