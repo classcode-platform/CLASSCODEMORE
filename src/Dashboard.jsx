@@ -279,7 +279,8 @@ export default function Dashboard() {
 
   const handleViewPublicProfile = () => {
     const userId = auth.currentUser?.uid;
-    navigate(`/profile/${userId}`);
+    if (!userId) return;
+    navigate(`/profile/${userId}?index=${activeProfileIndex}`);
   };
 
   if (loading) return <div className="min-h-screen w-full bg-[#0a0a0a] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-['Poppins'] overflow-x-hidden box-border">CARGANDO DASHBOARD...</div>;
