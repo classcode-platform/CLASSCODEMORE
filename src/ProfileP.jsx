@@ -62,7 +62,23 @@ export default function ProfileP() {
     const docRef = doc(db, "professionals", id);
     const unsubscribeUser = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
-        setUser(docSnap.data());
+        const data = docSnap.data();
+        let profileData = data;
+        
+        // Soporte para perfiles múltiples guardados en array manteniendo compatibilidad con documentos planos
+        if (data.profiles && data.profiles.length > 0) {
+          const params = new URLSearchParams(window.location.search);
+          const profileIndex = parseInt(params.get('p')) || 0;
+          profileData = data.profiles[profileIndex] || data.profiles[0];
+          
+          profileData = {
+            ...data,
+            ...profileData,
+            photos: profileData.photos && profileData.photos.length > 0 ? profileData.photos : [profileData.photo1, profileData.photo2].filter(Boolean)
+          };
+        }
+        
+        setUser(profileData);
       }
     });
 

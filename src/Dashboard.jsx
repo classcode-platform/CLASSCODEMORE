@@ -301,7 +301,6 @@ export default function Dashboard() {
       <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-black/60 backdrop-blur-xl border-b border-white/5 z-[100] px-8 py-6 flex justify-between items-center box-border">
         <div onClick={() => navigate('/home')} className="flex flex-col cursor-pointer leading-none">
           <span className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white">CLASSCODE</span>
-          <span className="text-[9px] font-light tracking-[0.05em] uppercase text-white text-right mt-0.5" style={{ width: '55%', alignSelf: 'flex-end' }}>Academy</span>
         </div>
         <button onClick={() => setIsMobileMenuOpen(true)} className="text-white"><Menu size={28} /></button>
       </header>
@@ -336,7 +335,6 @@ export default function Dashboard() {
         <header className="mb-12 text-left leading-none">
           <div onClick={() => navigate('/home')} className="flex flex-col cursor-pointer leading-none">
             <span className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white">CLASSCODE</span>
-            <span className="text-[10px] font-light tracking-[0.05em] uppercase text-white text-right mt-1" style={{ width: '55%', alignSelf: 'flex-end' }}>Academy</span>
           </div>
           <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-3 leading-none uppercase">Talent</p>
         </header>
@@ -555,7 +553,6 @@ export default function Dashboard() {
           <div className="max-w-[1400px] mx-auto box-border flex flex-col items-center">
             <div className="flex flex-col items-center leading-none mb-3">
               <span className="text-white text-2xl md:text-3xl font-normal tracking-[0.05em] uppercase opacity-30">CLASSCODE</span>
-              <span className="text-[11px] font-light tracking-[0.05em] uppercase text-white text-right mt-1 opacity-30" style={{ width: '55%', alignSelf: 'flex-end' }}>Academy</span>
             </div>
             <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-gray-600 opacity-30">© 2026 — TODOS LOS DERECHOS RESERVADOS</p>
           </div>
