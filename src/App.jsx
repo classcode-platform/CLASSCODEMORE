@@ -10,7 +10,7 @@ import Results from './Results';
 import Dashboard from './Dashboard';   
 import ProfileP from './ProfileP';     
 import ClientProfile from './ClientProfile'; 
-import Organizer from './Organizer'; // <--- ¡IMPORTANTE: Agregado aquí!
+import EventOrganizer from './EventOrganizer'; // <--- Importado con su nombre correcto
 import Academy from './Academy';       
 import Terms from './Terms';           
 import Privacy from './Privacy'; 
@@ -47,8 +47,8 @@ function AppContent() {
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/client-profile" element={<ProtectedRoute><ClientProfile /></ProtectedRoute>} /> 
         
-        {/* --- RUTA DE ORGANIZADOR (AQUÍ ESTABA EL FALTANTE) --- */}
-        <Route path="/organizer" element={<ProtectedRoute><Organizer /></ProtectedRoute>} /> 
+        {/* --- RUTA DE ORGANIZADOR --- */}
+        <Route path="/organizer" element={<ProtectedRoute><EventOrganizer /></ProtectedRoute>} /> 
 
         <Route path="/academy" element={<ProtectedRoute><Academy /></ProtectedRoute>} />      
         <Route path="/academy-test/:category" element={<ProtectedRoute><AcademyTest /></ProtectedRoute>} /> 

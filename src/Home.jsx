@@ -145,7 +145,7 @@ export default function Home() {
         {/* CONTENEDOR MAESTRO CON AIRE HORIZONTAL Y VERTICAL AMPLIADO */}
         <div className="max-w-4xl mx-auto px-6 md:px-10 flex flex-col items-center w-full gap-8 md:gap-10">
           
-          {/* HEADER PRINCIPAL: CLASSCODE GIGANTE EN MÓVIL, MODERADO EN WEB */}
+          {/* HEADER PRINCIPAL */}
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
             <h1 className="text-5xl md:text-5xl text-white mb-2.5 uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">
               CLASSCODE
@@ -243,7 +243,7 @@ export default function Home() {
                       TODAS LAS UBICACIONES
                       {!location && <Check size={14} className="text-purple-400" />}
                     </div>
-                    {locationsList.locList || locationsList.map((prov) => (
+                    {locationsList.map((prov) => (
                       <div 
                         key={prov}
                         onClick={() => { setLocation(prov); setIsLocOpen(false); }}
@@ -261,7 +261,7 @@ export default function Home() {
             <button type="button" onClick={handleSearch} className="w-full md:w-auto px-8 py-3 rounded-xl bg-white text-black font-black uppercase tracking-[0.2em] text-[9px] hover:bg-gray-200 transition-all shadow-xl">BUSCAR</button>
           </motion.div>
 
-          {/* CONTENEDOR CENTRAL: BANNER ULTRA ESTRECHO/FLAQUITO RESPETANDO LA PROPORCIÓN REAL 1200x280 (aprox aspect-[4.28/1]) + BOTONES */}
+          {/* CONTENEDOR CENTRAL: BANNER Y BOTONES LATERALES */}
           <div className="w-full flex flex-col md:flex-row items-center justify-center gap-3">
             
             <div className="flex flex-row md:flex-col items-center justify-center gap-3 order-2 md:order-1">
@@ -281,8 +281,9 @@ export default function Home() {
                 <PlayCircle size={18} className="group-hover:scale-110 transition-transform" />
               </button>
 
+              {/* Botón organizador linkeado a /organizer */}
               <button 
-                onClick={handleAccount}
+                onClick={() => navigate('/organizer')}
                 title="Organizador"
                 className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-indigo-500/50 flex items-center justify-center text-indigo-400 transition-all shadow-lg group"
               >
@@ -303,7 +304,7 @@ export default function Home() {
 
           </div>
 
-          {/* GRILLA DE CATEGORÍAS: OCULTA EN MÓVIL (hidden md:grid), VISIBLE EN TABLET/WEB */}
+          {/* GRILLA DE CATEGORÍAS */}
           <div className="w-full hidden md:grid grid-cols-2 md:grid-cols-4 gap-3">
             {categories.map((cat) => (
               <motion.div key={cat.name} onClick={() => handleCategoryClick(cat.name)} whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.08)' }} className="bg-white/5 backdrop-blur-md p-3 rounded-2xl flex items-center gap-3 border border-white/5 hover:border-white/20 transition-all cursor-pointer group shadow-lg">
