@@ -7,7 +7,7 @@ import { ArrowLeft, Users, LayoutGrid, DollarSign, Plus, Trash2, Edit3, Image as
 
 export default function EventDetail() {
   const { eventId } = useParams();
-  const navigate = useNavigate();
+  const useNavigateRef = useNavigate();
   const [event, setEvent] = useState(null);
   const [activeTab, setActiveTab] = useState('guests');
 
@@ -143,7 +143,7 @@ export default function EventDetail() {
       {/* TOPBAR LIMPIA */}
       <nav className="w-full border-b border-white/5 bg-[#070709]/90 backdrop-blur-xl sticky top-0 z-50 px-6 py-6 flex justify-center">
         <div className="max-w-[1200px] w-full flex justify-between items-center font-['Poppins']">
-          <button onClick={() => navigate('/organizer')} className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] tracking-[0.3em] font-bold transition-colors">
+          <button onClick={() => useNavigateRef('/client-profile')} className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] tracking-[0.3em] font-bold transition-colors cursor-pointer">
             <ArrowLeft size={14}/> VOLVER
           </button>
           
@@ -177,7 +177,7 @@ export default function EventDetail() {
               </div>
             </div>
             
-            <button onClick={() => setShowPhotoModal(true)} className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-[9px] font-black tracking-widest flex items-center gap-2 backdrop-blur-md transition-all shrink-0">
+            <button onClick={() => setShowPhotoModal(true)} className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-[9px] font-black tracking-widest flex items-center gap-2 backdrop-blur-md transition-all shrink-0 cursor-pointer">
               <ImageIcon size={14}/> EDITAR PORTADA
             </button>
           </div>
@@ -187,13 +187,13 @@ export default function EventDetail() {
       {/* PESTAÑAS DE NAVEGACIÓN */}
       <div className="w-full max-w-[1200px] px-6 mt-8">
         <div className="flex gap-4 overflow-x-auto scrollbar-hide font-['Poppins'] justify-start md:justify-center">
-          <button onClick={() => setActiveTab('guests')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg ${activeTab === 'guests' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
+          <button onClick={() => setActiveTab('guests')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg cursor-pointer ${activeTab === 'guests' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
             <Users size={14}/> INVITADOS ({guests.length} / {confirmedGuestsCount} CONFIRM.)
           </button>
-          <button onClick={() => setActiveTab('tables')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg ${activeTab === 'tables' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
+          <button onClick={() => setActiveTab('tables')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg cursor-pointer ${activeTab === 'tables' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
             <LayoutGrid size={14}/> MESAS ({tables.length})
           </button>
-          <button onClick={() => setActiveTab('budget')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg ${activeTab === 'budget' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
+          <button onClick={() => setActiveTab('budget')} className={`px-6 py-4 rounded-2xl text-[9px] font-black tracking-widest transition-all flex items-center gap-2 shadow-lg cursor-pointer ${activeTab === 'budget' ? 'bg-white text-black' : 'bg-[#0c0c0e] text-gray-400 hover:text-white border border-white/10'}`}>
             <DollarSign size={14}/> PRESUPUESTO (REAL: ${totalActual} / EST: ${totalEstimated})
           </button>
         </div>
@@ -205,14 +205,14 @@ export default function EventDetail() {
           <div className="space-y-6">
             <form onSubmit={handleAddGuest} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-[2rem] grid md:grid-cols-4 gap-4 font-bold items-center shadow-xl">
               <input placeholder="NOMBRE Y APELLIDO" value={newGuest.name} onChange={e => setNewGuest({...newGuest, name: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
-              <select value={newGuest.table} onChange={e => setNewGuest({...newGuest, table: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest">
+              <select value={newGuest.table} onChange={e => setNewGuest({...newGuest, table: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest cursor-pointer">
                 {tables.length === 0 ? <option>Sin mesas creadas</option> : tables.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
               </select>
-              <select value={newGuest.status} onChange={e => setNewGuest({...newGuest, status: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest">
+              <select value={newGuest.status} onChange={e => setNewGuest({...newGuest, status: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest cursor-pointer">
                 <option value="PENDIENTE">PENDIENTE</option>
                 <option value="CONFIRMADO">CONFIRMADO</option>
               </select>
-              <button type="submit" className="py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
+              <button type="submit" className="py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest hover:bg-gray-200 transition-all flex items-center justify-center gap-2 cursor-pointer">
                 <Plus size={14}/> AGREGAR INVITADO
               </button>
             </form>
@@ -224,7 +224,7 @@ export default function EventDetail() {
                     <h4 className="font-['Poppins'] font-normal text-white text-sm">{g.name}</h4>
                     <p className="text-[9px] text-gray-400 font-bold tracking-widest">{g.table} — <span className={g.status === 'CONFIRMADO' ? 'text-green-400' : 'text-amber-400'}>{g.status}</span></p>
                   </div>
-                  <button onClick={() => handleDelete('guests', g.id)} className="p-2.5 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all">
+                  <button onClick={() => handleDelete('guests', g.id)} className="p-2.5 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all cursor-pointer">
                     <Trash2 size={14}/>
                   </button>
                 </div>
@@ -238,7 +238,7 @@ export default function EventDetail() {
             <form onSubmit={handleAddTable} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-[2rem] grid md:grid-cols-3 gap-4 font-bold items-center shadow-xl">
               <input placeholder="NOMBRE DE MESA (EJ: FAMILIA)" value={newTable.name} onChange={e => setNewTable({...newTable, name: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
               <input type="number" placeholder="CAPACIDAD (EJ: 10)" value={newTable.capacity} onChange={e => setNewTable({...newTable, capacity: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
-              <button type="submit" className="py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
+              <button type="submit" className="py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest hover:bg-gray-200 transition-all flex items-center justify-center gap-2 cursor-pointer">
                 <Plus size={14}/> CREAR MESA
               </button>
             </form>
@@ -246,19 +246,42 @@ export default function EventDetail() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {tables.map(t => {
                 const assignedGuests = guests.filter(g => g.table === t.name);
+                const capacity = Number(t.capacity) || 10;
+                const seats = Array.from({ length: capacity }, (_, index) => assignedGuests[index] || null);
+
                 return (
                   <div key={t.id} className="bg-[#0c0c0e] border border-white/10 p-6 rounded-3xl space-y-4 shadow-xl">
                     <div className="flex justify-between items-center">
                       <h4 className="font-['Poppins'] font-normal text-white text-base">{t.name}</h4>
-                      <button onClick={() => handleDelete('tables', t.id)} className="p-2 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all">
+                      <button onClick={() => handleDelete('tables', t.id)} className="p-2 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all cursor-pointer">
                         <Trash2 size={14}/>
                       </button>
                     </div>
-                    <p className="text-[9px] text-gray-400 font-bold tracking-widest">Asignados: {assignedGuests.length} / {t.capacity}</p>
+                    <p className="text-[9px] text-gray-400 font-bold tracking-widest">Asignados: {assignedGuests.length} / {capacity}</p>
+                    
+                    {/* ESQUEMA VISUAL DE SILLITAS */}
+                    <div className="flex flex-wrap gap-2 justify-center py-2 bg-black/40 rounded-2xl border border-white/5 p-4">
+                      {seats.map((guest, idx) => (
+                        <div 
+                          key={idx} 
+                          title={guest ? `${guest.name} (${guest.status})` : `Asiento ${idx + 1} Libre`}
+                          className={`w-7 h-7 rounded-full flex items-center justify-center text-[8px] font-black transition-all border ${
+                            guest 
+                              ? guest.status === 'CONFIRMADO' 
+                                ? 'bg-white text-black border-white shadow-md' 
+                                : 'bg-amber-500/20 text-amber-400 border-amber-500/40'
+                              : 'bg-white/[0.02] text-gray-600 border-white/5 border-dashed'
+                          }`}
+                        >
+                          {idx + 1}
+                        </div>
+                      ))}
+                    </div>
+
                     <div className="space-y-2 pt-2 border-t border-white/5 max-h-40 overflow-y-auto">
                       {assignedGuests.map(ag => (
                         <div key={ag.id} className="text-[10px] text-gray-300 bg-white/[0.03] px-3 py-2 rounded-xl border border-white/5 flex justify-between items-center">
-                          <span>{ag.name}</span>
+                          <span className="truncate">{ag.name}</span>
                           <span className={`text-[8px] font-black tracking-widest px-2 py-0.5 rounded-md ${ag.status === 'CONFIRMADO' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>{ag.status}</span>
                         </div>
                       ))}
@@ -276,7 +299,7 @@ export default function EventDetail() {
               <input placeholder="CONCEPTO (EJ: CATERING)" value={newBudget.concept} onChange={e => setNewBudget({...newBudget, concept: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" required />
               <input type="number" placeholder="ESTIMADO ($)" value={newBudget.estimated} onChange={e => setNewBudget({...newBudget, estimated: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" />
               <input type="number" placeholder="REAL ($)" value={newBudget.actual} onChange={e => setNewBudget({...newBudget, actual: e.target.value})} className="bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-white outline-none focus:border-white tracking-widest" />
-              <button type="submit" className="py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
+              <button type="submit" className="py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-widest hover:bg-gray-200 transition-all flex items-center justify-center gap-2 cursor-pointer">
                 <Plus size={14}/> AGREGAR GASTO
               </button>
             </form>
@@ -319,13 +342,13 @@ export default function EventDetail() {
                           <td className="py-4 text-right flex items-center justify-end gap-2">
                             {isEditing ? (
                               <>
-                                <button onClick={() => handleUpdateBudget(b.id)} className="p-2 bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl"><Check size={14}/></button>
-                                <button onClick={() => setEditingBudgetId(null)} className="p-2 bg-white/5 text-gray-400 border border-white/10 rounded-xl"><X size={14}/></button>
+                                <button onClick={() => handleUpdateBudget(b.id)} className="p-2 bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl cursor-pointer"><Check size={14}/></button>
+                                <button onClick={() => setEditingBudgetId(null)} className="p-2 bg-white/5 text-gray-400 border border-white/10 rounded-xl cursor-pointer"><X size={14}/></button>
                               </>
                             ) : (
                               <>
-                                <button onClick={() => { setEditingBudgetId(b.id); setEditBudgetValues({ concept: b.concept, estimated: b.estimated, actual: b.actual }); }} className="p-2 bg-white/[0.03] hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 rounded-xl transition-all"><Edit3 size={14}/></button>
-                                <button onClick={() => handleDelete('budget', b.id)} className="p-2 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all"><Trash2 size={14}/></button>
+                                <button onClick={() => { setEditingBudgetId(b.id); setEditBudgetValues({ concept: b.concept, estimated: b.estimated, actual: b.actual }); }} className="p-2 bg-white/[0.03] hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 rounded-xl transition-all cursor-pointer"><Edit3 size={14}/></button>
+                                <button onClick={() => handleDelete('budget', b.id)} className="p-2 bg-white/[0.03] hover:bg-red-500/20 text-gray-400 hover:text-red-400 border border-white/10 rounded-xl transition-all cursor-pointer"><Trash2 size={14}/></button>
                               </>
                             )}
                           </td>
@@ -336,7 +359,6 @@ export default function EventDetail() {
                 </tbody>
               </table>
 
-              {/* FILA DE TOTALES GENERALES */}
               {budgetItems.length > 0 && (
                 <div className="pt-4 border-t border-white/10 flex justify-between items-center text-[10px] font-black tracking-widest px-2">
                   <span className="text-gray-400">TOTALES GENERALES:</span>
@@ -358,7 +380,7 @@ export default function EventDetail() {
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               className="bg-[#0c0c0e] w-full max-w-md p-8 rounded-[3rem] border border-white/10 relative shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
             >
-              <button onClick={() => setShowPhotoModal(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
+              <button onClick={() => setShowPhotoModal(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors cursor-pointer"><X size={20} /></button>
               
               <div className="space-y-2 text-center">
                 <span className="text-[8px] tracking-[0.3em] font-black text-gray-400">CUSTOMIZACIÓN</span>
@@ -389,7 +411,7 @@ export default function EventDetail() {
                   </div>
                 )}
 
-                <button type="submit" className="w-full py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-[0.3em] uppercase hover:bg-gray-200 transition-all shadow-xl">
+                <button type="submit" className="w-full py-4 bg-white text-black rounded-2xl text-[9px] font-black tracking-[0.3em] uppercase hover:bg-gray-200 transition-all shadow-xl cursor-pointer">
                   GUARDAR PORTADA
                 </button>
               </form>

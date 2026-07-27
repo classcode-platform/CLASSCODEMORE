@@ -318,7 +318,7 @@ export default function Dashboard() {
               <nav className="flex-1 space-y-12">
                 <button onClick={() => { navigate('/dashboard'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-purple-500 uppercase cursor-pointer"><LayoutDashboard size={22}/> DASHBOARD</button>
                 <button onClick={() => { navigate('/academy'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase cursor-pointer"><GraduationCap size={22}/> ACADEMY</button>
-                <button onClick={() => { handleAddNewProfile(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase cursor-pointer"><Plus size={22}/> NUEVO PERFIL</button>
+                <button onClick={() => { handleAddNewProfile(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase cursor-pointer"><Plus size={22}/> NUEVO RUBRO</button>
               </nav>
               <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-700 text-[10px] font-black tracking-widest uppercase mt-8 cursor-pointer"><LogOut size={20}/> SALIR</button>
             </motion.div>
@@ -349,7 +349,7 @@ export default function Dashboard() {
         <nav className="flex-1 space-y-8 text-left">
           <button onClick={() => navigate('/dashboard')} className="flex items-center gap-4 text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><LayoutDashboard size={18} className="text-purple-500"/> DASHBOARD</button>
           <button onClick={() => navigate('/academy')} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><GraduationCap size={18}/> ACADEMY</button>
-          <button onClick={handleAddNewProfile} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><Plus size={18}/> NUEVO PERFIL</button>
+          <button onClick={handleAddNewProfile} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><Plus size={18}/> NUEVO RUBRO</button>
         </nav>
         <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-700 hover:text-red-500 text-[10px] font-black tracking-widest transition-all mt-auto pt-8 border-t border-white/5 leading-none cursor-pointer"><LogOut size={18}/> CERRAR SESIÓN</button>
       </aside>
