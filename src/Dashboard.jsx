@@ -318,7 +318,7 @@ export default function Dashboard() {
               <nav className="flex-1 space-y-12">
                 <button onClick={() => { navigate('/dashboard'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-purple-500 uppercase cursor-pointer"><LayoutDashboard size={22}/> DASHBOARD</button>
                 <button onClick={() => { navigate('/academy'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase cursor-pointer"><GraduationCap size={22}/> ACADEMY</button>
-                <button onClick={() => { handleViewPublicProfile(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase cursor-pointer"><Eye size={22}/> PERFIL PÚBLICO</button>
+                <button onClick={() => { handleAddNewProfile(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase cursor-pointer"><Plus size={22}/> NUEVO PERFIL</button>
               </nav>
               <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-700 text-[10px] font-black tracking-widest uppercase mt-8 cursor-pointer"><LogOut size={20}/> SALIR</button>
             </motion.div>
@@ -349,7 +349,7 @@ export default function Dashboard() {
         <nav className="flex-1 space-y-8 text-left">
           <button onClick={() => navigate('/dashboard')} className="flex items-center gap-4 text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><LayoutDashboard size={18} className="text-purple-500"/> DASHBOARD</button>
           <button onClick={() => navigate('/academy')} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><GraduationCap size={18}/> ACADEMY</button>
-          <button onClick={handleViewPublicProfile} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><Eye size={18}/> PERFIL PÚBLICO</button>
+          <button onClick={handleAddNewProfile} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><Plus size={18}/> NUEVO PERFIL</button>
         </nav>
         <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-700 hover:text-red-500 text-[10px] font-black tracking-widest transition-all mt-auto pt-8 border-t border-white/5 leading-none cursor-pointer"><LogOut size={18}/> CERRAR SESIÓN</button>
       </aside>
@@ -433,8 +433,8 @@ export default function Dashboard() {
                   </div>
 
                   <div className="flex items-center gap-3 w-full md:w-auto justify-center pb-2 flex-shrink-0">
-                    <button onClick={handleAddNewProfile} className="px-4 py-4 rounded-2xl bg-white/[0.03] hover:bg-white/15 border border-white/10 transition-all text-white flex items-center gap-2 text-[9px] font-black tracking-widest cursor-pointer" title="Crear otro perfil profesional">
-                      <Plus size={16} /> <span className="hidden md:inline">NUEVO PERFIL</span>
+                    <button onClick={handleViewPublicProfile} className="px-4 py-4 rounded-2xl bg-white/[0.03] hover:bg-white/15 border border-white/10 transition-all text-white flex items-center gap-2 text-[9px] font-black tracking-widest cursor-pointer shadow-xl" title="Ver perfil público">
+                      <Eye size={14} /> <span className="hidden md:inline">VER PÚBLICO</span>
                     </button>
                     <button onClick={() => setIsEditingProfile(true)} className="px-6 py-4 rounded-2xl bg-purple-600 text-white font-black text-[10px] tracking-[0.3em] hover:bg-purple-500 transition-all shadow-xl flex items-center justify-center gap-2 cursor-pointer">
                       <Edit3 size={14}/> EDITAR PERFIL
