@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db, auth } from './firebase';
+import { db, auth } from "../firebase";
 import { doc, getDoc, collection, onSnapshot, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Users, LayoutGrid, DollarSign, Plus, Trash2, QrCode, X, Check, Clock } from 'lucide-react';
