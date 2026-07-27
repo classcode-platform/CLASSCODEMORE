@@ -33,23 +33,15 @@ export default function EventOrganizer() {
   useEffect(() => {
     if (!auth.currentUser) return;
     
-    let q;
-    if (clientId) {
-      q = query(
-        collection(db, "events_organizer"),
-        where("userId", "==", auth.currentUser.uid),
-        where("clientId", "==", clientId)
-      );
-    } else {
-      q = query(
-        collection(db, "events_organizer"),
-        where("userId", "==", auth.currentUser.uid)
-      );
-    }
+    // Unificamos la consulta a la colección "events" que usa ClientProfile
+    let q = query(
+      collection(db, "events"),
+      where("clientId", "==", auth.currentUser.uid)
+    );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      docs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+      docs.sort((a, b) => (b.createdAt?.seconds || 0) - (String(a.createdAt || '').localeCompare(String(b.createdAt || ''))));
       setEvents(docs);
     }, (error) => {
       console.error("Error cargando eventos:", error);
@@ -60,8 +52,8 @@ export default function EventOrganizer() {
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.date) {
-      alert("Completá al menos el título y la fecha.");
+    if (!formData.title) {
+      alert("Completá al menos el título del evento.");
       return;
     }
 
@@ -72,16 +64,21 @@ export default function EventOrganizer() {
 
     setLoading(true);
     try {
-      await addDoc(collection(db, "events_organizer"), {
-        userId: auth.currentUser.uid,
-        clientId: clientId || '',
+      const rawCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const eventCode = `LIVE-${rawCode}`;
+
+      await addDoc(collection(db, "events"), {
+        clientId: auth.currentUser.uid,
+        eventName: formData.title.toUpperCase(),
         title: formData.title.toUpperCase(),
         category: formData.category,
-        date: formData.date,
+        date: formData.date || '',
         location: formData.location ? formData.location.toUpperCase() : '',
         notes: formData.notes ? formData.notes.toUpperCase() : '',
         coverImage: '',
-        status: 'PLANIFICACION',
+        status: 'active',
+        eventCode: eventCode,
+        liveGallery: [],
         createdAt: serverTimestamp()
       });
       
@@ -89,7 +86,7 @@ export default function EventOrganizer() {
       setShowCreateModal(false);
     } catch (error) {
       console.error("Error al crear:", error);
-      alert("Error al guardar en Firebase. Verificá las reglas de seguridad.");
+      alert("Error al guardar en Firebase.");
     }
     setLoading(false);
   };
@@ -98,29 +95,29 @@ export default function EventOrganizer() {
     e.stopPropagation();
     if (!confirm("¿Eliminar este evento?")) return;
     try {
-      await deleteDoc(doc(db, "events_organizer", id));
+      await deleteDoc(doc(db, "events", id));
     } catch (err) { console.error(err); }
   };
 
   const handleToggleStatus = async (event, e) => {
     e.stopPropagation();
-    const nextStatus = event.status === 'PLANIFICACION' ? 'EN_CURSO' : event.status === 'EN_CURSO' ? 'FINALIZADO' : 'PLANIFICACION';
+    const nextStatus = event.status === 'active' ? 'paused' : 'active';
     try {
-      await updateDoc(doc(db, "events_organizer", event.id), { status: nextStatus });
+      await updateDoc(doc(db, "events", event.id), { status: nextStatus });
     } catch (err) { console.error(err); }
   };
 
   return (
     <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] antialiased flex flex-col relative uppercase selection:bg-white selection:text-black">
       
-      {/* TOPBAR CON CLASSCODE LIMPIO */}
+      {/* TOPBAR */}
       <nav className="p-6 md:p-10 w-full sticky top-0 z-50 bg-[#070709]/90 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-[1440px] mx-auto flex justify-between items-center w-full">
           <button 
             onClick={() => navigate('/client-profile')} 
             className="text-gray-400 hover:text-white flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-bold font-['Poppins'] transition-colors"
           >
-            <ArrowLeft size={14}/> VOLVER
+            <ArrowLeft size={14}/> VOLVER A LIVE CONTROL
           </button>
           
           <div className="font-['Poppins']">
@@ -157,10 +154,9 @@ export default function EventOrganizer() {
                 onClick={() => navigate(`/organizer/${ev.id}`)}
                 className="bg-[#0c0c0e] border border-white/10 hover:border-white/30 rounded-3xl overflow-hidden flex flex-col justify-between shadow-xl cursor-pointer transition-all group"
               >
-                {/* PORTADA EN TARJETA */}
                 <div className="relative w-full h-40 bg-black/40 overflow-hidden border-b border-white/5">
                   {ev.coverImage ? (
-                    <img src={ev.coverImage} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" />
+                    <img src={ev.coverImage} alt={ev.eventName || ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-white/[0.02] to-white/[0.06]">
                       <ImageIcon size={20} className="text-white/20" />
@@ -168,19 +164,19 @@ export default function EventOrganizer() {
                   )}
                   <div className="absolute top-3 left-3">
                     <span className="text-[8px] tracking-[0.3em] font-black px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-gray-300">
-                      {ev.category}
+                      {ev.category || 'EVENTO'}
                     </span>
                   </div>
                   <div className="absolute top-3 right-3">
                     <button 
                       onClick={(e) => handleToggleStatus(ev, e)} 
                       className={`text-[8px] tracking-widest font-black px-2.5 py-1 rounded-full border backdrop-blur-md transition-all ${
-                        ev.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
-                        ev.status === 'EN_CURSO' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
-                        'bg-black/60 text-gray-300 border-white/10'
+                        ev.status === 'finished' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
+                        ev.status === 'paused' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
+                        'bg-green-500/20 text-green-400 border-green-500/30'
                       }`}
                     >
-                      {ev.status}
+                      {ev.status || 'active'}
                     </button>
                   </div>
                 </div>
@@ -188,7 +184,7 @@ export default function EventOrganizer() {
                 <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
                   <div className="space-y-3">
                     <h3 className="text-lg font-['Poppins'] font-normal tracking-wide text-white group-hover:text-gray-200 flex items-center justify-between">
-                      {ev.title}
+                      {ev.eventName || ev.title}
                       <ChevronRight size={16} className="text-white/40 group-hover:translate-x-1 transition-transform" />
                     </h3>
                     <div className="space-y-1.5 text-[10px] text-gray-400 font-bold tracking-wider">
@@ -244,7 +240,7 @@ export default function EventOrganizer() {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})}
-                    className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white" required 
+                    className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white" 
                   />
                   <input placeholder="UBICACIÓN" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})}
                     className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[10px] text-white uppercase outline-none focus:border-white tracking-widest" 
@@ -275,19 +271,19 @@ export default function EventOrganizer() {
               
               <div className="space-y-2">
                 <span className="text-[8px] tracking-[0.3em] font-black text-gray-400">QR INVITADOS</span>
-                <h3 className="text-xl font-['Poppins'] font-normal text-white">{selectedEvent.title}</h3>
+                <h3 className="text-xl font-['Poppins'] font-normal text-white">{selectedEvent.eventName || selectedEvent.title}</h3>
               </div>
 
               <div className="w-48 h-48 mx-auto bg-white p-3 rounded-2xl flex items-center justify-center shadow-xl">
                 <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://www.classcode.com.ar/guest/${selectedEvent.id}`} 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://www.classcode.com.ar/guest-upload/${selectedEvent.eventCode}`} 
                   alt="QR Invitados" 
                   className="w-full h-full object-contain"
                 />
               </div>
 
               <button onClick={() => {
-                navigator.clipboard.writeText(`https://www.classcode.com.ar/guest/${selectedEvent.id}`);
+                navigator.clipboard.writeText(`https://www.classcode.com.ar/guest-upload/${selectedEvent.eventCode}`);
                 alert("¡Link copiado!");
               }} className="w-full py-3.5 rounded-xl bg-white text-black font-black text-[9px] tracking-widest uppercase hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
                 COPIAR LINK

@@ -5,65 +5,16 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { 
   X, Search, LogOut, Bell, RefreshCcw, User, Heart, Menu,
-  MessageSquare, ArrowRight, QrCode, Calendar, MapPin, LayoutDashboard,
-  Upload, ImageIcon, GraduationCap, Trash2, Plus, Eye, Copy, Monitor, Edit3, Share2, Power, Link as LinkIcon, Camera, Pause, Play, Check, LayoutGrid
+  MessageSquare, ArrowRight, QrCode, Calendar, MapPin, 
+  Upload, ImageIcon, GraduationCap, Trash2, Plus, Monitor, Edit3, Share2, Power, Link as LinkIcon, Camera, Pause, Play, Check, LayoutGrid
 } from 'lucide-react'; 
-import CustomModal from './components/CustomModal'; 
 import { motion, AnimatePresence } from 'framer-motion';
-
-// --- SHARE MODAL INTEGRADO ---
-const ShareModal = ({ isOpen, onClose, userProfile }) => {
-  const [copied, setCopied] = useState(false);
-  const profileUrl = "https://www.classcode.com.ar"; 
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(profileUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 font-['Open_Sans']">
-      <div className="relative w-full max-w-sm bg-[#0c0c0e] border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden uppercase">
-        <button onClick={onClose} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-white transition-colors rounded-full hover:bg-white/10">
-          <X size={20} />
-        </button>
-        <div className="p-8 flex flex-col items-center text-center uppercase">
-          <div className="mb-6">
-            <div className="w-20 h-20 rounded-full bg-white/5 mx-auto mb-4 border border-white/10 overflow-hidden shadow-xl">
-                <img src={userProfile?.photoURL || "/api/placeholder/80/80"} alt="Profile" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-[14px] font-['Poppins'] font-normal text-white mb-1 tracking-wider uppercase">
-              {userProfile?.name || 'ORGANIZADOR'}
-            </h3>
-            <p className="text-[8px] tracking-[0.3em] text-gray-400 font-bold">EXPERIENCE MODE</p>
-          </div>
-          <div className="bg-white p-3 rounded-2xl mb-8 shadow-2xl">
-             <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${profileUrl}`} alt="QR" className="w-32 h-32 block" />
-          </div>
-          <div className="w-full relative mb-2">
-            <div className="flex items-center bg-black border border-white/10 rounded-2xl p-1.5 pl-4">
-              <span className="text-gray-400 text-[9px] truncate flex-1 text-left font-mono lowercase">{profileUrl}</span>
-              <button onClick={handleCopy} className={`p-2.5 px-4 rounded-xl text-[9px] font-black tracking-widest transition-all duration-200 ${copied ? 'bg-green-500/20 text-green-400' : 'bg-white text-black'}`}>
-                {copied ? <Check size={12}/> : <Copy size={12}/>}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default function ClientProfile() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [isEditingEventName, setIsEditingEventName] = useState(false);
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [newEventName, setNewEventName] = useState('');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -72,7 +23,7 @@ export default function ClientProfile() {
   const [favorites, setFavorites] = useState([]);
   const [profile, setProfile] = useState({ name: '', location: '', interests: '', photoURL: '' });
   const [previewImage, setPreviewImage] = useState(null);
-  const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'warning', onConfirm: null });
+  const [, setModal] = useState({ isOpen: false, title: '', message: '', type: 'warning' });
 
   const CLOUD_NAME = "dsyfitywd";
   const UPLOAD_PRESET = "CLASSCODE";
@@ -91,7 +42,6 @@ export default function ClientProfile() {
         onSnapshot(query(collection(db, "events"), where("clientId", "==", user.uid)), (snap) => {
           const fetchedEvents = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           setEvents(fetchedEvents);
-          if (fetchedEvents.length > 0) setNewEventName(fetchedEvents[0].eventName);
         });
         onSnapshot(query(collection(db, "chats"), where("participants", "array-contains", user.uid)), (snap) => {
           setMessages(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -104,13 +54,13 @@ export default function ClientProfile() {
   const copyGuestLink = () => {
     if (!events[0]) return;
     navigator.clipboard.writeText(`https://www.classcode.com.ar/guest-upload/${events[0].eventCode}`);
-    setModal({ isOpen: true, title: "GUEST LINK", message: "LINK DE SUBIDA COPIADO.", type: "success" });
+    alert("¡Link de subida copiado!");
   };
 
   const handleShareTV = () => {
     if (!events[0]) return;
     navigator.clipboard.writeText(`https://www.classcode.com.ar/live-gallery/${events[0].eventCode}`);
-    setModal({ isOpen: true, title: "LIVE GALLERY", message: "LINK DE PROYECCIÓN COPIADO.", type: "success" });
+    alert("¡Link de proyección copiado!");
   };
 
   const handleSwitchToPro = async () => {
@@ -127,6 +77,7 @@ export default function ClientProfile() {
     try {
       await addDoc(collection(db, "events"), {
         eventName: newEventName.toUpperCase(),
+        title: newEventName.toUpperCase(),
         clientId: auth.currentUser.uid,
         eventCode: eventCode,
         createdAt: new Date().toISOString(),
@@ -135,7 +86,6 @@ export default function ClientProfile() {
       });
       setIsCreatingEvent(false);
       setNewEventName('');
-      setModal({ isOpen: true, title: "ÉXITO", message: `SISTEMA INICIADO: ${eventCode}`, type: "success" });
     } catch (e) { console.error(e); }
   };
 
@@ -145,47 +95,24 @@ export default function ClientProfile() {
     await updateDoc(doc(db, "events", events[0].id), { status: newStatus });
   };
   
-  const confirmFinish = () => {
+  const confirmFinish = async () => {
     if (!events[0]) return;
-    setModal({
-      isOpen: true,
-      title: "APAGAR SISTEMA",
-      message: "¿TERMINAR RECEPCIÓN DE FOTOS? LOS INVITADOS YA NO PODRÁN SUBIR CONTENIDO.",
-      type: 'warning',
-      onConfirm: async () => {
-        await updateDoc(doc(db, "events", events[0].id), { status: 'finished' });
-        setModal({ isOpen: false });
-      }
-    });
+    if (confirm("¿Terminar recepción de fotos? Los invitados ya no podrán subir contenido.")) {
+      await updateDoc(doc(db, "events", events[0].id), { status: 'finished' });
+    }
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!events[0]) return;
-    setModal({
-      isOpen: true,
-      title: "ELIMINAR PROYECTO",
-      message: "¿ESTÁS SEGURO? ESTA ACCIÓN ELIMINARÁ EL PROYECTO Y TODA SU GALERÍA PERMANENTEMENTE.",
-      type: 'warning',
-      onConfirm: async () => {
-        await deleteDoc(doc(db, "events", events[0].id));
-        setModal({ isOpen: false });
-      }
-    });
+    if (confirm("¿Estás seguro? Esta acción eliminará el proyecto y toda su galería permanentemente.")) {
+      await deleteDoc(doc(db, "events", events[0].id));
+    }
   };
 
   const handleSaveProfile = async () => {
     try {
       await setDoc(doc(db, "users", auth.currentUser.uid), profile, { merge: true });
       setIsEditingProfile(false);
-      setModal({ isOpen: true, title: "ÉXITO", message: "PERFIL ACTUALIZADO.", type: "success" });
-    } catch (e) { console.error(e); }
-  };
-
-  const handleUpdateEventName = async () => {
-    if (!newEventName.trim() || !events[0]) return;
-    try {
-      await updateDoc(doc(db, "events", events[0].id), { eventName: newEventName.toUpperCase() });
-      setIsEditingEventName(false);
     } catch (e) { console.error(e); }
   };
 
@@ -194,7 +121,7 @@ export default function ClientProfile() {
   return (
     <div className="min-h-screen bg-[#070709] text-white font-['Open_Sans'] flex overflow-x-hidden uppercase antialiased relative text-left">
       
-      {/* FONDO LIMPIO ESTILO HOME */}
+      {/* FONDO */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <motion.div animate={{ x: [-50, 50, -50], y: [-30, 30, -30], scale: [1, 1.2, 1] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="absolute top-0 left-0 w-[600px] h-[600px] bg-white/[0.01] rounded-full blur-[120px]" />
         <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-white/[0.01] rounded-full blur-[100px]" />
@@ -274,8 +201,8 @@ export default function ClientProfile() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/organizer')} className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-white/[0.03] hover:bg-white/10 border border-white/10 rounded-2xl text-[9px] font-black tracking-widest text-white transition-all">
-              <LayoutGrid size={14}/> ORGANIZADOR DE EVENTOS
+            <button onClick={() => navigate('/organizer')} className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.03] hover:bg-white/10 border border-white/10 rounded-2xl text-[9px] font-black tracking-widest text-white transition-all">
+              <LayoutGrid size={14}/> VER TODOS LOS EVENTOS
             </button>
             <Bell size={20} className="text-gray-500 cursor-pointer hover:text-white transition-colors" />
           </div>
@@ -286,7 +213,7 @@ export default function ClientProfile() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 text-left border-b border-white/5 pb-6">
               <div>
                 <h3 className="text-[10px] text-gray-400 font-black tracking-[0.4em] uppercase leading-none">Live Control Panel</h3>
-                <p className="text-[8px] text-gray-500 font-bold tracking-widest mt-1">Gestión rápida de tu evento en curso</p>
+                <p className="text-[8px] text-gray-500 font-bold tracking-widest mt-1">Gestión rápida de tu evento activo</p>
               </div>
               <div className="flex items-center gap-3 w-full sm:w-auto">
                  {events.length > 0 && (
@@ -310,7 +237,7 @@ export default function ClientProfile() {
                     <p className="text-black text-[5px] font-bold mt-1 tracking-[0.2em] uppercase text-center leading-none">Scan to upload</p>
                   </div>
                   <div className="flex-1 space-y-4 text-center lg:text-left w-full leading-none">
-                    <h4 className="text-[18px] md:text-[22px] font-['Poppins'] font-normal text-white uppercase">{events[0].eventName}</h4>
+                    <h4 className="text-[18px] md:text-[22px] font-['Poppins'] font-normal text-white uppercase">{events[0].eventName || events[0].title}</h4>
                     <div className="flex items-center justify-center lg:justify-start gap-3">
                       <span className={`w-2 h-2 rounded-full animate-pulse ${events[0].status === 'paused' ? 'bg-amber-400' : 'bg-green-400'}`}></span>
                       <p className="text-[9px] font-black tracking-[0.2em] text-gray-400 uppercase">{events[0].eventCode}</p>
@@ -383,12 +310,25 @@ export default function ClientProfile() {
         </div>
       </main>
 
-      {/* MODALES */}
+      {/* MODAL PREVIEW IMAGEN */}
       <AnimatePresence>
-        {(isEditingProfile || isEditingEventName || isCreatingEvent) && (
+        {previewImage && (
+          <div className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4" onClick={() => setPreviewImage(null)}>
+            <div className="relative max-w-4xl max-h-[90vh]">
+              <button className="absolute -top-12 right-0 text-white p-2"><X size={24}/></button>
+              <img src={previewImage} alt="Preview" className="max-w-full max-h-[85vh] rounded-2xl border border-white/10 object-contain shadow-2xl" />
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODALES EDICIÓN Y CREACIÓN */}
+      <AnimatePresence>
+        {(isEditingProfile || isCreatingEvent) && (
           <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[250] flex items-center justify-center p-6 antialiased uppercase">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-[#0c0c0e] border border-white/10 rounded-[2.5rem] p-10 max-w-md w-full space-y-8 text-center shadow-2xl relative">
-              <button onClick={() => { setIsEditingProfile(false); setIsEditingEventName(false); setIsCreatingEvent(false); }} className="absolute top-8 right-8 text-gray-500 hover:text-white p-2"><X size={20} /></button>
+              <button onClick={() => { setIsEditingProfile(false); setIsCreatingEvent(false); }} className="absolute top-8 right-8 text-gray-500 hover:text-white p-2"><X size={20} /></button>
+              
               {isEditingProfile ? (
                 <>
                   <h3 className="text-[13px] font-['Poppins'] tracking-[0.3em] uppercase text-white border-b border-white/5 pb-6 text-left leading-none font-normal">Identidad Organizador</h3>
@@ -421,37 +361,17 @@ export default function ClientProfile() {
                     <h3 className="text-[16px] font-['Poppins'] tracking-[0.2em] uppercase text-white">Nuevo Evento</h3>
                     <p className="text-[8px] text-gray-500 uppercase tracking-[0.3em]">Live Gallery Config</p>
                   </div>
-                  <input autoFocus className="w-full bg-black border border-white/10 p-5 rounded-2xl text-[12px] font-black uppercase text-center outline-none focus:border-white transition-all text-white shadow-inner" value={newEventName} onChange={e => setNewEventName(e.target.value)} placeholder="TÍTULO DEL EVENTO" />
-                  <div className="grid grid-cols-2 gap-4"><button onClick={() => { setIsCreatingEvent(false); setIsEditingEventName(false); }} className="py-4 bg-white/5 text-gray-400 rounded-2xl font-black text-[9px] uppercase tracking-widest transition-all hover:bg-white/10">CANCELAR</button><button onClick={isCreatingEvent ? handleCreateEvent : handleUpdateEventName} className="py-4 bg-white text-black rounded-2xl font-black text-[9px] uppercase tracking-widest shadow-xl hover:bg-gray-200 transition-all">ACEPTAR</button></div>
+                  <input autoFocus className="w-full bg-black border border-white/10 p-5 rounded-2xl text-[12px] font-black uppercase text-center outline-none focus:border-white transition-all text-white tracking-widest" placeholder="NOMBRE DEL EVENTO" value={newEventName} onChange={e => setNewEventName(e.target.value)} />
+                  <div className="grid grid-cols-2 gap-4">
+                    <button onClick={() => setIsCreatingEvent(false)} className="py-4 bg-white/5 text-gray-400 rounded-2xl font-black text-[9px] uppercase tracking-widest hover:bg-white/10">CANCELAR</button>
+                    <button onClick={handleCreateEvent} className="py-4 bg-white text-black rounded-2xl font-black text-[9px] uppercase tracking-widest hover:bg-gray-200 shadow-xl">INICIAR</button>
+                  </div>
                 </>
               )}
             </motion.div>
           </div>
         )}
       </AnimatePresence>
-
-      {/* MODAL DE VISTA PREVIA DE IMAGEN */}
-      <AnimatePresence>
-        {previewImage && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={() => setPreviewImage(null)}
-            className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out"
-          >
-            <button className="absolute top-8 right-8 text-white/50 hover:text-white p-2"><X size={32}/></button>
-            <motion.img 
-              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-              src={previewImage} 
-              className="max-w-full max-h-[85vh] rounded-3xl shadow-2xl object-contain border border-white/10"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <ShareModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} userProfile={profile} />
-
-      <CustomModal isOpen={modal.isOpen} onClose={() => setModal({ ...modal, isOpen: false })} onConfirm={modal.onConfirm} title={modal.title} message={modal.message} type={modal.type} />
     </div>
   );
 }
