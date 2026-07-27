@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { db, auth } from "./firebase";
+import { db, auth } from "../firebase";
 import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Plus, Calendar, MapPin, QrCode, Trash2, X, ChevronRight, Image as ImageIcon } from 'lucide-react';
