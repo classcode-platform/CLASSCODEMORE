@@ -65,7 +65,6 @@ export default function ProfileP() {
         const data = docSnap.data();
         let profileData = data;
         
-        // Soporte para perfiles múltiples guardados en array leyendo correctamente 'index' o 'p'
         if (data.profiles && data.profiles.length > 0) {
           const params = new URLSearchParams(window.location.search);
           const profileIndex = parseInt(params.get('index') || params.get('p')) || 0;
