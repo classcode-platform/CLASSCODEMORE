@@ -7,7 +7,7 @@ import {
   Home as HomeIcon, Shirt, Palette, PartyPopper, Zap, 
   Users, Theater, Smartphone, Clapperboard, CalendarDays,
   Instagram, Linkedin, MessageCircle, Send, Globe, ShieldCheck, Check, X,
-  GraduationCap, PlayCircle, Briefcase
+  GraduationCap, PlayCircle, Briefcase, ArrowLeft
 } from 'lucide-react';
 import { auth, db } from './firebase'; 
 import { signOut } from 'firebase/auth';
@@ -24,6 +24,10 @@ export default function Home() {
   const [isCatOpen, setIsCatOpen] = useState(false);
   const [isLocOpen, setIsLocOpen] = useState(false);
 
+  // Estado para mostrar la Live Gallery Estática / Showcase
+  const [showLiveGallery, setShowLiveGallery] = useState(false);
+  const [selectedGalleryItem, setSelectedGalleryItem] = useState(null);
+
   // Estado Modal Suscripción Pop-Up
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
 
@@ -31,6 +35,53 @@ export default function Home() {
   const locRef = useRef(null);
 
   const singleBannerVideo = "https://res.cloudinary.com/dsyfitywd/video/upload/v1785118161/Copia_de_Video_C1_Banner_para_Twitch_1200_x_280_px_4_x7weiy.mp4";
+  
+  // Showcase estático con proporciones variadas (masonry)
+  const showcaseItems = [
+    { 
+      id: 1, 
+      title: 'BACKSTAGE 01', 
+      category: 'PRODUCCIÓN', 
+      aspect: 'aspect-[3/4]', 
+      url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1000&q=80' 
+    },
+    { 
+      id: 2, 
+      title: 'RODAJE EN ESTUDIO', 
+      category: 'FILMACIÓN', 
+      aspect: 'aspect-[16/9]', 
+      url: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1200&q=80' 
+    },
+    { 
+      id: 3, 
+      title: 'SHOW EN VIVO', 
+      category: 'ESCÉNICO', 
+      aspect: 'aspect-square', 
+      url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80' 
+    },
+    { 
+      id: 4, 
+      title: 'EDITORIAL DE MODA', 
+      category: 'ESTILISMO', 
+      aspect: 'aspect-[4/5]', 
+      url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80' 
+    },
+    { 
+      id: 5, 
+      title: 'DIRECCIÓN DE ARTE', 
+      category: 'CINE', 
+      aspect: 'aspect-[16/9]', 
+      url: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1200&q=80' 
+    },
+    { 
+      id: 6, 
+      title: 'BACKSTAGE SHOW', 
+      category: 'FOTOGRAFÍA', 
+      aspect: 'aspect-[3/4]', 
+      url: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1000&q=80' 
+    }
+  ];
+
   const categories = [
     { name: 'Fotografía', count: '+ profesionales', icon: Camera, gradient: 'from-cyan-400 to-blue-500' },
     { name: 'Audiovisual', count: '+ profesionales', icon: Video, gradient: 'from-blue-400 to-indigo-600' },
@@ -128,6 +179,133 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] font-['Open_Sans'] flex flex-col relative overflow-hidden antialiased text-white justify-between">
+      
+      {/* VISTA DE LA LIVE GALLERY (SHOWCASE ESTÁTICO) EN OVERLAY */}
+      <AnimatePresence>
+        {showLiveGallery && (
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 30 }}
+            className="fixed inset-0 z-[150] bg-[#0a0a0a] overflow-y-auto flex flex-col justify-between"
+          >
+            {/* HEADER DE LA GALERÍA */}
+            <header className="px-6 py-6 md:px-12 max-w-7xl mx-auto w-full flex items-center justify-between border-b border-white/5">
+              <button 
+                onClick={() => setShowLiveGallery(false)}
+                className="group flex items-center gap-2 text-[10px] uppercase font-bold tracking-[0.2em] text-gray-400 hover:text-white transition-all cursor-pointer"
+              >
+                <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                VOLVER AL INICIO
+              </button>
+
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                <span className="text-[9px] uppercase tracking-[0.3em] font-bold text-gray-400">SHOWCASE / PROMO</span>
+              </div>
+            </header>
+
+            {/* CONTENIDO PRINCIPAL SHOWCASE */}
+            <main className="max-w-7xl mx-auto px-6 md:px-12 py-12 w-full flex-grow">
+              <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-blue-400 text-[9px] font-bold tracking-[0.3em] uppercase">
+                  <Sparkles size={12} /> CLASSCODE VISUALS
+                </div>
+                <h1 className="text-4xl md:text-6xl font-normal font-['Poppins'] tracking-[0.05em] uppercase text-white">
+                  LIVE GALLERY
+                </h1>
+                <p className="text-gray-400 text-xs md:text-sm font-light leading-relaxed">
+                  Explorá una selección exclusiva de nuestras producciones, rodajes y el detrás de escena del talento argentino.
+                </p>
+              </div>
+
+              {/* GRILLA MASONRY DINÁMICA CON DIFERENTES PROPORCIONES */}
+              <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+                {showcaseItems.map((item) => (
+                  <motion.div 
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                    onClick={() => setSelectedGalleryItem(item)}
+                    className="break-inside-avoid group relative rounded-2xl overflow-hidden bg-white/5 border border-white/10 cursor-pointer shadow-2xl hover:border-blue-500/50 transition-all duration-500"
+                  >
+                    <div className={`w-full ${item.aspect} overflow-hidden bg-[#121215]`}>
+                      <img 
+                        src={item.url} 
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                      <span className="text-[9px] uppercase font-bold tracking-[0.3em] text-blue-400 mb-1">
+                        {item.category}
+                      </span>
+                      <h3 className="text-sm font-['Poppins'] tracking-[0.05em] uppercase text-white font-medium">
+                        {item.title}
+                      </h3>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </main>
+
+            <footer className="border-t border-white/5 py-8 text-center text-gray-600 text-[9px] uppercase tracking-[0.3em]">
+              CLASSCODE • ARGENTINA © 2026
+            </footer>
+
+            {/* MODAL LIGHTBOX INTERNO */}
+            <AnimatePresence>
+              {selectedGalleryItem && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setSelectedGalleryItem(null)}
+                  className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 md:p-10"
+                >
+                  <motion.div 
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="relative max-w-5xl w-full bg-[#121215] border border-white/15 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+                  >
+                    <button 
+                      onClick={() => setSelectedGalleryItem(null)}
+                      className="absolute top-4 right-4 z-10 p-2.5 text-gray-400 hover:text-white rounded-full bg-black/60 hover:bg-black/95 backdrop-blur-md transition-all cursor-pointer"
+                    >
+                      <X size={18} />
+                    </button>
+                    <div className="w-full flex-grow overflow-hidden flex items-center justify-center bg-black/50 p-2">
+                      <img 
+                        src={selectedGalleryItem.url} 
+                        alt={selectedGalleryItem.title}
+                        className="max-h-[70vh] w-auto object-contain rounded-xl"
+                      />
+                    </div>
+                    <div className="p-6 bg-[#0e0e11] border-t border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                      <div>
+                        <span className="text-[9px] uppercase font-bold tracking-[0.3em] text-blue-400">
+                          {selectedGalleryItem.category}
+                        </span>
+                        <h3 className="text-lg font-['Poppins'] tracking-[0.05em] uppercase text-white font-medium mt-0.5">
+                          {selectedGalleryItem.title}
+                        </h3>
+                      </div>
+                      <span className="text-[9px] tracking-widest text-gray-500 uppercase">
+                        CLASSCODE SHOWCASE
+                      </span>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* LUCES DINÁMICAS DE FONDO */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div animate={{ x: [-50, 50, -50], y: [-30, 30, -30], scale: [1, 1.2, 1] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="absolute top-0 left-0 w-[250px] md:w-[600px] h-[250px] md:h-[600px] bg-purple-600/10 rounded-full blur-[100px] md:blur-[150px]" />
@@ -136,8 +314,8 @@ export default function Home() {
 
       <header className="px-4 py-3 md:px-6 md:py-4 flex justify-end items-center max-w-4xl mx-auto w-full relative z-[60]">
         <div className="flex items-center gap-6">
-          <button onClick={handleAccount} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-white transition-all flex items-center gap-2 font-bold"><User size={12}/> MI CUENTA</button>
-          <button onClick={handleLogout} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-red-400 transition-all flex items-center gap-2 font-bold"><LogOut size={12}/> SALIR</button>
+          <button onClick={handleAccount} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-white transition-all flex items-center gap-2 font-bold cursor-pointer"><User size={12}/> MI CUENTA</button>
+          <button onClick={handleLogout} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-red-400 transition-all flex items-center gap-2 font-bold cursor-pointer"><LogOut size={12}/> SALIR</button>
         </div>
       </header>
 
@@ -167,7 +345,7 @@ export default function Home() {
               <button 
                 type="button"
                 onClick={() => { setIsCatOpen(!isCatOpen); setIsLocOpen(false); }}
-                className="w-full flex items-center justify-between px-3 md:px-4 py-2.5 text-left uppercase text-[10px] tracking-widest text-gray-300 hover:text-white transition-all"
+                className="w-full flex items-center justify-between px-3 md:px-4 py-2.5 text-left uppercase text-[10px] tracking-widest text-gray-300 hover:text-white transition-all cursor-pointer"
               >
                 <span className={selectedCategory ? "text-purple-300 font-bold" : "text-gray-400"}>
                   {selectedCategory || "CATEGORÍAS"}
@@ -217,7 +395,7 @@ export default function Home() {
               <button 
                 type="button"
                 onClick={() => { setIsLocOpen(!isLocOpen); setIsCatOpen(false); }}
-                className="w-full flex items-center justify-between px-3 md:px-4 py-2.5 text-left uppercase text-[10px] tracking-widest text-gray-300 hover:text-white transition-all"
+                className="w-full flex items-center justify-between px-3 md:px-4 py-2.5 text-left uppercase text-[10px] tracking-widest text-gray-300 hover:text-white transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
                   <MapPin className="text-purple-400 w-4 h-4 shrink-0" />
@@ -258,7 +436,7 @@ export default function Home() {
               </AnimatePresence>
             </div>
 
-            <button type="button" onClick={handleSearch} className="w-full md:w-auto px-8 py-3 rounded-xl bg-white text-black font-black uppercase tracking-[0.2em] text-[9px] hover:bg-gray-200 transition-all shadow-xl">BUSCAR</button>
+            <button type="button" onClick={handleSearch} className="w-full md:w-auto px-8 py-3 rounded-xl bg-white text-black font-black uppercase tracking-[0.2em] text-[9px] hover:bg-gray-200 transition-all shadow-xl cursor-pointer">BUSCAR</button>
           </motion.div>
 
           {/* CONTENEDOR CENTRAL: BANNER Y BOTONES LATERALES */}
@@ -268,25 +446,25 @@ export default function Home() {
               <button 
                 onClick={() => navigate('/academy')}
                 title="Academy"
-                className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-purple-500/50 flex items-center justify-center text-purple-400 transition-all shadow-lg group"
+                className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-purple-500/50 flex items-center justify-center text-purple-400 transition-all shadow-lg group cursor-pointer"
               >
                 <GraduationCap size={18} className="group-hover:scale-110 transition-transform" />
               </button>
 
-              {/* Botón Live Gallery corregido a la galería pública */}
+              {/* Botón Live Gallery conectado al showcase estático (sin Firestore rules issues) */}
               <button 
-                onClick={() => navigate('/public-gallery')}
+                onClick={() => setShowLiveGallery(true)}
                 title="Live Gallery"
-                className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-blue-500/50 flex items-center justify-center text-blue-400 transition-all shadow-lg group"
+                className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-blue-500/50 flex items-center justify-center text-blue-400 transition-all shadow-lg group cursor-pointer"
               >
                 <PlayCircle size={18} className="group-hover:scale-110 transition-transform" />
               </button>
 
-              {/* Botón El maletín organizador corregido al modo experience del ClientProfile */}
+              {/* Botón El maletín organizador ajustado al modo experience del ClientProfile */}
               <button 
                 onClick={() => navigate('/client-profile?mode=experience')}
                 title="El maletín organizador"
-                className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-indigo-500/50 flex items-center justify-center text-indigo-400 transition-all shadow-lg group"
+                className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-indigo-500/50 flex items-center justify-center text-indigo-400 transition-all shadow-lg group cursor-pointer"
               >
                 <Briefcase size={18} className="group-hover:scale-110 transition-transform" />
               </button>
@@ -338,9 +516,9 @@ export default function Home() {
             </div>
 
             <nav className="flex items-center gap-5 text-[9px] font-bold tracking-widest text-gray-500">
-              <button onClick={() => navigate('/results')} className="hover:text-purple-400 transition-all uppercase">MARKETPLACE</button>
-              <button onClick={() => navigate('/academy')} className="hover:text-purple-400 transition-all uppercase">ACADEMY</button>
-              <button onClick={() => navigate('/terms')} className="hover:text-purple-400 transition-all uppercase">TÉRMINOS</button>
+              <button onClick={() => navigate('/results')} className="hover:text-purple-400 transition-all uppercase cursor-pointer">MARKETPLACE</button>
+              <button onClick={() => navigate('/academy')} className="hover:text-purple-400 transition-all uppercase cursor-pointer">ACADEMY</button>
+              <button onClick={() => navigate('/terms')} className="hover:text-purple-400 transition-all uppercase cursor-pointer">TÉRMINOS</button>
             </nav>
           </div>
 
@@ -370,7 +548,7 @@ export default function Home() {
             >
               <button 
                 onClick={handleCloseModal}
-                className="absolute top-5 right-5 p-2 text-gray-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-all"
+                className="absolute top-5 right-5 p-2 text-gray-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-all cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -399,7 +577,7 @@ export default function Home() {
                   />
                   <button 
                     type="submit" 
-                    className="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl font-black text-[10px] tracking-[0.3em] transition-all uppercase leading-none shadow-xl"
+                    className="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl font-black text-[10px] tracking-[0.3em] transition-all uppercase leading-none shadow-xl cursor-pointer"
                   >
                     SUSCRIBIRME
                   </button>
@@ -407,7 +585,7 @@ export default function Home() {
 
                 <button 
                   onClick={handleCloseModal}
-                  className="text-[9px] uppercase tracking-widest text-gray-500 hover:text-gray-300 transition-all font-bold pt-1"
+                  className="text-[9px] uppercase tracking-widest text-gray-500 hover:text-gray-300 transition-all font-bold pt-1 cursor-pointer"
                 >
                   NO, GRACIAS
                 </button>
