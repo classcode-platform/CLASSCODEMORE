@@ -158,16 +158,20 @@ export default function EventDetail() {
         <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-0 w-[200px] md:w-[500px] h-[200px] md:h-[500px] bg-indigo-600/10 rounded-full blur-[90px] md:blur-[130px]" />
       </div>
 
-      {/* TOPBAR ESTILO HOME */}
-      <nav className="w-full border-b border-white/5 bg-[#0a0a0a]/80 backdrop-blur-2xl sticky top-0 z-50 px-4 sm:px-8 py-5 flex justify-center">
-        <div className="max-w-[1200px] w-full flex justify-between items-center font-['Poppins']">
+      {/* TOPBAR CON LOGO TIPOGRÁFICO EXACTO CLASSCODE */}
+      <nav className="w-full border-b border-white/5 bg-[#0a0a0a]/80 backdrop-blur-2xl sticky top-0 z-50 px-4 sm:px-8 py-4 flex justify-center">
+        <div className="max-w-[1200px] w-full flex justify-between items-center">
           <button onClick={() => navigate('/client-profile')} className="text-gray-400 hover:text-white flex items-center gap-1.5 text-[8px] tracking-[0.3em] font-bold transition-colors cursor-pointer">
             <ArrowLeft size={13}/> VOLVER
           </button>
           
-          <div className="flex flex-col items-center">
-            <span className="text-[11px] font-normal tracking-[0.05em] text-white uppercase font-['Poppins']">CLASSCODE</span>
-            <span className="text-[7px] font-black tracking-[0.4em] text-purple-400 uppercase">Academy</span>
+          <div className="flex flex-col items-end">
+            <h1 className="text-lg text-white uppercase font-['Poppins'] font-normal tracking-[0.05em] leading-none">
+              CLASSCODE
+            </h1>
+            <span className="text-purple-400 text-[6px] font-light tracking-[0.2em] uppercase mt-0.5">
+              ORGANIZADOR
+            </span>
           </div>
 
           <span className="text-[7px] tracking-widest px-2.5 py-1 bg-white/5 border border-white/10 rounded-full text-purple-300 font-bold">{event.category}</span>
@@ -189,7 +193,7 @@ export default function EventDetail() {
 
           <div className="relative z-10 p-6 sm:p-10 w-full flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
             <div className="space-y-2 max-w-2xl">
-              <h1 className="text-xl sm:text-3xl font-['Poppins'] font-normal text-white tracking-wide leading-tight">{event.title}</h1>
+              <h2 className="text-xl sm:text-3xl font-['Poppins'] font-normal text-white tracking-wide leading-tight">{event.title}</h2>
               <div className="flex flex-wrap gap-3 text-[9px] text-gray-300 font-bold pt-1">
                 {event.date && <span className="flex items-center gap-1.5 text-purple-300"><Calendar size={12}/> {event.date}</span>}
                 {event.location && <span className="flex items-center gap-1.5 text-indigo-300"><MapPin size={12}/> {event.location}</span>}
@@ -233,7 +237,6 @@ export default function EventDetail() {
 
             <div className="bg-[#0e0e10] border border-white/15 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 space-y-6 shadow-[0_0_40px_rgba(0,0,0,0.4)] relative overflow-hidden">
               
-              {/* CABECERA Y RESUMEN GLOBAL DE OCUPACIÓN RESPONSIVE */}
               <div className="flex flex-col gap-4 border-b border-white/10 pb-5 font-['Poppins']">
                 <div className="flex justify-between items-start gap-4">
                   <div className="space-y-0.5">
@@ -241,7 +244,6 @@ export default function EventDetail() {
                     <h3 className="text-lg sm:text-xl font-normal text-white uppercase tracking-wide">Plano Global</h3>
                   </div>
 
-                  {/* BLOQUE DE PARÁMETROS GLOBALES */}
                   <div className="flex items-center gap-4 bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl shrink-0 shadow-inner">
                     <div className="space-y-0.5 text-right">
                       <span className="text-[6px] text-gray-400 font-bold tracking-widest block">OCUPADOS</span>
@@ -255,7 +257,6 @@ export default function EventDetail() {
                   </div>
                 </div>
 
-                {/* SELECTOR DE MODO */}
                 <div className="grid grid-cols-3 gap-1 bg-white/5 border border-white/10 p-1 rounded-xl">
                   <button onClick={() => setLayoutMode('tables')} className={`py-2 text-[7px] font-black tracking-widest rounded-lg transition-all cursor-pointer ${layoutMode === 'tables' ? 'bg-purple-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}>
                     MESAS
@@ -275,7 +276,6 @@ export default function EventDetail() {
                 </div>
               ) : (
                 <>
-                  {/* MODO MESAS: AMUCHADO CIRCULAR COMPACTO */}
                   {layoutMode === 'tables' && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
                       {tables.map((t) => {
@@ -295,7 +295,6 @@ export default function EventDetail() {
                               </div>
                             </div>
 
-                            {/* MAPA CIRCULAR AMUCHADO */}
                             <div className="relative w-36 h-36 my-1.5 flex items-center justify-center">
                               <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-600/20 to-indigo-600/10 border border-purple-500/30 flex flex-col items-center justify-center text-center shadow-inner z-10 p-1">
                                 <Utensils size={11} className="text-purple-400 mb-0.5" />
@@ -348,7 +347,6 @@ export default function EventDetail() {
                     </div>
                   )}
 
-                  {/* MODO TEATRO / AUDITORIO AMUCHADO */}
                   {layoutMode === 'auditorium' && (
                     <div className="space-y-4 py-1">
                       <div className="w-full bg-gradient-to-r from-purple-600/20 via-indigo-600/20 to-purple-600/20 border border-purple-500/30 py-2.5 rounded-xl text-center text-[7px] tracking-[0.3em] font-black text-purple-300 shadow-inner">
@@ -399,7 +397,6 @@ export default function EventDetail() {
                     </div>
                   )}
 
-                  {/* MODO CAMPO / STANDING AMUCHADO */}
                   {layoutMode === 'standing' && (
                     <div className="space-y-4 py-1">
                       <div className="w-full bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-indigo-600/20 border border-indigo-500/30 py-2.5 rounded-xl text-center text-[7px] tracking-[0.3em] font-black text-indigo-300 shadow-inner">
