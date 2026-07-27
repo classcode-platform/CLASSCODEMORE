@@ -432,13 +432,13 @@ export default function Dashboard() {
                     </div>
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] text-white/80 font-bold tracking-widest pt-1">
                       {profile.location && <span className="flex items-center gap-1.5"><MapPin size={14} className="text-purple-400"/> {profile.location}</span>}
-                      <span className="flex items-center gap-1.5">
+                      <span className="flex items-center gap-2 px-3 py-1 bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-full shadow-inner">
                         <div className="flex items-center text-purple-400">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <span key={i} className={`text-xs ${i < Math.min(5, Math.max(1, Math.round(calculateTotalScore(profile) / 40))) ? 'opacity-100' : 'opacity-30'}`}>★</span>
                           ))}
                         </div>
-                        <span>{calculateTotalScore(profile)} PTS</span>
+                        <span className="font-mono text-[9px]">{calculateTotalScore(profile)} PTS</span>
                       </span>
                     </div>
                   </div>
