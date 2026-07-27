@@ -278,8 +278,12 @@ export default function Dashboard() {
   };
 
   const handleViewPublicProfile = () => {
-    const userId = auth.currentUser?.uid;
-    navigate(`/profile/${userId}`);
+    const user = auth.currentUser;
+    if (user) {
+      navigate(`/profile/${user.uid}`);
+    } else {
+      setModal({ isOpen: true, type: 'warning', title: 'ACCESO DENEGADO', message: 'No hay un usuario activo para mostrar el perfil público.' });
+    }
   };
 
   if (loading) return <div className="min-h-screen w-full bg-[#0a0a0a] flex items-center justify-center text-white tracking-[0.4em] text-[10px] uppercase font-['Poppins'] overflow-x-hidden box-border">CARGANDO DASHBOARD...</div>;
@@ -295,7 +299,10 @@ export default function Dashboard() {
       </div>
 
       <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-black/60 backdrop-blur-xl border-b border-white/5 z-[100] px-8 py-6 flex justify-between items-center box-border">
-        <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer text-white">CLASSCODE</div>
+        <div onClick={() => navigate('/home')} className="flex flex-col cursor-pointer leading-none">
+          <span className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white">CLASSCODE</span>
+          <span className="text-[9px] font-light tracking-[0.05em] uppercase text-white text-right mt-0.5" style={{ width: '55%', alignSelf: 'flex-end' }}>Academy</span>
+        </div>
         <button onClick={() => setIsMobileMenuOpen(true)} className="text-white"><Menu size={28} /></button>
       </header>
 
@@ -327,8 +334,11 @@ export default function Dashboard() {
 
       <aside className="hidden md:flex w-72 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50 box-border">
         <header className="mb-12 text-left leading-none">
-          <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">CLASSCODE</div>
-          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Talent</p>
+          <div onClick={() => navigate('/home')} className="flex flex-col cursor-pointer leading-none">
+            <span className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] uppercase text-white">CLASSCODE</span>
+            <span className="text-[10px] font-light tracking-[0.05em] uppercase text-white text-right mt-1" style={{ width: '55%', alignSelf: 'flex-end' }}>Academy</span>
+          </div>
+          <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-3 leading-none uppercase">Talent</p>
         </header>
         
         <div className="mb-12 text-left">
@@ -542,8 +552,11 @@ export default function Dashboard() {
         </div>
 
         <footer className="w-full bg-black py-16 px-6 border-t border-white/5 text-center relative z-10 box-border font-['Poppins'] mt-auto">
-          <div className="max-w-[1400px] mx-auto box-border">
-            <h2 className="text-white text-2xl md:text-3xl font-normal tracking-[0.1em] uppercase mb-3 opacity-30">CLASSCODE</h2>
+          <div className="max-w-[1400px] mx-auto box-border flex flex-col items-center">
+            <div className="flex flex-col items-center leading-none mb-3">
+              <span className="text-white text-2xl md:text-3xl font-normal tracking-[0.05em] uppercase opacity-30">CLASSCODE</span>
+              <span className="text-[11px] font-light tracking-[0.05em] uppercase text-white text-right mt-1 opacity-30" style={{ width: '55%', alignSelf: 'flex-end' }}>Academy</span>
+            </div>
             <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-gray-600 opacity-30">© 2026 — TODOS LOS DERECHOS RESERVADOS</p>
           </div>
         </footer>
@@ -606,7 +619,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              <div className="space-y-1">
+              <div className="index space-y-1">
                 <label className="text-[7px] text-gray-500 tracking-widest">Biografía / Presentación</label>
                 <textarea 
                   className="w-full bg-white/[0.03] border border-white/10 rounded-3xl p-4 text-[10px] text-white uppercase h-28 resize-none outline-none focus:border-purple-500 tracking-widest box-border" 
