@@ -291,7 +291,7 @@ export default function ClientProfile() {
         <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[90px] md:blur-[130px]" />
       </div>
 
-      <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-black/60 backdrop-blur-xl border-b border-white/5 z-[100] px-8 py-6 flex justify-between items-center box-border">
+      <header className="md:hidden fixed top-0 left-0 right-0 w-full bg-black/40 backdrop-blur-2xl border-b border-white/10 z-[100] px-8 py-6 flex justify-between items-center box-border shadow-lg">
         <div onClick={() => navigate('/home')} className="text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer text-white">CLASSCODE</div>
         <button onClick={() => setIsMobileMenuOpen(true)} className="text-white cursor-pointer"><Menu size={28} /></button>
       </header>
@@ -299,45 +299,45 @@ export default function ClientProfile() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileMenuOpen(false)} className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[110] md:hidden" />
-            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-[#050505] z-[120] p-12 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto">
-              <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-12 text-gray-500 hover:text-white transition-colors cursor-pointer"><X size={32} /></button>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileMenuOpen(false)} className="fixed inset-0 bg-black/80 backdrop-blur-2xl z-[110] md:hidden" />
+            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-black/40 backdrop-blur-3xl border-l border-white/10 z-[120] p-12 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto">
+              <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-12 text-gray-400 hover:text-white transition-colors cursor-pointer"><X size={32} /></button>
               
-              <button onClick={handleSwitchToTalent} className="mb-12 w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-5 rounded-2xl group hover:bg-purple-500/10 transition-all box-border cursor-pointer">
+              <button onClick={handleSwitchToTalent} className="mb-12 w-full flex items-center justify-between bg-white/[0.03] backdrop-blur-xl border border-white/10 p-5 rounded-2xl group hover:bg-purple-500/10 transition-all box-border cursor-pointer shadow-lg">
                 <div className="flex items-center gap-4 text-left leading-none">
                   <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400"><RefreshCcw size={20} className="group-hover:rotate-180 transition-transform duration-700" /></div>
                   <div>
-                    <p className="text-[7px] font-black text-gray-500 tracking-[0.2em]">SWITCH MOOD</p>
+                    <p className="text-[7px] font-black text-gray-400 tracking-[0.2em]">SWITCH MOOD</p>
                     <p className="text-[11px] font-black text-white tracking-widest uppercase leading-none mt-1">MODO TALENT</p>
                   </div>
                 </div>
               </button>
 
               <nav className="flex-1 space-y-12">
-                <button onClick={() => { navigate('/client-profile'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-purple-500 uppercase cursor-pointer"><LayoutGrid size={22}/> ORGANIZADOR</button>
+                <button onClick={() => { navigate('/client-profile'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-purple-400 uppercase cursor-pointer"><LayoutGrid size={22}/> ORGANIZADOR</button>
                 <button onClick={() => { navigate('/home'); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-[12px] font-black tracking-widest text-gray-400 uppercase cursor-pointer"><Search size={22}/> EXPLORAR</button>
               </nav>
 
-              <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-700 text-[10px] font-black tracking-widest uppercase mt-8 cursor-pointer"><LogOut size={20}/> SALIR</button>
+              <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className="flex items-center gap-6 text-gray-400 hover:text-red-400 text-[10px] font-black tracking-widest uppercase mt-8 cursor-pointer"><LogOut size={20}/> SALIR</button>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      <aside className="hidden md:flex w-72 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-10 fixed h-full z-50 box-border">
+      <aside className="hidden md:flex w-72 bg-black/30 backdrop-blur-3xl border-r border-white/10 flex-col p-10 fixed h-full z-50 box-border shadow-2xl">
         <header className="mb-12 text-left leading-none">
           <div onClick={() => navigate('/home')} className="text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase text-white">CLASSCODE</div>
           <p className="text-purple-400 text-[10px] font-bold tracking-[0.3em] mt-2 leading-none uppercase">Experience</p>
         </header>
         
         <div className="mb-12 text-left">
-          <button onClick={handleSwitchToTalent} className="w-full flex items-center justify-between bg-white/[0.03] border border-white/10 p-4 rounded-2xl group hover:bg-purple-500/10 transition-all leading-none box-border cursor-pointer">
+          <button onClick={handleSwitchToTalent} className="w-full flex items-center justify-between bg-white/[0.03] backdrop-blur-xl border border-white/10 p-4 rounded-2xl group hover:bg-purple-500/10 transition-all leading-none box-border cursor-pointer shadow-lg">
             <div className="flex items-center gap-3 text-left leading-none">
               <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
                 <RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
               </div>
               <div>
-                <p className="text-[6px] font-black text-gray-500 tracking-[0.2em] leading-none">SWITCH MOOD</p>
+                <p className="text-[6px] font-black text-gray-400 tracking-[0.2em] leading-none">SWITCH MOOD</p>
                 <p className="text-[9px] font-black text-white tracking-widest uppercase mt-1 leading-none">MODO TALENT</p>
               </div>
             </div>
@@ -345,44 +345,44 @@ export default function ClientProfile() {
         </div>
 
         <nav className="flex-1 space-y-8 text-left">
-          <button onClick={() => navigate('/client-profile')} className="flex items-center gap-4 text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><LayoutGrid size={18} className="text-purple-500"/> ORGANIZADOR</button>
-          <button onClick={() => navigate('/home')} className="flex items-center gap-4 text-gray-500 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><Search size={18}/> EXPLORAR</button>
+          <button onClick={() => navigate('/client-profile')} className="flex items-center gap-4 text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><LayoutGrid size={18} className="text-purple-400"/> ORGANIZADOR</button>
+          <button onClick={() => navigate('/home')} className="flex items-center gap-4 text-gray-400 hover:text-white text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer"><Search size={18}/> EXPLORAR</button>
         </nav>
 
-        <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-700 hover:text-red-500 text-[10px] font-black tracking-widest transition-all mt-auto pt-8 border-t border-white/5 leading-none cursor-pointer"><LogOut size={18}/> CERRAR SESIÓN</button>
+        <button onClick={() => auth.signOut()} className="flex items-center gap-4 text-gray-400 hover:text-red-400 text-[10px] font-black tracking-widest transition-all mt-auto pt-8 border-t border-white/10 leading-none cursor-pointer"><LogOut size={18}/> CERRAR SESIÓN</button>
       </aside>
 
       <main className="flex-1 md:ml-72 p-6 md:p-12 mt-16 md:mt-0 relative z-10 w-full max-w-[1400px] mx-auto space-y-8 box-border">
         
-        <header className="flex justify-between items-center bg-[#0c0c0e]/80 border border-white/5 p-5 md:p-6 rounded-3xl backdrop-blur-md shadow-xl box-border">
+        <header className="flex justify-between items-center bg-black/30 backdrop-blur-3xl border border-white/10 p-5 md:p-6 rounded-3xl shadow-2xl box-border">
           <div className="flex items-center gap-5">
-            <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center flex-shrink-0">
-              {profile.photoURL ? <img src={profile.photoURL} className="w-full h-full object-cover" alt="Profile" /> : <User size={24} className="text-gray-500"/>}
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center flex-shrink-0 shadow-inner">
+              {profile.photoURL ? <img src={profile.photoURL} className="w-full h-full object-cover" alt="Profile" /> : <User size={24} className="text-gray-400"/>}
             </div>
             <div className="text-left leading-none min-w-0">
               <div className="flex items-center gap-3">
                 <h2 className="text-[14px] md:text-[16px] font-['Poppins'] text-white truncate">{profile.name || 'ORGANIZADOR'}</h2>
-                <button onClick={() => setIsEditingProfile(true)} className="text-gray-500 hover:text-white transition-colors cursor-pointer flex-shrink-0"><Edit3 size={14} /></button>
+                <button onClick={() => setIsEditingProfile(true)} className="text-gray-400 hover:text-white transition-colors cursor-pointer flex-shrink-0"><Edit3 size={14} /></button>
               </div>
-              {profile.location && <p className="text-[9px] text-gray-400 font-bold mt-2 flex items-center gap-1"><MapPin size={10} className="text-purple-400"/> {profile.location}</p>}
+              {profile.location && <p className="text-[9px] text-gray-300 font-bold mt-2 flex items-center gap-1"><MapPin size={10} className="text-purple-400"/> {profile.location}</p>}
             </div>
           </div>
           
-          <button onClick={() => setIsCreatingEvent(true)} className="px-5 py-3.5 bg-purple-600 text-white rounded-xl text-[9px] font-black flex items-center gap-2 hover:bg-purple-500 transition-all tracking-widest font-['Poppins'] cursor-pointer shadow-xl flex-shrink-0">
+          <button onClick={() => setIsCreatingEvent(true)} className="px-5 py-3.5 bg-purple-600/80 backdrop-blur-md border border-purple-400/30 text-white rounded-xl text-[9px] font-black flex items-center gap-2 hover:bg-purple-500 transition-all tracking-widest font-['Poppins'] cursor-pointer shadow-2xl flex-shrink-0">
             <Plus size={14}/> NUEVO EVENTO
           </button>
         </header>
 
         <section className="space-y-6">
-          <div className="flex justify-between items-center border-l-2 border-purple-500 pl-4">
-            <h3 className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black">Panel Experience</h3>
+          <div className="flex justify-between items-center border-l-2 border-purple-400 pl-4">
+            <h3 className="text-[10px] text-gray-300 uppercase tracking-[0.4EN] font-normal">organizador</h3>
           </div>
           
           {events.length === 0 ? (
-            <div className="py-20 text-center border border-white/5 rounded-3xl bg-[#0c0c0e]/80 space-y-4 shadow-xl">
+            <div className="py-20 text-center border border-white/10 rounded-3xl bg-black/30 backdrop-blur-3xl space-y-4 shadow-2xl">
               <Calendar size={32} className="mx-auto text-white/20" />
-              <p className="text-[9px] text-gray-500 tracking-[0.3em] font-black">No hay eventos registrados</p>
-              <button onClick={() => setIsCreatingEvent(true)} className="px-6 py-3.5 bg-purple-600 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-purple-500 transition-all font-['Poppins'] cursor-pointer shadow-xl">
+              <p className="text-[9px] text-gray-400 tracking-[0.3em] font-black">No hay eventos registrados</p>
+              <button onClick={() => setIsCreatingEvent(true)} className="px-6 py-3.5 bg-purple-600/80 backdrop-blur-md border border-purple-400/30 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-purple-500 transition-all font-['Poppins'] cursor-pointer shadow-2xl">
                 CREAR PRIMER EVENTO
               </button>
             </div>
@@ -392,26 +392,26 @@ export default function ClientProfile() {
                 <div 
                   key={ev.id} 
                   onClick={() => navigate(`/organizer/${ev.id}`)} 
-                  className="bg-[#0c0c0e]/80 border border-white/10 hover:border-purple-500/30 rounded-3xl overflow-hidden flex flex-col justify-between shadow-xl cursor-pointer transition-all group box-border"
+                  className="bg-black/30 backdrop-blur-3xl border border-white/10 hover:border-purple-400/30 rounded-3xl overflow-hidden flex flex-col justify-between shadow-2xl cursor-pointer transition-all group box-border"
                 >
-                  <div className="relative w-full h-36 bg-black/40 overflow-hidden border-b border-white/5 flex items-center justify-center">
+                  <div className="relative w-full h-36 bg-black/40 overflow-hidden border-b border-white/10 flex items-center justify-center">
                     {ev.coverImage ? (
                       <img src={ev.coverImage} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" />
                     ) : (
                       <ImageIcon size={24} className="text-white/20" />
                     )}
                     <div className="absolute top-3 left-3">
-                      <span className="text-[7px] tracking-[0.3em] font-black px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-gray-300 uppercase">
+                      <span className="text-[7px] tracking-[0.3em] font-black px-3 py-1 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full text-gray-300 uppercase shadow-lg">
                         {ev.category || 'EVENTO'}
                       </span>
                     </div>
                     <div className="absolute top-3 right-3">
                       <button 
                         onClick={(e) => handleToggleStatus(ev, e)} 
-                        className={`text-[7px] tracking-widest font-black px-2.5 py-1 rounded-full border backdrop-blur-md transition-all uppercase ${
-                          ev.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
-                          ev.status === 'EN_CURSO' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
-                          'bg-black/60 text-gray-300 border-white/10'
+                        className={`text-[7px] tracking-widest font-black px-2.5 py-1 rounded-full border backdrop-blur-xl transition-all uppercase shadow-lg ${
+                          ev.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-300 border-green-500/30' :
+                          ev.status === 'EN_CURSO' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
+                          'bg-black/40 text-gray-300 border-white/10'
                         }`}
                       >
                         {ev.status}
@@ -424,21 +424,21 @@ export default function ClientProfile() {
                       {ev.title}
                       <ChevronRight size={16} className="text-white/40 group-hover:translate-x-1 transition-transform" />
                     </h4>
-                    <div className="space-y-1 text-[9px] text-gray-400 font-bold uppercase">
+                    <div className="space-y-1 text-[9px] text-gray-300 font-bold uppercase">
                       {ev.date && <p className="flex items-center gap-2"><Calendar size={12} className="text-purple-400"/> {ev.date}</p>}
                       {ev.location && <p className="flex items-center gap-2"><MapPin size={12} className="text-purple-400"/> {ev.location}</p>}
                     </div>
 
-                    <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
+                    <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
                       <button 
                         onClick={(e) => { e.stopPropagation(); setSelectedEventIndex(index); setShowLivePanel(true); }} 
-                        className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.03] hover:bg-white/10 border border-white/10 text-[8px] font-black tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer"
+                        className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.03] backdrop-blur-xl hover:bg-white/10 border border-white/10 text-[8px] font-black tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg"
                       >
                         <QrCode size={13} className="text-purple-400"/> LIVE CONTROL
                       </button>
                       <button 
                         onClick={(e) => confirmDelete(ev.id, e)} 
-                        className="p-2.5 bg-white/[0.03] hover:bg-red-500/25 hover:text-red-400 border border-white/10 rounded-xl transition-all text-gray-500 cursor-pointer"
+                        className="p-2.5 bg-white/[0.03] backdrop-blur-xl hover:bg-red-500/20 hover:text-red-400 border border-white/10 rounded-xl transition-all text-gray-400 cursor-pointer shadow-lg"
                       >
                         <Trash2 size={14}/>
                       </button>
@@ -454,56 +454,56 @@ export default function ClientProfile() {
 
       <AnimatePresence>
         {isEditingProfile && (
-          <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[250] flex items-center justify-center p-4 uppercase">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-2xl z-[250] flex items-center justify-center p-4 uppercase">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0c0c0e] w-full max-w-lg p-6 md:p-8 rounded-[2.5rem] border border-white/10 relative shadow-2xl space-y-6"
+              className="bg-black/40 backdrop-blur-3xl w-full max-w-lg p-6 md:p-8 rounded-[2.5rem] border border-white/10 relative shadow-2xl space-y-6"
             >
-              <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
+              <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
               
-              <h3 className="text-[11px] font-['Poppins'] text-white tracking-[0.3em] font-black border-b border-white/5 pb-4">Editar Perfil</h3>
+              <h3 className="text-[11px] font-['Poppins'] text-white tracking-[0.3em] font-black border-b border-white/10 pb-4">Editar Perfil</h3>
 
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[8px] text-gray-400 tracking-widest font-black">Nombre / Organizador</label>
+                  <label className="text-[8px] text-gray-300 tracking-widest font-black">Nombre / Organizador</label>
                   <input 
                     type="text" 
                     value={editForm.name} 
                     onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-500 transition-colors"
+                    className="w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors shadow-inner"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[8px] text-gray-400 tracking-widest font-black">Provincia</label>
+                  <label className="text-[8px] text-gray-300 tracking-widest font-black">Provincia</label>
                   <select 
                     value={editForm.province} 
                     onChange={handleProvinceChange}
-                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-500 transition-colors cursor-pointer"
+                    className="w-full bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner"
                   >
                     {ARGENTINE_PROVINCES.map((prov) => (
-                      <option key={prov.name} value={prov.name}>{prov.name}</option>
+                      <option key={prov.name} value={prov.name} className="bg-[#0c0c0e] text-white">{prov.name}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[8px] text-gray-400 tracking-widest font-black">Localidad / Zona</label>
+                  <label className="text-[8px] text-gray-300 tracking-widest font-black">Localidad / Zona</label>
                   <select 
                     value={editForm.locality} 
                     onChange={(e) => setEditForm({ ...editForm, locality: e.target.value })}
-                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-500 transition-colors cursor-pointer"
+                    className="w-full bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner"
                   >
                     {selectedProvinceObj.localities.map((loc) => (
-                      <option key={loc} value={loc}>{loc}</option>
+                      <option key={loc} value={loc} className="bg-[#0c0c0e] text-white">{loc}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[8px] text-gray-400 tracking-widest font-black">Subir Foto de Perfil</label>
+                  <label className="text-[8px] text-gray-300 tracking-widest font-black">Subir Foto de Perfil</label>
                   <div className="flex items-center gap-4">
-                    <label className="flex-1 flex items-center justify-center gap-2 bg-black border border-dashed border-white/20 hover:border-purple-500 rounded-xl px-4 py-3 text-[9px] text-gray-300 cursor-pointer transition-colors">
+                    <label className="flex-1 flex items-center justify-center gap-2 bg-black/30 backdrop-blur-xl border border-dashed border-white/20 hover:border-purple-400 rounded-xl px-4 py-3 text-[9px] text-gray-300 cursor-pointer transition-colors shadow-inner">
                       <Upload size={14} className="text-purple-400" />
                       <span>{editForm.photoURL ? "Cambiar imagen..." : "Seleccionar archivo..."}</span>
                       <input 
@@ -514,7 +514,7 @@ export default function ClientProfile() {
                       />
                     </label>
                     {editForm.photoURL && (
-                      <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 flex-shrink-0 bg-black">
+                      <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 flex-shrink-0 bg-black/40 shadow-inner">
                         <img src={editForm.photoURL} alt="Preview" className="w-full h-full object-cover" />
                       </div>
                     )}
@@ -525,13 +525,13 @@ export default function ClientProfile() {
                   <button 
                     type="button" 
                     onClick={() => setIsEditingProfile(false)} 
-                    className="px-5 py-3 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black tracking-widest hover:bg-white/10 transition-all cursor-pointer"
+                    className="px-5 py-3 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-xl text-[9px] font-black tracking-widest hover:bg-white/10 transition-all cursor-pointer shadow-lg"
                   >
                     Cancelar
                   </button>
                   <button 
                     type="submit" 
-                    className="px-6 py-3 bg-purple-600 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-purple-500 transition-all cursor-pointer flex items-center gap-2"
+                    className="px-6 py-3 bg-purple-600/80 backdrop-blur-md border border-purple-400/30 text-white rounded-xl text-[9px] font-black tracking-widest hover:bg-purple-500 transition-all cursor-pointer flex items-center gap-2 shadow-2xl"
                   >
                     <Save size={14} /> Guardar Cambios
                   </button>
@@ -544,7 +544,7 @@ export default function ClientProfile() {
 
       <AnimatePresence>
         {isCreatingEvent && (
-          <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[250] flex items-center justify-center p-4 uppercase">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-2xl z-[250] flex items-center justify-center p-4 uppercase">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
               <EventOrganizer onClose={() => setIsCreatingEvent(false)} />
             </motion.div>
@@ -554,11 +554,11 @@ export default function ClientProfile() {
 
       <AnimatePresence>
         {showLivePanel && (
-          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 md:p-8 overflow-y-auto">
+          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-2xl p-4 md:p-8 overflow-y-auto">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0c0c0e] w-full max-w-4xl p-6 md:p-8 rounded-[2.5rem] border border-white/10 relative shadow-2xl space-y-6 uppercase"
+              className="bg-black/40 backdrop-blur-3xl w-full max-w-4xl p-6 md:p-8 rounded-[2.5rem] border border-white/10 relative shadow-2xl space-y-6 uppercase"
             >
-              <button onClick={() => setShowLivePanel(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
+              <button onClick={() => setShowLivePanel(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
 
               <div className="max-h-[80vh] overflow-y-auto pr-2">
                 <LiveControlPanel 
@@ -586,10 +586,10 @@ export default function ClientProfile() {
 
       <AnimatePresence>
         {previewImage && (
-          <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4" onClick={() => setPreviewImage(null)}>
+          <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/80 backdrop-blur-2xl p-4" onClick={() => setPreviewImage(null)}>
             <div className="relative max-w-3xl max-h-[90vh]">
-              <img src={previewImage} alt="Preview" className="max-w-full max-h-[85vh] object-contain rounded-2xl border border-white/10" />
-              <button onClick={() => setPreviewImage(null)} className="absolute -top-4 -right-4 p-2 bg-black/80 text-white rounded-full border border-white/20"><X size={18}/></button>
+              <img src={previewImage} alt="Preview" className="max-w-full max-h-[85vh] object-contain rounded-2xl border border-white/10 shadow-2xl" />
+              <button onClick={() => setPreviewImage(null)} className="absolute -top-4 -right-4 p-2 bg-black/80 backdrop-blur-xl text-white rounded-full border border-white/20 shadow-lg"><X size={18}/></button>
             </div>
           </div>
         )}
