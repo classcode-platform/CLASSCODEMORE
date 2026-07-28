@@ -60,13 +60,14 @@ export default function ClientProfile() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
   
+  const [currentTheme, setCurrentTheme] = useState('dark');
   const [newEventForm, setNewEventForm] = useState({ title: '', category: 'EVENTO', date: '', location: '' });
 
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
   const [profile, setProfile] = useState({ name: '', location: '', interests: '', photoURL: '', theme: 'dark' });
   
-  const [editForm, setEditForm] = useState({ name: '', province: '', locality: '', photoURL: '', theme: 'dark' });
+  const [editForm, setEditForm] = useState({ name: '', province: '', locality: '', photoURL: '' });
   const [selectedProvinceObj, setSelectedProvinceObj] = useState(ARGENTINE_PROVINCES[0]);
 
   const [showLivePanel, setShowLivePanel] = useState(false);
@@ -79,9 +80,6 @@ export default function ClientProfile() {
   const [nuevoMensaje, setNuevoMensaje] = useState('');
   const [cargandoChat, setCargandoChat] = useState(true);
 
-  // Usamos directamente el theme del perfil globalmente en el componente
-  const currentTheme = profile.theme || 'dark';
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -89,6 +87,10 @@ export default function ClientProfile() {
           if (docSnap.exists()) {
             const data = docSnap.data();
             setProfile(prev => ({ ...prev, ...data }));
+            
+            if (data.theme) {
+              setCurrentTheme(data.theme);
+            }
             
             let prov = ARGENTINE_PROVINCES[0].name;
             let loc = "";
@@ -108,8 +110,7 @@ export default function ClientProfile() {
               name: data.name || '', 
               province: foundProv.name, 
               locality: loc || foundProv.localities[0], 
-              photoURL: data.photoURL || '',
-              theme: data.theme || 'dark'
+              photoURL: data.photoURL || '' 
             });
           }
           setLoading(false);
@@ -199,7 +200,7 @@ export default function ClientProfile() {
         name: editForm.name,
         location: formattedLocation,
         photoURL: editForm.photoURL,
-        theme: editForm.theme
+        theme: currentTheme
       });
       setIsEditingProfile(false);
       setModal({ isOpen: true, title: "PERFIL ACTUALIZADO", message: "TUS DATOS SE HAN GUARDADO CORRECTAMENTE.", type: "success" });
@@ -300,10 +301,7 @@ export default function ClientProfile() {
         sidebar: 'bg-white/60 border-zinc-200',
         input: 'bg-zinc-100 border-zinc-300 text-zinc-900 placeholder-zinc-500',
         subtext: 'text-zinc-600',
-        accentGlow: 'bg-purple-400/20',
-        modalBg: 'bg-white text-zinc-900 border-zinc-300',
-        selectBg: 'bg-zinc-100 text-zinc-900 border-zinc-300',
-        optionBg: 'bg-white text-zinc-900'
+        accentGlow: 'bg-purple-400/20'
       }
     : {
         bg: 'bg-[#070709]',
@@ -312,10 +310,7 @@ export default function ClientProfile() {
         sidebar: 'bg-[#070709]/40 border-white/10',
         input: 'bg-white/[0.04] border-white/15 text-white placeholder-white/40',
         subtext: 'text-white/70',
-        accentGlow: 'bg-purple-600/40',
-        modalBg: 'bg-[#070709] text-white border-white/15',
-        selectBg: 'bg-[#0b0c10] text-white border-white/15',
-        optionBg: 'bg-[#0b0c10] text-white'
+        accentGlow: 'bg-purple-600/40'
       };
 
   if (loading) return (
@@ -577,7 +572,7 @@ export default function ClientProfile() {
         {isEditingProfile && (
           <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-[250] flex items-center justify-center p-4 uppercase">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className={`${themeClasses.modalBg} backdrop-blur-2xl w-full max-w-lg p-6 md:p-8 rounded-3xl border relative shadow-2xl space-y-6`}
+              className={`${currentTheme === 'light' ? 'bg-white text-zinc-900 border-zinc-300' : 'bg-[#070709] text-white border-white/15'} backdrop-blur-2xl w-full max-w-lg p-6 md:p-8 rounded-3xl border relative shadow-2xl space-y-6`}
             >
               <button onClick={() => setIsEditingProfile(false)} className={`absolute top-6 right-6 ${themeClasses.subtext} hover:${themeClasses.text} transition-colors cursor-pointer p-2 z-10`}><X size={22} /></button>
               
@@ -590,27 +585,27 @@ export default function ClientProfile() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className={`text-[8px] ${themeClasses.subtext} tracking-widest font-black`}>Tema Visual Global</label>
-                  <select value={editForm.theme} onChange={(e) => setEditForm({ ...editForm, theme: e.target.value })} className={`w-full ${themeClasses.selectBg} border rounded-xl px-4 py-3 text-[10px] outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner uppercase`}>
-                    <option value="dark" className={themeClasses.optionBg}>MODO OSCURO (DARK)</option>
-                    <option value="light" className={themeClasses.optionBg}>MODO CLARO (LIGHT)</option>
+                  <label className={`text-[8px] ${themeClasses.subtext} tracking-widest font-black`}>Tema Visual (Sincronizado con Home)</label>
+                  <select value={currentTheme} onChange={(e) => setCurrentTheme(e.target.value)} className={`w-full ${currentTheme === 'light' ? 'bg-zinc-100 text-zinc-900 border-zinc-300' : 'bg-[#0b0c10] text-white border-white/15'} border rounded-xl px-4 py-3 text-[10px] outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner uppercase`}>
+                    <option value="dark">MODO OSCURO (DARK)</option>
+                    <option value="light">MODO CLARO (LIGHT)</option>
                   </select>
                 </div>
 
                 <div className="space-y-2">
                   <label className={`text-[8px] ${themeClasses.subtext} tracking-widest font-black`}>Provincia</label>
-                  <select value={editForm.province} onChange={handleProvinceChange} className={`w-full ${themeClasses.selectBg} border rounded-xl px-4 py-3 text-[10px] outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner`}>
+                  <select value={editForm.province} onChange={handleProvinceChange} className={`w-full ${currentTheme === 'light' ? 'bg-zinc-100 text-zinc-900 border-zinc-300' : 'bg-[#0b0c10] text-white border-white/15'} border rounded-xl px-4 py-3 text-[10px] outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner`}>
                     {ARGENTINE_PROVINCES.map((prov) => (
-                      <option key={prov.name} value={prov.name} className={themeClasses.optionBg}>{prov.name}</option>
+                      <option key={prov.name} value={prov.name} className={`${currentTheme === 'light' ? 'bg-white text-zinc-900' : 'bg-[#0b0c10] text-white'}`}>{prov.name}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="space-y-2">
                   <label className={`text-[8px] ${themeClasses.subtext} tracking-widest font-black`}>Localidad / Zona</label>
-                  <select value={editForm.locality} onChange={(e) => setEditForm({ ...editForm, locality: e.target.value })} className={`w-full ${themeClasses.selectBg} border rounded-xl px-4 py-3 text-[10px] outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner`}>
+                  <select value={editForm.locality} onChange={(e) => setEditForm({ ...editForm, locality: e.target.value })} className={`w-full ${currentTheme === 'light' ? 'bg-zinc-100 text-zinc-900 border-zinc-300' : 'bg-[#0b0c10] text-white border-white/15'} border rounded-xl px-4 py-3 text-[10px] outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner`}>
                     {selectedProvinceObj.localities.map((loc) => (
-                      <option key={loc} value={loc} className={themeClasses.optionBg}>{loc}</option>
+                      <option key={loc} value={loc} className={`${currentTheme === 'light' ? 'bg-white text-zinc-900' : 'bg-[#0b0c10] text-white'}`}>{loc}</option>
                     ))}
                   </select>
                 </div>
@@ -649,7 +644,7 @@ export default function ClientProfile() {
         {isCreatingEvent && (
           <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-[250] flex items-center justify-center p-4 uppercase">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className={`${themeClasses.modalBg} backdrop-blur-2xl w-full max-w-lg p-6 md:p-8 rounded-3xl border relative shadow-2xl space-y-6`}
+              className={`${currentTheme === 'light' ? 'bg-white text-zinc-900 border-zinc-300' : 'bg-[#070709] text-white border-white/15'} backdrop-blur-2xl w-full max-w-lg p-6 md:p-8 rounded-3xl border relative shadow-2xl space-y-6`}
             >
               <button onClick={() => setIsCreatingEvent(false)} className={`absolute top-6 right-6 ${themeClasses.subtext} hover:${themeClasses.text} transition-colors cursor-pointer p-2 z-10`}><X size={22} /></button>
               
@@ -719,7 +714,7 @@ export default function ClientProfile() {
         {showLivePanel && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/75 backdrop-blur-md p-4 md:p-8 overflow-y-auto">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className={`${themeClasses.modalBg} backdrop-blur-2xl w-full max-w-4xl p-6 md:p-8 rounded-3xl border relative shadow-2xl space-y-6 uppercase`}
+              className={`${currentTheme === 'light' ? 'bg-white text-zinc-900 border-zinc-300' : 'bg-[#070709] text-white border-white/15'} backdrop-blur-2xl w-full max-w-4xl p-6 md:p-8 rounded-3xl border relative shadow-2xl space-y-6 uppercase`}
             >
               <button onClick={() => setShowLivePanel(false)} className={`absolute top-6 right-6 ${themeClasses.subtext} hover:${themeClasses.text} transition-colors cursor-pointer p-2 z-10`}><X size={22} /></button>
 
@@ -735,7 +730,7 @@ export default function ClientProfile() {
                   onShareTV={() => {
                     const link = `https://www.classcode.com.ar/tv/${currentEvent?.id}`;
                     navigator.clipboard.writeText(link);
-                    setModal({ isOpen: true, title: "TV LINK", message: "LINK DE TV COPIADO.", type: "success"});
+                    setModal({ isOpen: true, title: "TV LINK", message: "LINK DE TV COPIADO.", type: "success" });
                   }}
                   onOpenTV={() => navigate(`/tv/${currentEvent?.id}`)}
                   onOpenCreate={() => { setShowLivePanel(false); setIsCreatingEvent(true); }}
