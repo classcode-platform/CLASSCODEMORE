@@ -88,7 +88,8 @@ export default function ClientProfile() {
             const data = docSnap.data();
             setProfile(prev => ({ ...prev, ...data }));
             
-            if (data.theme) {
+            // Sincronización en tiempo real del tema si cambia en Firestore
+            if (data.theme && data.theme !== currentTheme) {
               setCurrentTheme(data.theme);
             }
             
@@ -150,7 +151,7 @@ export default function ClientProfile() {
       }
     });
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate, currentTheme]);
 
   const handleEnviarMensaje = async (e) => {
     e.preventDefault();
@@ -297,8 +298,8 @@ export default function ClientProfile() {
     ? {
         bg: 'bg-[#f4f4f6]',
         text: 'text-zinc-900',
-        card: 'bg-white/70 border-zinc-300/60 shadow-xl',
-        sidebar: 'bg-white/60 border-zinc-200',
+        card: 'bg-white/90 border-zinc-300 shadow-xl',
+        sidebar: 'bg-white/90 border-zinc-200',
         input: 'bg-zinc-100 border-zinc-300 text-zinc-900 placeholder-zinc-500',
         subtext: 'text-zinc-600',
         accentGlow: 'bg-purple-400/20'
@@ -306,8 +307,8 @@ export default function ClientProfile() {
     : {
         bg: 'bg-[#070709]',
         text: 'text-white',
-        card: 'bg-[#070709]/50 border-white/15 shadow-2xl',
-        sidebar: 'bg-[#070709]/40 border-white/10',
+        card: 'bg-[#070709]/80 border-white/15 shadow-2xl',
+        sidebar: 'bg-[#070709]/90 border-white/10',
         input: 'bg-white/[0.04] border-white/15 text-white placeholder-white/40',
         subtext: 'text-white/70',
         accentGlow: 'bg-purple-600/40'
@@ -335,7 +336,7 @@ export default function ClientProfile() {
         />
       </div>
 
-      <header className={`md:hidden fixed top-0 left-0 right-0 w-full ${currentTheme === 'light' ? 'bg-white/70 border-zinc-200' : 'bg-[#070709]/60 border-white/10'} backdrop-blur-md border-b z-[100] px-8 py-5 flex justify-between items-center shadow-xl`}>
+      <header className={`md:hidden fixed top-0 left-0 right-0 w-full ${currentTheme === 'light' ? 'bg-white/90 border-zinc-200' : 'bg-[#070709]/80 border-white/10'} backdrop-blur-md border-b z-[100] px-8 py-5 flex justify-between items-center shadow-xl`}>
         <div onClick={() => navigate('/home')} className={`text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer ${themeClasses.text}`}>
           CLASSCODE
         </div>
@@ -348,7 +349,7 @@ export default function ClientProfile() {
         {isMobileMenuOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileMenuOpen(false)} className="fixed inset-0 bg-black/70 backdrop-blur-md z-[110] md:hidden" />
-            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className={`fixed top-0 right-0 bottom-0 w-[85%] max-w-sm ${currentTheme === 'light' ? 'bg-white/90 border-zinc-200' : 'bg-[#070709]/90 border-white/10'} backdrop-blur-xl border-l z-[120] p-10 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto`}>
+            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className={`fixed top-0 right-0 bottom-0 w-[85%] max-w-sm ${currentTheme === 'light' ? 'bg-white/95 border-zinc-200' : 'bg-[#070709]/95 border-white/10'} backdrop-blur-xl border-l z-[120] p-10 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto`}>
               <button onClick={() => setIsMobileMenuOpen(false)} className={`self-end mb-10 ${themeClasses.subtext} hover:${themeClasses.text} transition-colors cursor-pointer`}>
                 <X size={28} />
               </button>
@@ -444,7 +445,7 @@ export default function ClientProfile() {
             </div>
           </div>
           
-          <button onClick={() => setIsCreatingEvent(true)} className={`px-5 py-3 ${currentTheme === 'light' ? 'bg-zinc-200/80 border-zinc-300 text-zinc-900' : 'bg-white/[0.04] border-white/15 text-white'} backdrop-blur-md rounded-xl text-[9px] font-black flex items-center gap-2 hover:opacity-90 transition-all tracking-widest font-['Poppins'] cursor-pointer shadow-xl flex-shrink-0`}>
+          <button onClick={() => setIsCreatingEvent(true)} className={`px-5 py-3 ${currentTheme === 'light' ? 'bg-zinc-200/90 border-zinc-300 text-zinc-900' : 'bg-white/[0.04] border-white/15 text-white'} backdrop-blur-md rounded-xl text-[9px] font-black flex items-center gap-2 hover:opacity-90 transition-all tracking-widest font-['Poppins'] cursor-pointer shadow-xl flex-shrink-0`}>
             <Plus size={14} className="text-purple-400"/> NUEVO EVENTO
           </button>
         </header>
@@ -455,7 +456,7 @@ export default function ClientProfile() {
           </div>
           
           {events.length === 0 ? (
-            <div className={`py-20 text-center border ${currentTheme === 'light' ? 'border-zinc-300 bg-white/50' : 'border-white/15 bg-[#070709]/40'} rounded-2xl backdrop-blur-md space-y-4 shadow-2xl`}>
+            <div className={`py-20 text-center border ${currentTheme === 'light' ? 'border-zinc-300 bg-white/70' : 'border-white/15 bg-[#070709]/40'} rounded-2xl backdrop-blur-md space-y-4 shadow-2xl`}>
               <Calendar size={36} className={`mx-auto ${themeClasses.subtext}`} />
               <p className={`text-[9px] ${themeClasses.subtext} tracking-[0.3em] font-black uppercase`}>No hay eventos registrados</p>
               <button onClick={() => setIsCreatingEvent(true)} className={`px-6 py-3.5 ${currentTheme === 'light' ? 'bg-zinc-200 border-zinc-300 text-zinc-900' : 'bg-white/[0.04] border-white/15 text-white'} backdrop-blur-md rounded-xl text-[9px] font-black tracking-widest hover:opacity-90 transition-all font-['Poppins'] cursor-pointer shadow-xl`}>
