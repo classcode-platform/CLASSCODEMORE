@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 // --- IMPORTACIONES DE COMPONENTES ---
@@ -81,12 +81,22 @@ function AppContent() {
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
 
+  // Sincronizar el tema globalmente apenas carga la app
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('classcode_theme');
+    if (savedTheme === 'light') {
+      document.documentElement.classList.add('light-theme');
+    } else {
+      document.documentElement.classList.remove('light-theme');
+    }
+  }, []);
+
   return (
     <BrowserRouter>
       {showSplash ? (
         <SplashScreen onFinished={() => setShowSplash(false)} />
       ) : (
-        <div className="animate-in fade-in duration-1000 min-h-screen bg-[#0a0a0a]">
+        <div className="animate-in fade-in duration-1000 min-h-screen bg-[var(--bg-primary)] transition-colors duration-300">
           <AppContent />
         </div>
       )}

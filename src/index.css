@@ -5,7 +5,33 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 1. RESETEO UNIVERSAL: Esto quita el "aire" desprolijo de todos los elementos */
+/* 1. DEFINICIÓN DE VARIABLES DE TEMA (MODO OSCURO POR DEFECTO) */
+:root {
+  --bg-primary: #000000;
+  --bg-secondary: rgba(255, 255, 255, 0.05);
+  --bg-card: #121215;
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --border-glass: rgba(255, 255, 255, 0.1);
+  --glow-color: rgba(168, 85, 247, 0.15);
+  --scrollbar-track: #000000;
+  --scrollbar-thumb: #252526;
+}
+
+/* 2. VARIABLES PARA EL MODO DÍA / CLARO */
+:root.light-theme {
+  --bg-primary: #f4f4f6;
+  --bg-secondary: rgba(0, 0, 0, 0.04);
+  --bg-card: #ffffff;
+  --text-primary: #111113;
+  --text-secondary: #5b5b66;
+  --border-glass: rgba(0, 0, 0, 0.08);
+  --glow-color: rgba(168, 85, 247, 0.08);
+  --scrollbar-track: #f4f4f6;
+  --scrollbar-thumb: #d1d5db;
+}
+
+/* 3. RESETEO UNIVERSAL: Esto quita el "aire" desprolijo de todos los elementos */
 * {
   margin: 0;
   padding: 0;
@@ -15,39 +41,48 @@
 html, body {
   width: 100%;
   height: 100%;
-  background-color: #000000; /* Negro puro para el video */
-  color: white;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   font-family: 'Open Sans', sans-serif;
   margin: 0;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased; /* Hace que las letras se vean más finas y caras */
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* 2. TIPOGRAFÍA DE MARCA: Forzamos Poppins para que respete tu logo */
+/* 4. TIPOGRAFÍA DE MARCA: Forzamos Poppins para que respete tu logo */
 h1, h2, h3, h4, h5, h6, .font-poppins {
   font-family: 'Poppins', sans-serif !important;
 }
 
-/* 3. SCROLLBAR PERSONALIZADA: Para que no aparezca esa barra gris fea de Windows */
+/* 5. SCROLLBAR PERSONALIZADA: Para que no aparezca esa barra gris fea de Windows */
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: var(--scrollbar-track);
 }
 ::-webkit-scrollbar-thumb {
-  background: #252526; /* Gris sutil Japandi */
+  background: var(--scrollbar-thumb); /* Gris sutil adaptativo */
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #7c3aed; /* Violeta al pasar el mouse */
 }
 
-/* 4. UTILITY PARA EL LOGO (Poppins Regular + tracking) */
+/* 6. UTILITY PARA EL LOGO (Poppins Regular + tracking) */
 .logo-style {
   font-family: 'Poppins', sans-serif;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+/* 7. GLASSMORPHISM ADAPTATIVO */
+.glass-panel {
+  background-color: var(--bg-secondary);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass);
 }
