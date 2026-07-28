@@ -60,14 +60,13 @@ export default function ClientProfile() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
   
-  const [currentTheme, setCurrentTheme] = useState('dark');
   const [newEventForm, setNewEventForm] = useState({ title: '', category: 'EVENTO', date: '', location: '' });
 
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
   const [profile, setProfile] = useState({ name: '', location: '', interests: '', photoURL: '', theme: 'dark' });
   
-  const [editForm, setEditForm] = useState({ name: '', province: '', locality: '', photoURL: '' });
+  const [editForm, setEditForm] = useState({ name: '', province: '', locality: '', photoURL: '', theme: 'dark' });
   const [selectedProvinceObj, setSelectedProvinceObj] = useState(ARGENTINE_PROVINCES[0]);
 
   const [showLivePanel, setShowLivePanel] = useState(false);
@@ -80,6 +79,9 @@ export default function ClientProfile() {
   const [nuevoMensaje, setNuevoMensaje] = useState('');
   const [cargandoChat, setCargandoChat] = useState(true);
 
+  // Usamos directamente el theme del perfil globalmente en el componente
+  const currentTheme = profile.theme || 'dark';
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -87,10 +89,6 @@ export default function ClientProfile() {
           if (docSnap.exists()) {
             const data = docSnap.data();
             setProfile(prev => ({ ...prev, ...data }));
-            
-            if (data.theme) {
-              setCurrentTheme(data.theme);
-            }
             
             let prov = ARGENTINE_PROVINCES[0].name;
             let loc = "";
@@ -110,7 +108,8 @@ export default function ClientProfile() {
               name: data.name || '', 
               province: foundProv.name, 
               locality: loc || foundProv.localities[0], 
-              photoURL: data.photoURL || '' 
+              photoURL: data.photoURL || '',
+              theme: data.theme || 'dark'
             });
           }
           setLoading(false);
@@ -200,7 +199,7 @@ export default function ClientProfile() {
         name: editForm.name,
         location: formattedLocation,
         photoURL: editForm.photoURL,
-        theme: currentTheme
+        theme: editForm.theme
       });
       setIsEditingProfile(false);
       setModal({ isOpen: true, title: "PERFIL ACTUALIZADO", message: "TUS DATOS SE HAN GUARDADO CORRECTAMENTE.", type: "success" });
@@ -591,8 +590,8 @@ export default function ClientProfile() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className={`text-[8px] ${themeClasses.subtext} tracking-widest font-black`}>Tema Visual (Sincronizado con Home)</label>
-                  <select value={currentTheme} onChange={(e) => setCurrentTheme(e.target.value)} className={`w-full ${themeClasses.selectBg} border rounded-xl px-4 py-3 text-[10px] outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner uppercase`}>
+                  <label className={`text-[8px] ${themeClasses.subtext} tracking-widest font-black`}>Tema Visual Global</label>
+                  <select value={editForm.theme} onChange={(e) => setEditForm({ ...editForm, theme: e.target.value })} className={`w-full ${themeClasses.selectBg} border rounded-xl px-4 py-3 text-[10px] outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner uppercase`}>
                     <option value="dark" className={themeClasses.optionBg}>MODO OSCURO (DARK)</option>
                     <option value="light" className={themeClasses.optionBg}>MODO CLARO (LIGHT)</option>
                   </select>
