@@ -60,7 +60,9 @@ export default function ClientProfile() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
   
-  const [currentTheme, setCurrentTheme] = useState('dark');
+  const [currentTheme, setCurrentTheme] = useState(() => {
+    return localStorage.getItem('classcode_theme') || 'dark';
+  });
   const [newEventForm, setNewEventForm] = useState({ title: '', category: 'EVENTO', date: '', location: '' });
 
   const [loading, setLoading] = useState(true);
@@ -81,6 +83,10 @@ export default function ClientProfile() {
   const [cargandoChat, setCargandoChat] = useState(true);
 
   useEffect(() => {
+    localStorage.setItem('classcode_theme', currentTheme);
+  }, [currentTheme]);
+
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         onSnapshot(doc(db, "users", user.uid), (docSnap) => {
@@ -88,9 +94,9 @@ export default function ClientProfile() {
             const data = docSnap.data();
             setProfile(prev => ({ ...prev, ...data }));
             
-            // Sincronización reactiva y forzada del tema desde la base de datos
             if (data.theme && (data.theme === 'light' || data.theme === 'dark')) {
               setCurrentTheme(data.theme);
+              localStorage.setItem('classcode_theme', data.theme);
             }
             
             let prov = ARGENTINE_PROVINCES[0].name;
@@ -112,7 +118,7 @@ export default function ClientProfile() {
               province: foundProv.name, 
               locality: loc || foundProv.localities[0], 
               photoURL: data.photoURL || '',
-              theme: data.theme || 'dark'
+              theme: data.theme || currentTheme
             });
           }
           setLoading(false);
@@ -204,6 +210,7 @@ export default function ClientProfile() {
         photoURL: editForm.photoURL,
         theme: currentTheme
       });
+      localStorage.setItem('classcode_theme', currentTheme);
       setIsEditingProfile(false);
       setModal({ isOpen: true, title: "PERFIL ACTUALIZADO", message: "TUS DATOS SE HAN GUARDADO CORRECTAMENTE.", type: "success" });
     } catch (error) {
@@ -593,6 +600,7 @@ export default function ClientProfile() {
                     onChange={(e) => {
                       const nuevoTema = e.target.value;
                       setCurrentTheme(nuevoTema);
+                      localStorage.setItem('classcode_theme', nuevoTema);
                       setEditForm(prev => ({ ...prev, theme: nuevoTema }));
                     }} 
                     className={`w-full ${currentTheme === 'light' ? 'bg-zinc-100 text-zinc-900 border-zinc-300' : 'bg-[#0b0c10] text-white border-white/15'} border rounded-xl px-4 py-3 text-[10px] outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner uppercase`}
