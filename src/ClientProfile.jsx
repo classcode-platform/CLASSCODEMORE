@@ -88,8 +88,8 @@ export default function ClientProfile() {
             const data = docSnap.data();
             setProfile(prev => ({ ...prev, ...data }));
             
-            // Sincronización en tiempo real del tema si cambia en Firestore
-            if (data.theme && data.theme !== currentTheme) {
+            // Sincronización estricta del tema desde la base de datos
+            if (data.theme && (data.theme === 'light' || data.theme === 'dark')) {
               setCurrentTheme(data.theme);
             }
             
@@ -151,7 +151,7 @@ export default function ClientProfile() {
       }
     });
     return () => unsubscribe();
-  }, [navigate, currentTheme]);
+  }, [navigate]);
 
   const handleEnviarMensaje = async (e) => {
     e.preventDefault();
