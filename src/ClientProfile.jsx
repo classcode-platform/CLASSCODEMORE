@@ -67,7 +67,7 @@ export default function ClientProfile() {
   const [events, setEvents] = useState([]);
   const [profile, setProfile] = useState({ name: '', location: '', interests: '', photoURL: '', theme: 'dark' });
   
-  const [editForm, setEditForm] = useState({ name: '', province: '', locality: '', photoURL: '' });
+  const [editForm, setEditForm] = useState({ name: '', province: '', locality: '', photoURL: '', theme: 'dark' });
   const [selectedProvinceObj, setSelectedProvinceObj] = useState(ARGENTINE_PROVINCES[0]);
 
   const [showLivePanel, setShowLivePanel] = useState(false);
@@ -88,7 +88,7 @@ export default function ClientProfile() {
             const data = docSnap.data();
             setProfile(prev => ({ ...prev, ...data }));
             
-            // Sincronización estricta del tema desde la base de datos
+            // Sincronización reactiva y forzada del tema desde la base de datos
             if (data.theme && (data.theme === 'light' || data.theme === 'dark')) {
               setCurrentTheme(data.theme);
             }
@@ -111,7 +111,8 @@ export default function ClientProfile() {
               name: data.name || '', 
               province: foundProv.name, 
               locality: loc || foundProv.localities[0], 
-              photoURL: data.photoURL || '' 
+              photoURL: data.photoURL || '',
+              theme: data.theme || 'dark'
             });
           }
           setLoading(false);
@@ -587,7 +588,15 @@ export default function ClientProfile() {
 
                 <div className="space-y-2">
                   <label className={`text-[8px] ${themeClasses.subtext} tracking-widest font-black`}>Tema Visual (Sincronizado con Home)</label>
-                  <select value={currentTheme} onChange={(e) => setCurrentTheme(e.target.value)} className={`w-full ${currentTheme === 'light' ? 'bg-zinc-100 text-zinc-900 border-zinc-300' : 'bg-[#0b0c10] text-white border-white/15'} border rounded-xl px-4 py-3 text-[10px] outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner uppercase`}>
+                  <select 
+                    value={currentTheme} 
+                    onChange={(e) => {
+                      const nuevoTema = e.target.value;
+                      setCurrentTheme(nuevoTema);
+                      setEditForm(prev => ({ ...prev, theme: nuevoTema }));
+                    }} 
+                    className={`w-full ${currentTheme === 'light' ? 'bg-zinc-100 text-zinc-900 border-zinc-300' : 'bg-[#0b0c10] text-white border-white/15'} border rounded-xl px-4 py-3 text-[10px] outline-none focus:border-purple-400 transition-colors cursor-pointer shadow-inner uppercase`}
+                  >
                     <option value="dark">MODO OSCURO (DARK)</option>
                     <option value="light">MODO CLARO (LIGHT)</option>
                   </select>
