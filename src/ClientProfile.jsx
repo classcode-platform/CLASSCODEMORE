@@ -242,7 +242,7 @@ export default function ClientProfile() {
       type: 'warning',
       onConfirm: async () => {
         await deleteDoc(doc(db, "events_organizer", id));
-        setModal({ isOpen: false });
+        setModal(prev => ({ ...prev, isOpen: false }));
       }
     });
   };
@@ -281,7 +281,7 @@ export default function ClientProfile() {
       type: 'warning',
       onConfirm: async () => {
         await updateDoc(doc(db, "events_organizer", currentEvent.id), { status: 'FINALIZADO' });
-        setModal({ isOpen: false });
+        setModal(prev => ({ ...prev, isOpen: false }));
       }
     });
   };
@@ -340,18 +340,6 @@ export default function ClientProfile() {
               <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-10 text-white/60 hover:text-white transition-colors cursor-pointer">
                 <X size={28} />
               </button>
-              
-              <button onClick={handleSwitchToTalent} className="mb-10 w-full flex items-center justify-between bg-white/[0.04] backdrop-blur-md border border-white/10 p-4 rounded-xl group hover:bg-white/[0.08] transition-all cursor-pointer shadow-lg">
-                <div className="flex items-center gap-4 text-left leading-none">
-                  <div className="p-2.5 bg-purple-500/15 rounded-lg text-purple-300 border border-purple-500/30">
-                    <RefreshCcw size={16} className="group-hover:rotate-180 transition-transform duration-700" />
-                  </div>
-                  <div>
-                    <p className="text-[7px] font-black text-purple-300 tracking-[0.2em]">SWITCH MOOD</p>
-                    <p className="text-[11px] font-black text-white tracking-widest uppercase leading-none mt-1">MODO TALENT</p>
-                  </div>
-                </div>
-              </button>
 
               <nav className="flex-1 space-y-6">
                 <button onClick={() => { navigate('/client-profile'); setIsMobileMenuOpen(false); }} className="flex items-center gap-4 text-[11px] font-black tracking-widest text-purple-300 uppercase cursor-pointer w-full py-2">
@@ -380,20 +368,6 @@ export default function ClientProfile() {
             EXPERIENCE
           </p>
         </header>
-        
-        <div className="mb-10 text-left">
-          <button onClick={handleSwitchToTalent} className="w-full flex items-center justify-between bg-white/[0.04] backdrop-blur-md border border-white/10 p-4 rounded-xl group hover:bg-white/[0.08] transition-all cursor-pointer shadow-lg">
-            <div className="flex items-center gap-3 text-left leading-none">
-              <div className="p-2.5 bg-purple-500/15 rounded-lg text-purple-300 border border-purple-500/30">
-                <RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
-              </div>
-              <div>
-                <p className="text-[6px] font-black text-purple-300 tracking-[0.2em] leading-none">SWITCH MOOD</p>
-                <p className="text-[9px] font-black text-white tracking-widest uppercase mt-1 leading-none">MODO TALENT</p>
-              </div>
-            </div>
-          </button>
-        </div>
 
         <nav className="flex-1 space-y-3 text-left">
           <button onClick={() => navigate('/client-profile')} className="flex items-center gap-3 text-purple-300 py-3 px-3 text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer w-full">
@@ -570,8 +544,15 @@ export default function ClientProfile() {
       {/* MODAL EDITAR PERFIL */}
       <AnimatePresence>
         {isEditingProfile && (
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-[250] flex items-center justify-center p-4 uppercase">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+          <div 
+            onClick={() => setIsEditingProfile(false)} 
+            className="fixed inset-0 bg-black/75 backdrop-blur-md z-[250] flex items-center justify-center p-4 uppercase"
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
               className="bg-[#070709] backdrop-blur-2xl w-full max-w-lg p-6 md:p-8 rounded-3xl border border-white/15 relative shadow-2xl space-y-6"
             >
               <button onClick={() => setIsEditingProfile(false)} className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
@@ -635,8 +616,15 @@ export default function ClientProfile() {
       {/* MODAL CREAR EVENTO CON INPUT TIPO FECHA NATIVO */}
       <AnimatePresence>
         {isCreatingEvent && (
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-[250] flex items-center justify-center p-4 uppercase">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+          <div 
+            onClick={() => setIsCreatingEvent(false)} 
+            className="fixed inset-0 bg-black/75 backdrop-blur-md z-[250] flex items-center justify-center p-4 uppercase"
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
               className="bg-[#070709] backdrop-blur-2xl w-full max-w-lg p-6 md:p-8 rounded-3xl border border-white/15 relative shadow-2xl space-y-6"
             >
               <button onClick={() => setIsCreatingEvent(false)} className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
@@ -706,8 +694,15 @@ export default function ClientProfile() {
       {/* LIVE CONTROL PANEL EN GLASS */}
       <AnimatePresence>
         {showLivePanel && (
-          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/75 backdrop-blur-md p-4 md:p-8 overflow-y-auto">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+          <div 
+            onClick={() => setShowLivePanel(false)} 
+            className="fixed inset-0 z-[300] flex items-center justify-center bg-black/75 backdrop-blur-md p-4 md:p-8 overflow-y-auto"
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
               className="bg-[#070709] backdrop-blur-2xl w-full max-w-4xl p-6 md:p-8 rounded-3xl border border-white/15 relative shadow-2xl space-y-6 uppercase"
             >
               <button onClick={() => setShowLivePanel(false)} className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors cursor-pointer p-2 z-10"><X size={22} /></button>
@@ -740,15 +735,23 @@ export default function ClientProfile() {
       <AnimatePresence>
         {previewImage && (
           <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/80 backdrop-blur-lg p-4" onClick={() => setPreviewImage(null)}>
-            <div className="relative max-w-3xl max-h-[90vh]">
+            <div className="relative max-w-3xl max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
               <img src={previewImage} alt="Preview" className="max-w-full max-h-[85vh] object-contain rounded-xl border border-white/20 shadow-2xl" />
-              <button onClick={() => setPreviewImage(null)} className="absolute -top-4 -right-4 p-2 bg-black/90 text-white rounded-full border border-white/20 shadow-xl"><X size={18}/></button>
+              <button onClick={() => setPreviewImage(null)} className="absolute -top-4 -right-4 p-2 bg-black/90 text-white rounded-full border border-white/20 shadow-xl cursor-pointer"><X size={18}/></button>
             </div>
           </div>
         )}
       </AnimatePresence>
 
-      <CustomModal isOpen={modal.isOpen} onClose={() => setModal({ ...modal, isOpen: externalModalState => externalModalState })} onConfirm={modal.onConfirm} title={modal.title} message={modal.message} type={modal.type} />
+      {/* MODAL PERSONALIZADO (ALERTAS Y CONFIRMACIONES) */}
+      <CustomModal 
+        isOpen={modal.isOpen} 
+        onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} 
+        onConfirm={modal.onConfirm} 
+        title={modal.title} 
+        message={modal.message} 
+        type={modal.type} 
+      />
     </div>
   );
 }
