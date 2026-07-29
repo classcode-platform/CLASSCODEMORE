@@ -19,7 +19,7 @@ const ShareModal = ({ isOpen, onClose, userProfile, profileId, theme }) => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        className={`relative w-full max-w-sm ${theme === 'light' ? 'bg-white border-black/15 text-black' : 'bg-[#070709] border-white/15 text-white'} border rounded-3xl shadow-2xl overflow-hidden p-8 flex flex-col items-center text-center backdrop-blur-2xl uppercase`}
+        className={`relative w-full max-w-sm ${theme === 'light' ? 'bg-white border-black/15 text-black' : 'bg-[#070709] border-white/15 text-white'} border rounded-3xl shadow-2xl overflow-hidden p-8 flex flex-col items-center text-center uppercase`}
       >
         <button onClick={onClose} className={`absolute top-6 right-6 p-2 ${theme === 'light' ? 'text-gray-400 hover:text-black' : 'text-gray-500 hover:text-white'} transition-colors`}><X size={20} /></button>
         <div className="mb-6 text-center">
@@ -164,106 +164,103 @@ export default function ProfileP() {
   if (!user) return <div className={`min-h-screen ${isLight ? 'bg-gray-50 text-black' : 'bg-[#070709] text-white'} flex items-center justify-center text-[10px] tracking-[0.4em] uppercase font-['Poppins']`}>Sincronizando...</div>;
 
   return (
-    <div className={`min-h-screen ${isLight ? 'bg-gray-50 text-black selection:bg-black selection:text-white' : 'bg-[#070709] text-white selection:bg-white selection:text-black'} font-['Open_Sans'] antialiased flex flex-col relative overflow-x-hidden uppercase`}>
+    <div className={`min-h-screen ${isLight ? 'bg-[#f4f4f6] text-black selection:bg-black selection:text-white' : 'bg-[#070709] text-white selection:bg-white selection:text-black'} font-['Open_Sans'] antialiased flex flex-col relative overflow-x-hidden uppercase`}>
       
       {/* TOPBAR */}
-      <nav className={`p-6 md:p-8 w-full sticky top-0 z-50 ${isLight ? 'bg-gray-50/90 border-black/5' : 'bg-[#070709]/90 border-white/5'} backdrop-blur-xl border-b`}>
-        <div className="max-w-[1000px] mx-auto flex justify-between items-center w-full font-['Poppins']">
-          <button onClick={() => navigate(-1)} className={`${isLight ? 'text-gray-600 hover:text-black' : 'text-gray-400 hover:text-white'} flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-bold`}><ArrowLeft size={14}/> VOLVER</button>
-          <div className="text-xl md:text-2xl tracking-[0.05em] uppercase absolute left-1/2 -translate-x-1/2 cursor-pointer font-normal" onClick={() => navigate('/home')}>CLASSCODE</div>
+      <nav className={`p-6 md:p-8 w-full sticky top-0 z-50 ${isLight ? 'bg-[#f4f4f6]/90 border-black/5' : 'bg-[#070709]/90 border-white/5'} backdrop-blur-xl border-b`}>
+        <div className="max-w-5xl mx-auto flex justify-between items-center w-full font-['Poppins']">
+          <button onClick={() => navigate(-1)} className={`${isLight ? 'text-gray-600 hover:text-black' : 'text-gray-400 hover:text-white'} flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-bold transition-colors`}><ArrowLeft size={14}/> VOLVER</button>
+          <div className="text-xl md:text-2xl tracking-[0.05em] uppercase font-normal cursor-pointer" onClick={() => navigate('/home')}>CLASSCODE</div>
           <button onClick={() => navigate('/home')} className={`${isLight ? 'text-black hover:bg-black/5' : 'text-white hover:bg-white/5'} p-2 rounded-full transition-all`}><Search size={20} /></button>
         </div>
       </nav>
 
-      {/* SHOWREEL / BANNER PRINCIPAL */}
-      <div className={`w-full h-[160px] md:h-[200px] ${isLight ? 'bg-gray-200 border-black/5' : 'bg-black border-white/5'} relative overflow-hidden border-b`}>
-        {user.videoLink ? (
-          <video src={user.videoLink} autoPlay loop muted playsInline className="w-full h-full object-cover pointer-events-none opacity-90" />
-        ) : (
-          <div className={`w-full h-full ${isLight ? 'bg-gray-100 text-gray-400' : 'bg-[#070709] text-gray-600'} flex flex-col items-center justify-center p-6 text-center`}>
-            <Play size={24} className="opacity-40 mb-2" strokeWidth={1}/>
-            <span className="text-[8px] tracking-[0.4em] font-black">SIN SHOWREEL DISPONIBLE</span>
-          </div>
-        )}
-      </div>
-
-      {/* PERFIL HEADER & ACCIONES - CONTENIDO ESTRECHO */}
-      <div className="max-w-[900px] w-full mx-auto px-6 md:px-8 -mt-12 md:-mt-16 relative z-20 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 pb-8 border-b border-inherit">
-        <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left">
-          <div className={`relative w-28 h-28 md:w-32 md:h-32 rounded-full border-4 ${isLight ? 'border-gray-50 bg-white' : 'border-[#070709] bg-black'} overflow-hidden shadow-2xl flex-shrink-0`}>
-            <img src={user.photos?.[0]} className="w-full h-full object-cover" alt="" />
-          </div>
-
-          <div className="space-y-1.5 pb-1">
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-              <h1 className="text-2xl md:text-3xl font-['Poppins'] font-normal tracking-wide">{user.name}</h1>
-              {user.isPro ? (
-                <span className={`${isLight ? 'bg-black/5 text-black border-black/20' : 'bg-white/10 text-white border-white/20'} border px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1.5`}>
-                  <ShieldCheck size={12}/> PRO
-                </span>
-              ) : user.verified ? (
-                <span className={`${isLight ? 'bg-black/5 text-black border-black/20' : 'bg-white/10 text-white border-white/20'} border px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1.5`}>
-                  <ShieldCheck size={12}/> NIVELADO
-                </span>
-              ) : null}
-            </div>
-            <p className={`${isLight ? 'text-gray-500' : 'text-gray-400'} text-[10px] tracking-[0.3em] font-bold`}>{user.job || 'PROFESIONAL'}</p>
-            <div className={`flex items-center justify-center md:justify-start gap-4 text-[10px] ${isLight ? 'text-gray-500' : 'text-gray-500'} font-bold tracking-widest pt-1`}>
-              {user.location && <span className="flex items-center gap-1.5"><MapPin size={14} className={isLight ? 'text-black' : 'text-white'}/> {user.location}</span>}
-              <span className="flex items-center gap-1.5"><Star size={14} className={`${isLight ? 'text-black fill-black' : 'text-white fill-white'}`}/> {user.score || 0} PTS</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 w-full md:w-auto justify-center">
-          <button onClick={handleToggleFavorite} className={`p-4 ${isLight ? 'bg-black/[0.03] hover:bg-black/10 border-black/10 text-black' : 'bg-white/[0.03] hover:bg-white/10 border-white/10 text-white'} rounded-2xl border transition-all`}>
-            <Heart size={18} className={isFavorite ? (isLight ? 'fill-black text-black' : 'fill-white text-white') : ''}/>
-          </button>
-          <button onClick={() => setShowModal(true)} className={`flex-1 md:flex-initial px-8 py-4 rounded-2xl ${isLight ? 'bg-black text-white hover:bg-gray-800' : 'bg-white text-black hover:bg-gray-200'} font-black text-[10px] tracking-[0.3em] transition-all shadow-xl`}>
-            CONTACTAR
-          </button>
-        </div>
-      </div>
-
-      {/* CONTENIDO PRINCIPAL FLUIDO Y CONTENIDO */}
-      <main className="max-w-[900px] mx-auto px-6 md:px-8 py-10 grid lg:grid-cols-12 gap-10 relative z-10 w-full flex-1">
+      {/* CONTENEDOR PRINCIPAL FLUIDO Y SIN LÍNEAS */}
+      <main className="max-w-5xl w-full mx-auto px-6 md:px-8 py-8 flex flex-col gap-10 flex-1">
         
-        {/* COLUMNA IZQUIERDA: CERTIFICACIONES & COMPARTIR */}
-        <div className="lg:col-span-4 space-y-6">
-          {user.completedCourses && user.completedCourses.length > 0 && (
-            <div className="space-y-4">
-              <h3 className={`text-[9px] ${isLight ? 'text-gray-400 border-black/40' : 'text-gray-500 border-white/40'} uppercase tracking-[0.4em] font-black pl-2 border-l`}>Certificaciones</h3>
-              <div className="space-y-2">
-                {user.completedCourses.includes('cert_fotografia_triangulo') && (
-                  <div className={`flex items-center gap-3 ${isLight ? 'bg-black/[0.02] border-black/5 text-black' : 'bg-white/[0.02] border-white/5 text-white'} border px-4 py-3 rounded-2xl`}>
-                    <Zap size={14} className={isLight ? 'text-black' : 'text-white'} />
-                    <span className="text-[9px] font-black tracking-widest">TECH PRO EXPOSICIÓN</span>
-                  </div>
-                )}
-                {user.completedCourses.includes('cert_generico') && (
-                  <div className={`flex items-center gap-3 ${isLight ? 'bg-black/[0.02] border-black/5 text-black' : 'bg-white/[0.02] border-white/5 text-white'} border px-4 py-3 rounded-2xl`}>
-                    <Award size={14} className={isLight ? 'text-black' : 'text-white'} />
-                    <span className="text-[9px] font-black tracking-widest">ÉTICA PROFESIONAL</span>
-                  </div>
-                )}
-              </div>
+        {/* BANNER / SHOWREEL LIMPIO */}
+        <div className={`w-full h-[220px] md:h-[320px] rounded-3xl overflow-hidden relative border ${isLight ? 'bg-black/5 border-black/10' : 'bg-black/40 border-white/10'}`}>
+          {user.videoLink ? (
+            <video src={user.videoLink} autoPlay loop muted playsInline className="w-full h-full object-cover pointer-events-none opacity-90" />
+          ) : (
+            <div className={`w-full h-full ${isLight ? 'text-gray-400' : 'text-gray-600'} flex flex-col items-center justify-center p-6 text-center`}>
+              <Play size={24} className="opacity-40 mb-2" strokeWidth={1}/>
+              <span className="text-[8px] tracking-[0.4em] font-black">SIN SHOWREEL DISPONIBLE</span>
             </div>
           )}
-
-          <button onClick={() => setShowShareModal(true)} className={`w-full flex items-center justify-center gap-2 text-[9px] font-black tracking-[0.3em] ${isLight ? 'text-gray-500 hover:text-black bg-black/[0.02] border-black/5' : 'text-gray-400 hover:text-white bg-white/[0.02] border-white/5'} transition-all uppercase py-4 border rounded-2xl`}>
-            <Share2 size={14} /> Compartir Perfil
-          </button>
         </div>
 
-        {/* COLUMNA DERECHA: PORTFOLIO */}
-        <div className="lg:col-span-8 space-y-6">
-          <h3 className={`text-[9px] ${isLight ? 'text-gray-400 border-black/40' : 'text-gray-500 border-white/40'} uppercase tracking-[0.4em] font-black pl-2 border-l`}>Portfolio</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {user.photos?.slice(1, 13).map((url, i) => (
-              <div key={i} className={`aspect-square rounded-2xl overflow-hidden border ${isLight ? 'border-black/10 bg-gray-100' : 'border-white/10 bg-black'} group relative shadow-lg`}>
-                <img src={url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="" />
+        {/* PERFIL HEADER FLUIDO (SIN LÍNEA INFERIOR) */}
+        <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 pb-2">
+          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left">
+            <div className={`relative w-28 h-28 md:w-32 md:h-32 rounded-full border-2 ${isLight ? 'border-black/20 bg-white' : 'border-white/20 bg-black'} overflow-hidden shadow-2xl flex-shrink-0`}>
+              <img src={user.photos?.[0]} className="w-full h-full object-cover" alt="" />
+            </div>
+
+            <div className="space-y-1.5 pb-1">
+              <h1 className="text-2xl md:text-3xl font-['Poppins'] font-normal tracking-wide">{user.name}</h1>
+              <p className={`${isLight ? 'text-gray-500' : 'text-gray-400'} text-[10px] tracking-[0.3em] font-bold`}>{user.job || 'PROFESIONAL'}</p>
+              
+              <div className={`flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] ${isLight ? 'text-gray-600' : 'text-gray-400'} font-bold tracking-widest pt-1`}>
+                {user.location && <span className="flex items-center gap-1.5"><MapPin size={14} className={isLight ? 'text-black' : 'text-white'}/> {user.location}</span>}
+                <div className="flex items-center gap-1">
+                  <span className="text-[#a855f7]">★★★★★</span>
+                  <span className="ml-1">{user.score || 1425} PTS</span>
+                </div>
               </div>
-            ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 w-full md:w-auto justify-center">
+            <button onClick={handleToggleFavorite} className={`p-4 ${isLight ? 'bg-black/[0.03] hover:bg-black/10 border-black/10 text-black' : 'bg-white/[0.03] hover:bg-white/10 border-white/10 text-white'} rounded-2xl border transition-all`}>
+              <Heart size={18} className={isFavorite ? (isLight ? 'fill-black text-black' : 'fill-white text-white') : ''}/>
+            </button>
+            <button onClick={() => setShowModal(true)} className={`flex-1 md:flex-initial px-8 py-4 rounded-2xl ${isLight ? 'bg-black text-white hover:bg-gray-800' : 'bg-white text-black hover:bg-gray-200'} font-black text-[10px] tracking-[0.3em] transition-all shadow-xl`}>
+              CONTACTAR
+            </button>
+          </div>
+        </div>
+
+        {/* SECCIÓN INFERIOR: CERTIFICACIONES Y PORTFOLIO */}
+        <div className="grid lg:grid-cols-12 gap-10 pt-4">
+          
+          {/* COLUMNA IZQUIERDA: CERTIFICACIONES & COMPARTIR */}
+          <div className="lg:col-span-4 space-y-6">
+            {user.completedCourses && user.completedCourses.length > 0 && (
+              <div className="space-y-4">
+                <h3 className={`text-[9px] ${isLight ? 'text-gray-400 border-black/40' : 'text-gray-500 border-white/40'} uppercase tracking-[0.4em] font-black pl-2 border-l`}>Certificaciones</h3>
+                <div className="space-y-2">
+                  {user.completedCourses.includes('cert_fotografia_triangulo') && (
+                    <div className={`flex items-center gap-3 ${isLight ? 'bg-black/[0.02] border-black/5 text-black' : 'bg-white/[0.02] border-white/5 text-white'} border px-4 py-3 rounded-2xl`}>
+                      <Zap size={14} className={isLight ? 'text-black' : 'text-white'} />
+                      <span className="text-[9px] font-black tracking-widest">TECH PRO EXPOSICIÓN</span>
+                    </div>
+                  )}
+                  {user.completedCourses.includes('cert_generico') && (
+                    <div className={`flex items-center gap-3 ${isLight ? 'bg-black/[0.02] border-black/5 text-black' : 'bg-white/[0.02] border-white/5 text-white'} border px-4 py-3 rounded-2xl`}>
+                      <Award size={14} className={isLight ? 'text-black' : 'text-white'} />
+                      <span className="text-[9px] font-black tracking-widest">ÉTICA PROFESIONAL</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <button onClick={() => setShowShareModal(true)} className={`w-full flex items-center justify-center gap-2 text-[9px] font-black tracking-[0.3em] ${isLight ? 'text-gray-500 hover:text-black bg-black/[0.02] border-black/5' : 'text-gray-400 hover:text-white bg-white/[0.02] border-white/5'} transition-all uppercase py-4 border rounded-2xl`}>
+              <Share2 size={14} /> Compartir Perfil
+            </button>
+          </div>
+
+          {/* COLUMNA DERECHA: PORTFOLIO */}
+          <div className="lg:col-span-8 space-y-6">
+            <h3 className={`text-[9px] ${isLight ? 'text-gray-400 border-black/40' : 'text-gray-500 border-white/40'} uppercase tracking-[0.4em] font-black pl-2 border-l`}>Portfolio</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {user.photos?.slice(1, 13).map((url, i) => (
+                <div key={i} className={`aspect-square rounded-2xl overflow-hidden border ${isLight ? 'border-black/10 bg-gray-100' : 'border-white/10 bg-black'} group relative shadow-lg`}>
+                  <img src={url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </main>
@@ -325,7 +322,7 @@ export default function ProfileP() {
       <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} userProfile={user} profileId={id} theme={theme} />
       
       <footer className={`${isLight ? 'bg-white text-black border-black/5' : 'bg-black text-white border-white/5'} py-16 px-6 border-t text-center relative z-10 w-full font-['Poppins']`}>
-        <div className="max-w-[1000px] mx-auto">
+        <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl font-normal tracking-[0.1em] uppercase mb-3 opacity-30">CLASSCODE</h2>
           <p className="text-[9px] uppercase tracking-[0.4em] font-bold opacity-30">© 2026 — TODOS LOS DERECHOS RESERVADOS</p>
         </div>
