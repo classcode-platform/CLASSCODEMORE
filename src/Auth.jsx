@@ -20,21 +20,40 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
 
   const processUserRedirection = async (user) => {
-    const pendingRole = localStorage.getItem('pendingRole');
-    if (pendingRole) {
-      await setDoc(doc(db, "users", user.uid), {
-        role: pendingRole,
-        email: user.email
-      }, { merge: true });
-      localStorage.removeItem('pendingRole');
-      navigate(pendingRole === 'professional' ? '/dashboard' : '/home');
-    } else {
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        navigate(userDoc.data().role === 'professional' ? '/dashboard' : '/home');
+    try {
+      const pendingRole = localStorage.getItem('pendingRole');
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+
+      if (pendingRole) {
+        // Si hay un rol pendiente de registro (ej: profesional)
+        await setDoc(userRef, {
+          role: pendingRole,
+          email: user.email,
+          createdAt: new Date().toISOString()
+        }, { merge: true });
+        localStorage.removeItem('pendingRole');
+        navigate(pendingRole === 'professional' ? '/dashboard' : '/client-profile');
+      } else if (userDoc.exists()) {
+        // Si ya existe el usuario, respetamos el rol que tenga guardado en la base de datos
+        const role = userDoc.data().role;
+        if (role === 'professional') {
+          navigate('/dashboard');
+        } else {
+          navigate('/client-profile');
+        }
       } else {
-        navigate('/home');
+        // Usuario nuevo por defecto sin rol previo -> va al perfil de cliente / organizador
+        await setDoc(userRef, {
+          email: user.email,
+          role: 'client',
+          createdAt: new Date().toISOString()
+        }, { merge: true });
+        navigate('/client-profile');
       }
+    } catch (error) {
+      console.error("Error en la redirección:", error);
+      navigate('/client-profile'); // Respaldo de seguridad
     }
   };
 
