@@ -109,7 +109,11 @@ export default function ProfileP() {
   }, [showChat, currentChatId]);
 
   const handleToggleFavorite = async () => {
-    if (!auth.currentUser) return alert("Inicia sesión.");
+    if (!auth.currentUser) {
+      alert("Debes iniciar sesión para guardar en favoritos.");
+      navigate('/auth');
+      return;
+    }
     const favRef = doc(db, "users", auth.currentUser.uid, "favorites", id);
     try {
       if (isFavorite) { 
@@ -126,9 +130,22 @@ export default function ProfileP() {
     } catch (e) { console.error(e); }
   };
 
+  const handleOpenContactModal = () => {
+    if (!auth.currentUser) {
+      alert("Debes iniciar sesión para solicitar un presupuesto.");
+      navigate('/auth');
+      return;
+    }
+    setShowModal(true);
+  };
+
   const handleSendMessage = async () => {
     const userAuth = auth.currentUser;
-    if (!userAuth) return navigate('/');
+    if (!userAuth) {
+      alert("Debes iniciar sesión para enviar la solicitud.");
+      navigate('/auth');
+      return;
+    }
     if (!formData.tipoEvento || !formData.fecha || !formData.direccion || !formData.duracion) {
       return alert("POR FAVOR, COMPLETÁ TODOS LOS CAMPOS OBLIGATORIOS.");
     }
@@ -155,6 +172,10 @@ export default function ProfileP() {
   const sendDirectMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
+    if (!auth.currentUser) {
+      navigate('/auth');
+      return;
+    }
     await addDoc(collection(db, "chats", currentChatId, "messages"), { text: newMessage.toUpperCase(), senderId: auth.currentUser.uid, createdAt: serverTimestamp() });
     setNewMessage('');
   };
@@ -215,7 +236,7 @@ export default function ProfileP() {
             <button onClick={handleToggleFavorite} className={`p-4 ${isLight ? 'bg-black/[0.03] hover:bg-black/10 border-black/10 text-black' : 'bg-white/[0.03] hover:bg-white/10 border-white/10 text-white'} rounded-2xl border transition-all`}>
               <Heart size={18} className={isFavorite ? (isLight ? 'fill-black text-black' : 'fill-white text-white') : ''}/>
             </button>
-            <button onClick={() => setShowModal(true)} className={`flex-1 md:flex-initial px-8 py-4 rounded-2xl ${isLight ? 'bg-black text-white hover:bg-gray-800' : 'bg-white text-black hover:bg-gray-200'} font-black text-[10px] tracking-[0.3em] transition-all shadow-xl`}>
+            <button onClick={handleOpenContactModal} className={`flex-1 md:flex-initial px-8 py-4 rounded-2xl ${isLight ? 'bg-black text-white hover:bg-gray-800' : 'bg-white text-black hover:bg-gray-200'} font-black text-[10px] tracking-[0.3em] transition-all shadow-xl`}>
               CONTACTAR
             </button>
           </div>
