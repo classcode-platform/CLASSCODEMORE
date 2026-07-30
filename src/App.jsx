@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 // --- IMPORTACIONES DE COMPONENTES ---
 import SplashScreen from './components/SplashScreen'; 
-import Landing from './Landing';       
 import Auth from './Auth';             
 import Home from './Home';             
 import Results from './Results';       
@@ -68,7 +67,7 @@ function AppContent() {
         } />
 
         {/* RUTA DE RESPALDO */}
-        <Route path="*" element={<Landing />} />
+        <Route path="*" element={<Home />} />
       </Routes>
 
       {isChatRoute && (
