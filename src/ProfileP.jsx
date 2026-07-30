@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { db, auth } from './firebase';
 import { doc, collection, serverTimestamp, setDoc, addDoc, deleteDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MapPin, Search, X, Heart, Send, Share2, Star, ShieldCheck, Zap, Award, Play } from 'lucide-react';
+import { ArrowLeft, MapPin, Search, X, Heart, Send, Share2, Star, ShieldCheck, Zap, Award, Play, AlertCircle } from 'lucide-react';
 
 // --- SHARE MODAL ---
 const ShareModal = ({ isOpen, onClose, userProfile, profileId, theme }) => {
@@ -40,6 +40,33 @@ const ShareModal = ({ isOpen, onClose, userProfile, profileId, theme }) => {
   );
 };
 
+// --- CUSTOM ALERT MODAL ---
+const AuthAlertModal = ({ isOpen, onClose, onConfirm, message, theme }) => {
+  if (!isOpen) return null;
+  const isLight = theme === 'light';
+  return (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+        className={`relative w-full max-w-sm ${isLight ? 'bg-white border-black/15 text-black' : 'bg-[#070709] border-white/15 text-white'} border rounded-3xl shadow-2xl p-8 flex flex-col items-center text-center uppercase`}
+      >
+        <div className={`p-4 rounded-2xl ${isLight ? 'bg-black/5 text-black' : 'bg-white/5 text-white'} mb-4`}>
+          <AlertCircle size={24} strokeWidth={1.5} />
+        </div>
+        <h3 className="text-[11px] font-black tracking-[0.3em] mb-2 font-['Poppins']">Acceso Requerido</h3>
+        <p className={`text-[10px] ${isLight ? 'text-gray-600' : 'text-gray-400'} tracking-wider mb-8 leading-relaxed`}>{message}</p>
+        <div className="flex gap-3 w-full">
+          <button onClick={onClose} className={`flex-1 py-3.5 rounded-2xl ${isLight ? 'bg-black/5 hover:bg-black/10 text-black' : 'bg-white/5 hover:bg-white/10 text-white'} font-black text-[9px] tracking-[0.2em] transition-all`}>
+            CANCELAR
+          </button>
+          <button onClick={onConfirm} className={`flex-1 py-3.5 rounded-2xl ${isLight ? 'bg-black text-white hover:bg-gray-800' : 'bg-white text-black hover:bg-gray-200'} font-black text-[9px] tracking-[0.2em] transition-all shadow-lg`}>
+            INICIAR SESIÓN
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
 export default function ProfileP() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -53,6 +80,10 @@ export default function ProfileP() {
   const [newMessage, setNewMessage] = useState('');
   const [currentChatId, setCurrentChatId] = useState(null);
   const [theme, setTheme] = useState('dark');
+  
+  // Estados para la alerta personalizada de auth
+  const [authAlert, setAuthAlert] = useState({ isOpen: false, message: '' });
+
   const scrollRef = useRef();
   
   const [formData, setFormData] = useState({ 
@@ -110,8 +141,10 @@ export default function ProfileP() {
 
   const handleToggleFavorite = async () => {
     if (!auth.currentUser) {
-      alert("Debes iniciar sesión para guardar en favoritos.");
-      navigate('/auth');
+      setAuthAlert({
+        isOpen: true,
+        message: 'DEBES INICIAR SESIÓN PARA GUARDAR PROFESIONALES EN FAVORITOS.'
+      });
       return;
     }
     const favRef = doc(db, "users", auth.currentUser.uid, "favorites", id);
@@ -132,8 +165,10 @@ export default function ProfileP() {
 
   const handleOpenContactModal = () => {
     if (!auth.currentUser) {
-      alert("Debes iniciar sesión para solicitar un presupuesto.");
-      navigate('/auth');
+      setAuthAlert({
+        isOpen: true,
+        message: 'DEBES INICIAR SESIÓN PARA SOLICITAR UN PRESUPUESTO.'
+      });
       return;
     }
     setShowModal(true);
@@ -142,8 +177,10 @@ export default function ProfileP() {
   const handleSendMessage = async () => {
     const userAuth = auth.currentUser;
     if (!userAuth) {
-      alert("Debes iniciar sesión para enviar la solicitud.");
-      navigate('/auth');
+      setAuthAlert({
+        isOpen: true,
+        message: 'DEBES INICIAR SESIÓN PARA ENVIAR LA SOLICITUD.'
+      });
       return;
     }
     if (!formData.tipoEvento || !formData.fecha || !formData.direccion || !formData.duracion) {
@@ -211,7 +248,7 @@ export default function ProfileP() {
           )}
         </div>
 
-        {/* PERFIL HEADER FLUIDO (SIN LÍNEA INFERIOR) */}
+        {/* PERFIL HEADER FLUIDO */}
         <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 pb-2">
           <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left">
             <div className={`relative w-28 h-28 md:w-32 md:h-32 rounded-full border-2 ${isLight ? 'border-black/20 bg-white' : 'border-white/20 bg-black'} overflow-hidden shadow-2xl flex-shrink-0`}>
@@ -244,8 +281,6 @@ export default function ProfileP() {
 
         {/* SECCIÓN INFERIOR: CERTIFICACIONES Y PORTFOLIO */}
         <div className="grid lg:grid-cols-12 gap-10 pt-4">
-          
-          {/* COLUMNA IZQUIERDA: CERTIFICACIONES & COMPARTIR */}
           <div className="lg:col-span-4 space-y-6">
             {user.completedCourses && user.completedCourses.length > 0 && (
               <div className="space-y-4">
@@ -272,7 +307,6 @@ export default function ProfileP() {
             </button>
           </div>
 
-          {/* COLUMNA DERECHA: PORTFOLIO */}
           <div className="lg:col-span-8 space-y-6">
             <h3 className={`text-[9px] ${isLight ? 'text-gray-400 border-black/40' : 'text-gray-500 border-white/40'} uppercase tracking-[0.4em] font-black pl-2 border-l`}>Portfolio</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -341,6 +375,15 @@ export default function ProfileP() {
       </AnimatePresence>
 
       <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} userProfile={user} profileId={id} theme={theme} />
+      
+      {/* MODAL DE ALERTA DE AUTENTICACIÓN PERSONALIZADO */}
+      <AuthAlertModal 
+        isOpen={authAlert.isOpen} 
+        onClose={() => setAuthAlert({ isOpen: false, message: '' })}
+        onConfirm={() => navigate('/auth')}
+        message={authAlert.message}
+        theme={theme}
+      />
       
       <footer className={`${isLight ? 'bg-white text-black border-black/5' : 'bg-black text-white border-white/5'} py-16 px-6 border-t text-center relative z-10 w-full font-['Poppins']`}>
         <div className="max-w-5xl mx-auto">
