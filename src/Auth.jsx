@@ -6,7 +6,8 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   GoogleAuthProvider,
-  signInWithPopup 
+  signInWithPopup,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -55,7 +56,22 @@ export default function Auth() {
         : await createUserWithEmailAndPassword(auth, email, password);
       await processUserRedirection(userCredential.user);
     } catch (error) {
-      alert("Error en la autenticación");
+      console.error("Error detallado Firebase:", error.code, error.message);
+      alert(`Error en la autenticación: ${error.message}`);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!email) {
+      alert("Por favor, ingresá tu correo electrónico en el campo de arriba para recuperar tu contraseña.");
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("¡Correo de recuperación enviado! Revisá tu bandeja de entrada.");
+    } catch (error) {
+      console.error("Error al restablecer contraseña:", error.code, error.message);
+      alert(`No se pudo enviar el correo: ${error.message}`);
     }
   };
 
@@ -96,6 +112,7 @@ export default function Auth() {
         
         <div className="space-y-6">
           <button 
+            type="button"
             onClick={handleGoogleLogin}
             className="w-full py-3.5 px-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-3 hover:bg-white/10 transition-all group"
           >
@@ -160,10 +177,15 @@ export default function Auth() {
         </div>
         
         <footer className="pt-4 flex flex-col items-center gap-3">
-          <button className="text-[9px] text-gray-600 tracking-[0.15em] uppercase hover:text-purple-400 transition-colors">
+          <button 
+            type="button" 
+            onClick={handlePasswordReset}
+            className="text-[9px] text-gray-600 tracking-[0.15em] uppercase hover:text-purple-400 transition-colors"
+          >
             ¿Olvidaste tu contraseña?
           </button>
           <button 
+            type="button"
             onClick={() => setIsLogin(!isLogin)} 
             className="text-white text-[10px] tracking-[0.15em] uppercase font-bold border-b border-white/20 pb-1"
           >
