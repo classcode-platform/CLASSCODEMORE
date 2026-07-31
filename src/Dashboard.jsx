@@ -45,7 +45,7 @@ export default function Dashboard() {
   const CLOUD_NAME = "dsyfitywd";
   const UPLOAD_PRESET = "CLASSCODE"; 
 
-  // Estructura actualizada con la categoría Técnica y equipamiento ajustada[cite: 4]
+  // Estructura actualizada con las categorías oficiales correctas
   const RUBROS = {
     "FOTO Y VIDEO": [
       "Fotografía", "Video", "Edición", "Cobertura Integral", "Drone"
@@ -68,12 +68,12 @@ export default function Dashboard() {
   };
   
   const RUBRO_ICONS = {
-    "COBERTURA AUDIOVISUAL Y VISUAL": CameraIcon,
+    "FOTO Y VIDEO": CameraIcon,
     "ESPACIOS Y LOCACIONES": HomeIcon,
     "TÉCNICA Y EQUIPAMIENTO": Zap,
-    "AMBIENTACIÓN, DECO Y PROVEEDORES": Utensils,
-    "MODA, ESTILISMO Y BELLEZA": Sparkles,
-    "PRODUCCIÓN, TALENTO Y PLANIFICACIÓN": Clapperboard
+    "AMBIENTACIÓN Y PROVEEDORES": Utensils,
+    "ESTILISMO Y BELLEZA": Sparkles,
+    "SHOWS Y TALENTOS": Clapperboard
   };
 
   const PROVINCIAS = ["CABA", "Buenos Aires", "Capital Federal", "Córdoba", "Santa Fe", "Mendoza", "Tucumán", "Entre Ríos", "Salta", "Misiones", "Chaco", "Corrientes", "Río Negro", "Neuquén", "Chubut", "Formosa", "Jujuy", "San Luis", "San Juan", "La Rioja", "La Pampa", "Santiago del Estero", "Catamarca", "Santa Cruz", "Tierra del Fuego"];
