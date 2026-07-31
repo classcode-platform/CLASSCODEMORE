@@ -136,25 +136,31 @@ export default function Results() {
   const filteredProfessionals = professionals.filter(pro => {
     const proRubro = pro.job || pro.category || '';
     
+    // Normalizamos specialty de forma segura por si viene como Array o String
+    const specialtyList = Array.isArray(pro.specialty) 
+      ? pro.specialty.map(s => s.toLowerCase()) 
+      : (typeof pro.specialty === 'string' ? [pro.specialty.toLowerCase()] : []);
+
     let matchMacro = true;
     if (selectedMacro) {
       const subsOfMacro = RUBROS[selectedMacro] || [];
       matchMacro = proRubro.toLowerCase() === selectedMacro.toLowerCase() || 
                    subsOfMacro.some(s => s.toLowerCase() === proRubro.toLowerCase()) ||
-                   pro.specialty?.toLowerCase() === selectedMacro.toLowerCase();
+                   specialtyList.includes(selectedMacro.toLowerCase());
     }
 
     let matchSub = true;
     if (selectedSub) {
       matchSub = proRubro.toLowerCase() === selectedSub.toLowerCase() || 
-                 pro.specialty?.toLowerCase() === selectedSub.toLowerCase();
+                 specialtyList.includes(selectedSub.toLowerCase());
     }
 
     const matchProvincia = selectedProvincia ? pro.location?.toLowerCase().includes(selectedProvincia.toLowerCase()) : true;
     const matchQuery = searchTermQuery ? (
       pro.name?.toLowerCase().includes(searchTermQuery.toLowerCase()) ||
       proRubro.toLowerCase().includes(searchTermQuery.toLowerCase()) ||
-      pro.location?.toLowerCase().includes(searchTermQuery.toLowerCase())
+      pro.location?.toLowerCase().includes(searchTermQuery.toLowerCase()) ||
+      specialtyList.some(s => s.includes(searchTermQuery.toLowerCase()))
     ) : true;
 
     return matchMacro && matchSub && matchProvincia && matchQuery;
@@ -410,7 +416,9 @@ export default function Results() {
                       </div>
 
                       {pro.specialty && (
-                        <p className={`text-[9px] ${isDarkMode ? 'text-gray-400' : 'text-neutral-600'} font-bold tracking-widest`}>{pro.specialty}</p>
+                        <p className={`text-[9px] ${isDarkMode ? 'text-gray-400' : 'text-neutral-600'} font-bold tracking-widest`}>
+                          {Array.isArray(pro.specialty) ? pro.specialty.join(', ') : pro.specialty}
+                        </p>
                       )}
 
                       <div className={`flex flex-wrap items-center gap-3 text-[8px] ${isDarkMode ? 'text-gray-500' : 'text-neutral-500'} font-bold tracking-widest pt-2`}>
