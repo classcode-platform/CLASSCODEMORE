@@ -82,22 +82,22 @@ export default function Home() {
     }
   ];
 
-  // Estructura oficial de RUBROS y RUBRO_ICONS solicitada
+  // ESTRUCTURA OFICIAL DE RUBROS ACTUALIZADA (Macro-categorías en 2 palabras)
   const RUBROS = {
     "FOTO Y VIDEO": [
       "Fotografía", "Video", "Edición", "Cobertura Integral", "Drone"
     ],
     "ESPACIOS Y LOCACIONES": [
-      "Salones", "Estudios", "Quintas", "Teatros", "Hoteles", "Rooftops", "Otros espacios"
+      "Salones", "Estudios", "Quintas", "Teatros", "Hoteles", "Otros espacios"
     ],
     "TÉCNICA Y EQUIPAMIENTO": [
-      "Sonido e iluminación", "Rental", "Iluminación", "Pantallas LED", "Escenarios", "Sonidista", "DJ"
+      "Sonido e iluminación", "Rental", "Iluminación", "Pantallas LED", "DJ"
     ],
     "AMBIENTACIÓN Y PROVEEDORES": [
       "Ambientación", "Catering", "Pastelería", "Barra", "Planner"
     ],
     "ESTILISMO Y BELLEZA": [
-      "Makeup y pelo", "Atelier y alta costura", "Joyería y accesorios", "Make up", "Hairstylist"
+      "Make up", "Hairstylist", "Moda", "Estilismo", "Asesoría de Imagen"
     ],
     "SHOWS Y TALENTOS": [
       "Artista", "Producción", "Influencer", "Show", "UGC", "Community Manager"
@@ -501,7 +501,7 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* MACRO-CATEGORÍAS VISUALES CON LAS SUBCATEGORÍAS CORRESPONDIENTES (SIN ICONO EN TÍTULO) */}
+          {/* MACRO-CATEGORÍAS VISUALES CON LAS SUBCATEGORÍAS CORRESPONDIENTES */}
           <div className="w-full flex flex-col gap-6 mt-4">
             <div className="flex items-center justify-between border-b border-[var(--border-glass)] pb-3">
               <div className="flex items-center gap-2">

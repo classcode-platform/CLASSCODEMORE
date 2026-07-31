@@ -29,7 +29,7 @@ export default function Results() {
   const subRef = useRef(null);
   const locRef = useRef(null);
 
-  // ESTRUCTURA OFICIAL DE RUBROS ACTUALIZADA
+  // ESTRUCTURA OFICIAL DE RUBROS ACTUALIZADA (Macro-categorías en 2 palabras)
   const RUBROS = {
     "FOTO Y VIDEO": [
       "Fotografía", "Video", "Edición", "Cobertura Integral", "Drone"
@@ -239,7 +239,7 @@ export default function Results() {
                       onClick={() => { setSelectedMacro(''); setSelectedSub(''); setIsMacroOpen(false); }}
                       className={`px-3 py-3 text-[9px] uppercase tracking-widest rounded-xl cursor-pointer transition-all flex items-center justify-between ${!selectedMacro ? 'bg-purple-600/20 text-purple-400 font-bold' : 'hover:bg-white/5'}`}
                     >
-                      TODAS LOS RUBROS
+                      TODOS LOS RUBROS
                       {!selectedMacro && <Check size={14} className="text-purple-400" />}
                     </div>
 

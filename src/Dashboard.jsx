@@ -45,7 +45,7 @@ export default function Dashboard() {
   const CLOUD_NAME = "dsyfitywd";
   const UPLOAD_PRESET = "CLASSCODE"; 
 
-  // Estructura actualizada con la categoría Técnica y equipamiento ajustada
+  // Estructura actualizada con la categoría Técnica y equipamiento ajustada[cite: 4]
   const RUBROS = {
     "FOTO Y VIDEO": [
       "Fotografía", "Video", "Edición", "Cobertura Integral", "Drone"
