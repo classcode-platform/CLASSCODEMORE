@@ -657,7 +657,7 @@ export default function Dashboard() {
                 <button type="button" onClick={() => setIsEditingProfile(false)} className={`px-5 py-3 ${isDarkMode ? 'bg-white/[0.04] border-white/15 hover:bg-white/[0.08] text-white' : 'bg-black/[0.04] border-black/15 hover:bg-black/[0.08] text-neutral-900'} border rounded-xl text-[9px] font-black tracking-widest transition-all cursor-pointer`}>
                   Descartar
                 </button>
-                <button type="button" onClick={handleSaveProfileData} className={`px-6 py-3 ${isDarkMode ? 'bg-white/[0.04] hover:bg-white/[0.08] border-white/15 text-white' : 'bg-black/[0.04] hover:bg-black/[0.08] border-black/15 text-neutral-900'} border rounded-xl text-[9px] font-black tracking-widest transition-all cursor-pointer flex items-center gap-2`}>
+                <button type="button" onClick={handleSaveProfileData} className={`px-6 py-3 ${isDarkMode ? 'bg-white/[0.04] hover:bg-white/[0.08] border-white/15 text-white' : 'bg-black/[0.04] border-black/15 hover:bg-black/[0.08] text-neutral-900'} border rounded-xl text-[9px] font-black tracking-widest transition-all cursor-pointer flex items-center gap-2`}>
                   Guardar
                 </button>
               </div>
