@@ -20,7 +20,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState([]);
   
-  // Estado del tema (Día / Noche) sincronizado con la plataforma
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('classcode_theme');
     return savedTheme ? savedTheme === 'dark' : true;
@@ -312,7 +311,7 @@ export default function Dashboard() {
         <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className={`absolute bottom-0 right-0 w-[500px] h-[500px] ${isDarkMode ? 'bg-indigo-600/10' : 'bg-indigo-600/5'} rounded-full blur-[90px] md:blur-[130px]`} />
       </div>
 
-      <header className={`md:hidden fixed top-0 left-0 right-0 w-full ${isDarkMode ? 'bg-[#070709]/60 border-white/10 text-white' : 'bg-white/60 border-black/10 text-neutral-900'} backdrop-blur-md border-b z-[100] px-8 py-5 flex justify-between items-center shadow-xl`}>
+      <header className={`md:hidden fixed top-0 left-0 right-0 w-full ${isDarkMode ? 'bg-[#070709]/90 border-white/10 text-white' : 'bg-white/90 border-black/10 text-neutral-900'} backdrop-blur-md border-b z-[100] px-8 py-5 flex justify-between items-center shadow-xl`}>
         <div onClick={() => navigate('/home')} className={`text-[18px] font-['Poppins'] font-normal tracking-[0.05em] uppercase cursor-pointer ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>CLASSCODE</div>
         <button onClick={() => setIsMobileMenuOpen(true)} className={`${isDarkMode ? 'text-white hover:text-purple-300' : 'text-neutral-900 hover:text-purple-600'} transition-colors cursor-pointer`}><Menu size={28} /></button>
       </header>
@@ -321,7 +320,7 @@ export default function Dashboard() {
         {isMobileMenuOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileMenuOpen(false)} className="fixed inset-0 bg-black/70 backdrop-blur-md z-[110] md:hidden" />
-            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className={`fixed top-0 right-0 bottom-0 w-[85%] max-w-sm ${isDarkMode ? 'bg-[#070709]/90 border-white/10 text-white' : 'bg-white/95 border-black/10 text-neutral-900'} backdrop-blur-xl border-l z-[120] p-10 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto`}>
+            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className={`fixed top-0 right-0 bottom-0 w-[85%] max-w-sm ${isDarkMode ? 'bg-[#070709] border-white/10 text-white' : 'bg-white border-black/10 text-neutral-900'} border-l z-[120] p-10 flex flex-col md:hidden shadow-2xl box-border overflow-y-auto`}>
               <button onClick={() => setIsMobileMenuOpen(false)} className={`self-end mb-10 ${isDarkMode ? 'text-white/60 hover:text-white' : 'text-neutral-500 hover:text-neutral-900'} transition-colors cursor-pointer`}><X size={28} /></button>
               
               <button onClick={handleSwitchToClient} className="mb-10 w-full flex items-center justify-between p-2 group transition-all cursor-pointer">
@@ -348,7 +347,7 @@ export default function Dashboard() {
         )}
       </AnimatePresence>
 
-      <aside className={`hidden md:flex w-72 ${isDarkMode ? 'bg-[#070709]/40 border-white/10 text-white' : 'bg-white/60 border-black/10 text-neutral-900'} backdrop-blur-md border-r flex-col p-8 fixed h-full z-50 box-border shadow-2xl`}>
+      <aside className={`hidden md:flex w-72 ${isDarkMode ? 'bg-[#070709] border-white/10 text-white' : 'bg-white border-black/10 text-neutral-900'} border-r flex-col p-8 fixed h-full z-50 box-border shadow-2xl`}>
         <header className="mb-10 text-left leading-none">
           <div onClick={() => navigate('/home')} className={`text-[22px] font-['Poppins'] font-normal tracking-[0.05em] leading-none cursor-pointer uppercase ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>CLASSCODE</div>
           <p className="text-purple-500 text-[10px] font-bold tracking-[0.3em] mt-2.5 leading-none uppercase">Talent</p>
@@ -390,8 +389,8 @@ export default function Dashboard() {
                   onClick={() => setActiveProfileIndex(idx)}
                   className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-widest border transition-all uppercase cursor-pointer shadow-lg ${
                     activeProfileIndex === idx 
-                      ? (isDarkMode ? 'bg-white/[0.08] border-purple-400 text-purple-300 backdrop-blur-md' : 'bg-black/[0.05] border-purple-600 text-purple-600 backdrop-blur-md') 
-                      : (isDarkMode ? 'bg-white/[0.03] backdrop-blur-md border-white/10 text-white/70 hover:text-white' : 'bg-black/[0.02] backdrop-blur-md border-black/10 text-neutral-600 hover:text-neutral-900')
+                      ? (isDarkMode ? 'bg-white/[0.08] border-purple-400 text-purple-300' : 'bg-black/[0.05] border-purple-600 text-purple-600') 
+                      : (isDarkMode ? 'bg-white/[0.03] border-white/10 text-white/70 hover:text-white' : 'bg-black/[0.02] border-black/10 text-neutral-600 hover:text-neutral-900')
                   }`}>
                   {p.job || `PERFIL ${idx + 1}`}
                 </button>
@@ -421,7 +420,7 @@ export default function Dashboard() {
                   </div>
                 )}
                 
-                <div className={`absolute bottom-4 right-4 ${isDarkMode ? 'bg-black/70 text-white border-white/10' : 'bg-white/90 text-neutral-900 border-black/10'} backdrop-blur-md hover:opacity-90 px-4 py-2 rounded-full text-[8px] font-black tracking-widest transition-all flex items-center gap-2 z-20 cursor-pointer border`}>
+                <div className={`absolute bottom-4 right-4 ${isDarkMode ? 'bg-black/80 text-white border-white/10' : 'bg-white text-neutral-900 border-black/10'} hover:opacity-90 px-4 py-2 rounded-full text-[8px] font-black tracking-widest transition-all flex items-center gap-2 z-20 cursor-pointer border shadow-lg`}>
                   <Upload size={14} className="text-purple-500" /> {uploadingStatus.video ? 'SUBIENDO...' : (profile.videoLink ? 'CAMBIAR' : 'SUBIR')}
                 </div>
                 
@@ -437,7 +436,7 @@ export default function Dashboard() {
                     ) : (
                       <div className="w-full h-full flex items-center justify-center"><User size={40}/></div>
                     )}
-                    <label className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 cursor-pointer transition-all">
+                    <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 cursor-pointer transition-all">
                       <Camera size={20} className="text-purple-400"/>
                       <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'photo1')} className="hidden" />
                     </label>
@@ -574,7 +573,7 @@ export default function Dashboard() {
           </main>
         </div>
 
-        <footer className={`w-full ${isDarkMode ? 'bg-[#070709]/60 border-white/10 text-white' : 'bg-neutral-900 border-black/10 text-white'} backdrop-blur-md py-12 px-6 border-t text-center relative z-10 box-border font-['Poppins'] mt-auto`}>
+        <footer className={`w-full ${isDarkMode ? 'bg-[#070709] border-white/10 text-white' : 'bg-neutral-900 border-black/10 text-white'} py-12 px-6 border-t text-center relative z-10 box-border font-['Poppins'] mt-auto`}>
           <div className="max-w-[1400px] mx-auto box-border">
             <h2 className="text-2xl md:text-3xl font-normal tracking-[0.05em] uppercase mb-3 opacity-90">CLASSCODE</h2>
             <p className="text-[9px] uppercase tracking-[0.4em] font-bold opacity-60">© 2026 — TODOS LOS DERECHOS RESERVADOS</p>
@@ -584,7 +583,7 @@ export default function Dashboard() {
 
       <AnimatePresence>
         {isEditingProfile && (
-          <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/75 backdrop-blur-md p-4 box-border overflow-x-hidden uppercase">
+          <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/75 p-4 box-border overflow-x-hidden uppercase">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               className={`${isDarkMode ? 'bg-[#070709] border-white/15 text-white' : 'bg-white border-black/15 text-neutral-900'} w-full max-w-lg p-6 md:p-8 rounded-2xl border relative space-y-6 max-h-[90vh] flex flex-col box-border shadow-2xl`}
             >

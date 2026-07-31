@@ -79,10 +79,21 @@ h1, h2, h3, h4, h5, h6, .font-poppins {
   letter-spacing: 0.05em;
 }
 
-/* 7. GLASSMORPHISM ADAPTATIVO */
+/* 7. GLASSMORPHISM ADAPTATIVO (Optimizado para evitar el glitch de GPU en móviles) */
 .glass-panel {
   background-color: var(--bg-secondary);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-glass);
+  /* Aislamiento de capas para aceleración gráfica limpia en celulares */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Solo aplicamos el desenfoque pesado en pantallas medianas hacia arriba (PC / Tablets) */
+@media (min-width: 768px) {
+  .glass-panel {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
 }
