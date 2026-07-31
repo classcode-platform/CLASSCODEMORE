@@ -548,7 +548,11 @@ export default function Dashboard() {
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
-                    <div key={num} className={`aspect-square rounded-xl overflow-hidden border ${isDarkMode ? 'border-white/15 bg-black/40' : 'border-black/15 bg-black/5'} group relative flex items-center justify-center box-border`}>
+                    <div 
+                      key={num} 
+                      className={`aspect-square rounded-xl overflow-hidden border ${isDarkMode ? 'border-white/15 bg-black/40' : 'border-black/15 bg-black/5'} group relative flex items-center justify-center box-border transform-gpu translate-z-0`}
+                      style={{ backfaceVisibility: 'hidden' }}
+                    >
                       {profile[`photo${num}`] ? (
                         <>
                           <img src={profile[`photo${num}`]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" alt="" />
