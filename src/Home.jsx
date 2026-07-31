@@ -84,7 +84,7 @@ export default function Home() {
 
   // Estructura oficial de RUBROS y RUBRO_ICONS solicitada
   const RUBROS = {
-    "COBERTURA AUDIOVISUAL Y VISUAL": [
+    "FOTO Y VIDEO": [
       "Fotografía", "Video", "Edición", "Cobertura Integral", "Drone"
     ],
     "ESPACIOS Y LOCACIONES": [
@@ -93,10 +93,10 @@ export default function Home() {
     "TÉCNICA Y EQUIPAMIENTO": [
       "Sonido e iluminación", "Rental", "Iluminación", "Pantallas LED", "Escenarios", "Sonidista", "DJ"
     ],
-    "AMBIENTACIÓN, DECO Y PROVEEDORES": [
+    "AMBIENTACIÓN Y PROVEEDORES": [
       "Ambientación", "Catering", "Pastelería", "Barra", "Planner"
     ],
-    "MODA, ESTILISMO Y BELLEZA": [
+    "ESTILISMO Y BELLEZA": [
       "Makeup y pelo", "Atelier y alta costura", "Joyería y accesorios", "Make up", "Hairstylist"
     ],
     "SHOWS Y TALENTOS": [

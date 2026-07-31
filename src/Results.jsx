@@ -31,7 +31,7 @@ export default function Results() {
 
   // ESTRUCTURA OFICIAL DE RUBROS ACTUALIZADA
   const RUBROS = {
-    "COBERTURA AUDIOVISUAL Y VISUAL": [
+    "FOTO Y VIDEO": [
       "Fotografía", "Video", "Edición", "Cobertura Integral", "Drone"
     ],
     "ESPACIOS Y LOCACIONES": [
@@ -40,10 +40,10 @@ export default function Results() {
     "TÉCNICA Y EQUIPAMIENTO": [
       "Sonido e iluminación", "Rental", "Iluminación", "Pantallas LED", "DJ"
     ],
-    "AMBIENTACIÓN, DECO Y PROVEEDORES": [
+    "AMBIENTACIÓN Y PROVEEDORES": [
       "Ambientación", "Catering", "Pastelería", "Barra", "Planner"
     ],
-    "MODA, ESTILISMO Y BELLEZA": [
+    "ESTILISMO Y BELLEZA": [
       "Make up", "Hairstylist", "Moda", "Estilismo", "Asesoría de Imagen"
     ],
     "SHOWS Y TALENTOS": [
@@ -222,7 +222,7 @@ export default function Results() {
                 className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl border text-[9px] uppercase tracking-widest cursor-pointer transition-all ${isDarkMode ? 'bg-[#121215] border-white/10 text-white' : 'bg-white border-black/10 text-neutral-900'}`}
               >
                 <span className={selectedMacro ? "text-purple-400 font-bold truncate" : (isDarkMode ? "text-gray-400 truncate" : "text-neutral-500 truncate")}>
-                  {selectedMacro || "TODAS LAS MACRO-CATEGORÍAS"}
+                  {selectedMacro || "TODAS LAS CATEGORÍAS"}
                 </span>
                 <ChevronDown className={`w-4 h-4 shrink-0 transition-transform duration-300 ${isMacroOpen ? 'rotate-180 text-purple-400' : 'text-gray-400'}`} />
               </button>

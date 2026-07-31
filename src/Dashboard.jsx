@@ -47,7 +47,7 @@ export default function Dashboard() {
 
   // Estructura actualizada con la categoría Técnica y equipamiento ajustada
   const RUBROS = {
-    "COBERTURA AUDIOVISUAL Y VISUAL": [
+    "FOTO Y VIDEO": [
       "Fotografía", "Video", "Edición", "Cobertura Integral", "Drone"
     ],
     "ESPACIOS Y LOCACIONES": [
@@ -56,10 +56,10 @@ export default function Dashboard() {
     "TÉCNICA Y EQUIPAMIENTO": [
       "Sonido e iluminación", "Rental", "Iluminación", "Pantallas LED", "Escenarios", "Sonidista", "DJ"
     ],
-    "AMBIENTACIÓN, DECO Y PROVEEDORES": [
+    "AMBIENTACIÓN Y PROVEEDORES": [
       "Ambientación", "Catering", "Pastelería", "Barra", "Planner"
     ],
-    "MODA, ESTILISMO Y BELLEZA": [
+    "ESTILISMO Y BELLEZA": [
       "Makeup y pelo", "Atelier y alta costura", "Joyería y accesorios", "Make up", "Hairstylist"
     ],
     "SHOWS Y TALENTOS": [
