@@ -64,7 +64,7 @@ export default function Home() {
       title: 'EDITORIAL DE MODA', 
       category: 'ESTILISMO', 
       aspect: 'aspect-[4/5]', 
-      url: "https://res.cloudinary.com/dsyfitywd/image/upload/v1785476490/Dise%C3%B1o_sin_t%C3%ADtulo_18_llsvie.jpg"
+      url: "https://res.cloudinary.com/dsyfitywd/image/upload/v1785476490/Dise%C3%B1o_sin_t%C3%adtulo_18_llsvie.jpg"
     },
     { 
       id: 5, 
@@ -82,62 +82,45 @@ export default function Home() {
     }
   ];
 
-  // Las 6 Macro-Categorías Actualizadas con sus subcategorías completas
-  const macroCategories = [
-    {
-      id: 1,
-      title: "COBERTURA AUDIOVISUAL Y VISUAL",
-      subtitle: "Fotografía, Video, Filmmaking & Postproducción",
-      image: "https://res.cloudinary.com/dsyfitywd/image/upload/v1785476514/Dise%C3%B1o_sin_t%C3%ADtulo_21_pepaqt.jpg",
-      subcategories: ["Fotografía Social", "Fotografía de Moda", "Fotografía Publicitaria", "Fotografía de Producto", "Video y filmmaking", "Postproducción y edición", "Edición de Video", "Color Grading", "Streaming"]
-    },
-    {
-      id: 2,
-      title: "ESPACIOS Y LOCACIONES",
-      subtitle: "Salones, Quintas, Estudios & Sets",
-      image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1000&q=80",
-      subcategories: ["Salones y espacios", "Estudios y locaciones", "Salones", "Quintas", "Estudios Fotográficos", "Estudios Audiovisuales", "Teatros", "Hoteles", "Rooftops"]
-    },
-    {
-      id: 3,
-      title: "TÉCNICA Y EQUIPAMIENTO",
-      subtitle: "Sonido, Iluminación, Rental & Escenarios",
-      image: "https://res.cloudinary.com/dsyfitywd/image/upload/v1785476500/Dise%C3%B1o_sin_t%C3%ADtulo_19_lbiadp.jpg",
-      subcategories: ["Sonido e iluminación", "Alquiler de equipo / Rental", "Iluminación", "Pantallas LED", "Escenarios", "Sonidista", "Operador de Audio", "Mezcla y Mastering"]
-    },
-    {
-      id: 4,
-      title: "AMBIENTACIÓN, DECO Y PROVEEDORES",
-      subtitle: "Materiales, Deco, Catering & Barras",
-      image: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1000&q=80",
-      subcategories: ["Materiales, ambientación y deco", "Catering y barras", "Catering", "Barra", "Bartender", "Barista", "Pastelería", "Food Truck"]
-    },
-    {
-      id: 5,
-      title: "MODA, ESTILISMO Y BELLEZA",
-      subtitle: "Makeup, Pelo, Atelier, Alta Costura & Modelos",
-      image: "https://res.cloudinary.com/dsyfitywd/image/upload/v1785476490/Dise%C3%B1o_sin_t%C3%ADtulo_18_llsvie.jpg",
-      subcategories: ["Makeup y pelo", "Atelier y alta costura", "Joyería y accesorios", "Indumentaria y estilismo", "Moda", "Publicidad", "E-commerce", "Pasarela", "Makeup Social", "Hairstylist"]
-    },
-    {
-      id: 6,
-      title: "PRODUCCIÓN, TALENTO Y PLANIFICACIÓN",
-      subtitle: "Planners, Artistas, Entretenimiento & Logística",
-      image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80",
-      subcategories: ["Event & Wedding Planners", "Artistas y entretenimiento", "Logística y producción", "Wedding Planner", "Event Planner", "Actor / Actriz", "Bailarín/a", "Músico", "Influencer", "UGC Creator", "Community Manager"]
-    }
-  ];
+  // Estructura oficial de RUBROS y RUBRO_ICONS solicitada
+  const RUBROS = {
+    "COBERTURA AUDIOVISUAL Y VISUAL": [
+      "Fotografía", "Video", "Edición", "Cobertura Integral", "Drone"
+    ],
+    "ESPACIOS Y LOCACIONES": [
+      "Salones", "Estudios", "Quintas", "Teatros", "Hoteles", "Rooftops", "Otros espacios"
+    ],
+    "TÉCNICA Y EQUIPAMIENTO": [
+      "Sonido e iluminación", "Rental", "Iluminación", "Pantallas LED", "Escenarios", "Sonidista", "DJ"
+    ],
+    "AMBIENTACIÓN, DECO Y PROVEEDORES": [
+      "Ambientación", "Catering", "Pastelería", "Barra", "Planner"
+    ],
+    "MODA, ESTILISMO Y BELLEZA": [
+      "Makeup y pelo", "Atelier y alta costura", "Joyería y accesorios", "Make up", "Hairstylist"
+    ],
+    "SHOWS Y TALENTOS": [
+      "Artista", "Producción", "Influencer", "Show", "UGC", "Community Manager"
+    ]
+  };
 
-  // Lista simplificada y limpia para el desplegable principal del buscador en Home
-// Las 6 Macro-Categorías exactas para el desplegable limpio de la Home
-const categories = [
-  { name: 'COBERTURA AUDIOVISUAL Y VISUAL', count: '+ profesionales', icon: Camera, gradient: 'from-cyan-400 to-blue-500' },
-  { name: 'ESPACIOS Y LOCACIONES', count: '+ profesionales', icon: HomeIcon, gradient: 'from-slate-400 to-slate-700' },
-  { name: 'TÉCNICA Y EQUIPAMIENTO', count: '+ profesionales', icon: Zap, gradient: 'from-sky-400 to-blue-600' },
-  { name: 'AMBIENTACIÓN, DECO Y PROVEEDORES', count: '+ profesionales', icon: Palette, gradient: 'from-red-400 to-orange-500' },
-  { name: 'MODA, ESTILISMO Y BELLEZA', count: '+ profesionales', icon: Sparkles, gradient: 'from-pink-400 to-rose-500' },
-  { name: 'PRODUCCIÓN, TALENTO Y PLANIFICACIÓN', count: '+ profesionales', icon: Users, gradient: 'from-indigo-400 to-purple-500' }
-];
+  // Macro-Categorías construidas con sus respectivas imágenes y subcategorías
+  const macroCategories = Object.keys(RUBROS).map((key, index) => {
+    const images = [
+      "https://res.cloudinary.com/dsyfitywd/image/upload/v1785476514/Dise%C3%B1o_sin_t%C3%adtulo_21_pepaqt.jpg",
+      "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1000&q=80",
+      "https://res.cloudinary.com/dsyfitywd/image/upload/v1785476500/Dise%C3%B1o_sin_t%C3%adtulo_19_lbiadp.jpg",
+      "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1000&q=80",
+      "https://res.cloudinary.com/dsyfitywd/image/upload/v1785476490/Dise%C3%B1o_sin_t%C3%adtulo_18_llsvie.jpg",
+      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80"
+    ];
+    return {
+      id: index + 1,
+      title: key,
+      subcategories: RUBROS[key],
+      image: images[index]
+    };
+  });
 
   const locationsList = [
     "CABA", "Buenos Aires", "Córdoba", "Santa Fe", "Mendoza", "Tucumán", 
@@ -312,7 +295,7 @@ const categories = [
         <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-0 w-[200px] md:w-[500px] h-[200px] md:h-[500px] bg-indigo-600/10 rounded-full blur-[90px] md:blur-[130px]" />
       </div>
 
-      {/* HEADER: ThemeSwitcher a la izquierda y controles de cuenta/salir condicionales a la derecha */}
+      {/* HEADER: ThemeSwitcher a la izquierda y controles de cuenta/salir a la derecha */}
       <header className="px-4 py-3 md:px-6 md:py-4 flex justify-between items-center max-w-5xl mx-auto w-full relative z-[60]">
         <div>
           <ThemeSwitcher />
@@ -377,21 +360,16 @@ const categories = [
                       TODAS LAS CATEGORÍAS
                       {!selectedCategory && <Check size={14} className="text-purple-400" />}
                     </div>
-                    {categories.map((c) => {
-                      const IconComponent = c.icon;
+                    {macroCategories.map((c) => {
+                      const isSelected = selectedCategory === c.title;
                       return (
                         <div 
-                          key={c.name}
-                          onClick={() => { setSelectedCategory(c.name); setIsCatOpen(false); }}
-                          className={`px-3 py-2 text-[10px] uppercase tracking-widest rounded-xl cursor-pointer transition-all flex items-center justify-between gap-3 ${selectedCategory === c.name ? 'bg-purple-600/20 text-[var(--text-primary)] font-bold border border-purple-500/30' : 'text-gray-400 hover:bg-white/5'}`}
+                          key={c.title}
+                          onClick={() => { setSelectedCategory(c.title); setIsCatOpen(false); }}
+                          className={`px-3 py-2.5 text-[10px] uppercase tracking-widest rounded-xl cursor-pointer transition-all flex items-center justify-between gap-3 ${isSelected ? 'bg-purple-600/20 text-[var(--text-primary)] font-bold border border-purple-500/30' : 'text-gray-400 hover:bg-white/5'}`}
                         >
-                          <div className="flex items-center gap-3">
-                            <div className={`lg:hidden w-6 h-6 rounded-lg bg-gradient-to-br ${c.gradient} flex items-center justify-center shrink-0 shadow-sm`}>
-                              <IconComponent className="text-white w-3 h-3" />
-                            </div>
-                            <span>{c.name}</span>
-                          </div>
-                          {selectedCategory === c.name && <Check size={14} className="text-purple-400 shrink-0" />}
+                          <span className="truncate">{c.title}</span>
+                          {isSelected && <Check size={14} className="text-purple-400 shrink-0" />}
                         </div>
                       );
                     })}
@@ -523,7 +501,7 @@ const categories = [
             </div>
           </motion.div>
 
-          {/* MACRO-CATEGORÍAS VISUALES */}
+          {/* MACRO-CATEGORÍAS VISUALES CON LAS SUBCATEGORÍAS CORRESPONDIENTES (SIN ICONO EN TÍTULO) */}
           <div className="w-full flex flex-col gap-6 mt-4">
             <div className="flex items-center justify-between border-b border-[var(--border-glass)] pb-3">
               <div className="flex items-center gap-2">
@@ -554,12 +532,11 @@ const categories = [
 
                   {/* CONTENIDO DE LA TARJETA */}
                   <div className="relative z-10 flex flex-col justify-end h-full">
-                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-purple-500 dark:text-purple-400 mb-1.5">
-                      {macro.subtitle}
-                    </span>
-                    <h3 className="text-sm md:text-base font-['Poppins'] tracking-[0.05em] uppercase text-[var(--text-primary)] font-semibold mb-3 leading-snug">
-                      {macro.title}
-                    </h3>
+                    <div className="mb-2">
+                      <h3 className="text-sm md:text-base font-['Poppins'] tracking-[0.05em] uppercase text-[var(--text-primary)] font-semibold leading-snug">
+                        {macro.title}
+                      </h3>
+                    </div>
 
                     {/* SUBCATEGORÍAS COMO TAGS */}
                     <div className="flex flex-wrap gap-1.5 pt-3 border-t border-[var(--border-glass)]">

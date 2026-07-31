@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { db } from './firebase'; 
 import { collection, onSnapshot, query } from 'firebase/firestore'; 
-import { motion } from 'framer-motion';
-import { MapPin, ArrowRight, Search, Star, ShieldCheck, Zap, Award, Filter, X, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MapPin, ArrowRight, Search, ShieldCheck, Zap, Award, Filter, X, CheckCircle2, ChevronDown, Check } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Results() {
@@ -11,47 +11,43 @@ export default function Results() {
   const [professionals, setProfessionals] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Estado del tema (Día / Noche) sincronizado con la plataforma
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('classcode_theme');
     return savedTheme ? savedTheme === 'dark' : true;
   });
 
-  const [selectedRubro, setSelectedRubro] = useState('');
+  const [selectedMacro, setSelectedMacro] = useState('');
+  const [selectedSub, setSelectedSub] = useState('');
   const [selectedProvincia, setSelectedProvincia] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [searchTermQuery, setSearchTermQuery] = useState('');
 
-  // Las 6 Macro-Categorías exactas conectadas con sus subespecialidades finas para el filtro en cascada
+  const [isMacroOpen, setIsMacroOpen] = useState(false);
+  const [isSubOpen, setIsSubOpen] = useState(false);
+  const [isLocOpen, setIsLocOpen] = useState(false);
+
+  const macroRef = useRef(null);
+  const subRef = useRef(null);
+  const locRef = useRef(null);
+
+  // ESTRUCTURA OFICIAL DE RUBROS ACTUALIZADA
   const RUBROS = {
     "COBERTURA AUDIOVISUAL Y VISUAL": [
-      "Fotografía Social", "Fotografía de Moda", "Fotografía Publicitaria", "Fotografía de Producto", 
-      "Fotografía Gastronómica", "Fotografía Inmobiliaria", "Fotografía Corporativa", "Fotografía Editorial", 
-      "Fotografía Deportiva", "Fotografía de Naturaleza", "Retrato", "Filmmaker", "Dirección de Fotografía", 
-      "Edición de Video", "Color Grading", "Motion Graphics", "Animación 2D / 3D", "Streaming", "Operador de Cámara", "Drone"
+      "Fotografía", "Video", "Edición", "Cobertura Integral", "Drone"
     ],
     "ESPACIOS Y LOCACIONES": [
-      "Salones", "Quintas", "Estudios Fotográficos", "Estudios Audiovisuales", "Teatros", 
-      "Galpones", "Hoteles", "Rooftops", "Restaurantes", "Bares", "Espacios Corporativos", "Espacios al Aire Libre"
+      "Salones", "Estudios", "Quintas", "Teatros", "Hoteles", "Otros espacios"
     ],
     "TÉCNICA Y EQUIPAMIENTO": [
-      "Iluminación", "Operador de Luces", "Pantallas LED", "Escenarios", "Estructuras", 
-      "Rigging", "Efectos Especiales", "Mapping", "Sonidista", "Operador de Audio", "Ingeniería de Sonido"
+      "Sonido e iluminación", "Rental", "Iluminación", "Pantallas LED", "DJ"
     ],
     "AMBIENTACIÓN, DECO Y PROVEEDORES": [
-      "Catering", "Barra", "Bartender", "Barista", "Coffee Break", "Pastelería", "Food Truck", "Chef Privado",
-      "Escenografía", "Escaparatismo", "Arte Digital", "Wedding Planner", "Event Planner", "Coordinación de Eventos", "Organización Integral"
+      "Ambientación", "Catering", "Pastelería", "Barra", "Planner"
     ],
     "MODA, ESTILISMO Y BELLEZA": [
-      "Moda", "Publicidad", "E-commerce", "Pasarela", "Presencia para Eventos", "Fitness", "Curvy", "Comercial", 
-      "Makeup Social", "Makeup Editorial", "Makeup FX", "Makeup Artístico", "Hairstylist", "Barbería", "Caracterización",
-      "Estilismo", "Vestuario", "Personal Shopper", "Asesoría de Imagen", "Diseño de Moda", "Sastrería"
+      "Make up", "Hairstylist", "Moda", "Estilismo", "Asesoría de Imagen"
     ],
-    "PRODUCCIÓN, TALENTO Y PLANIFICACIÓN": [
-      "Actor / Actriz", "Bailarín/a", "Cantante", "Músico", "Performer", "Comediante", "Improvisación", "Voz", "Locución", "Doblaje",
-      "Influencer", "UGC Creator", "Streamer", "Presentador/a de Contenido", "Community Creator", "Community Manager", "Social Media Manager", "Content Creator", "Podcaster",
-      "Animación", "Magia", "Circo", "Personajes", "Shows Infantiles", "Shows Temáticos", "Zanquistas", "Comparsas", "Bandas", "DJs en Vivo", "Karaoke", "Humor",
-      "Producción Audiovisual", "Producción de Moda", "Producción de Eventos", "Dirección General", "Dirección Creativa", "Dirección de Arte", "Dirección de Casting", "Asistencia de Producción"
+    "SHOWS Y TALENTOS": [
+      "Artista", "Producción", "Influencer", "Show", "UGC", "Community Manager"
     ]
   };
 
@@ -69,15 +65,36 @@ export default function Results() {
   }, []);
 
   useEffect(() => {
+    function handleClickOutside(event) {
+      if (macroRef.current && !macroRef.current.contains(event.target)) setIsMacroOpen(false);
+      if (subRef.current && !subRef.current.contains(event.target)) setIsSubOpen(false);
+      if (locRef.current && !locRef.current.contains(event.target)) setIsLocOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
     if (!db) return;
 
     const params = new URLSearchParams(location.search);
-    
     const urlCategory = params.get('category') || params.get('job');
     const urlLocation = params.get('location');
     const urlQuery = params.get('q');
 
-    if (urlCategory) setSelectedRubro(urlCategory);
+    if (urlCategory) {
+      if (RUBROS[urlCategory]) {
+        setSelectedMacro(urlCategory);
+      } else {
+        for (const [macro, subs] of Object.entries(RUBROS)) {
+          if (subs.some(s => s.toLowerCase() === urlCategory.toLowerCase())) {
+            setSelectedMacro(macro);
+            setSelectedSub(urlCategory);
+            break;
+          }
+        }
+      }
+    }
     if (urlLocation) setSelectedProvincia(urlLocation);
     if (urlQuery) setSearchTermQuery(urlQuery);
 
@@ -92,17 +109,10 @@ export default function Results() {
 
         if (data.profiles && Array.isArray(data.profiles) && data.profiles.length > 0) {
           data.profiles.forEach((p, idx) => {
-            extractedProfiles.push({
-              id: docId,
-              subIndex: idx,
-              ...p
-            });
+            extractedProfiles.push({ id: docId, subIndex: idx, ...p });
           });
         } else {
-          extractedProfiles.push({
-            id: docId,
-            ...data
-          });
+          extractedProfiles.push({ id: docId, ...data });
         }
       });
       
@@ -125,29 +135,38 @@ export default function Results() {
 
   const filteredProfessionals = professionals.filter(pro => {
     const proRubro = pro.job || pro.category || '';
-    const matchRubro = selectedRubro ? proRubro.toLowerCase() === selectedRubro.toLowerCase() : true;
-    const matchProvincia = selectedProvincia ? pro.location?.toLowerCase().includes(selectedProvincia.toLowerCase()) : true;
-    const matchSpecialty = selectedSpecialty ? pro.specialty?.toLowerCase() === selectedSpecialty.toLowerCase() : true;
     
+    let matchMacro = true;
+    if (selectedMacro) {
+      const subsOfMacro = RUBROS[selectedMacro] || [];
+      matchMacro = proRubro.toLowerCase() === selectedMacro.toLowerCase() || 
+                   subsOfMacro.some(s => s.toLowerCase() === proRubro.toLowerCase()) ||
+                   pro.specialty?.toLowerCase() === selectedMacro.toLowerCase();
+    }
+
+    let matchSub = true;
+    if (selectedSub) {
+      matchSub = proRubro.toLowerCase() === selectedSub.toLowerCase() || 
+                 pro.specialty?.toLowerCase() === selectedSub.toLowerCase();
+    }
+
+    const matchProvincia = selectedProvincia ? pro.location?.toLowerCase().includes(selectedProvincia.toLowerCase()) : true;
     const matchQuery = searchTermQuery ? (
       pro.name?.toLowerCase().includes(searchTermQuery.toLowerCase()) ||
       proRubro.toLowerCase().includes(searchTermQuery.toLowerCase()) ||
-      pro.specialty?.toLowerCase().includes(searchTermQuery.toLowerCase()) ||
       pro.location?.toLowerCase().includes(searchTermQuery.toLowerCase())
     ) : true;
 
-    return matchRubro && matchProvincia && matchSpecialty && matchQuery;
+    return matchMacro && matchSub && matchProvincia && matchQuery;
   }).sort((a, b) => {
     const aComplete = isProfileComplete(a);
     const bComplete = isProfileComplete(b);
-
     if (aComplete && !bComplete) return -1;
     if (!aComplete && bComplete) return 1;
-
-    const scoreA = Number(a.score) || 0;
-    const scoreB = Number(b.score) || 0;
-    return scoreB - scoreA;
+    return (Number(b.score) || 0) - (Number(a.score) || 0);
   });
+
+  const currentSubcategories = selectedMacro && RUBROS[selectedMacro] ? RUBROS[selectedMacro] : [];
 
   if (loading) return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-[#0a0a0c] text-white' : 'bg-[#f4f4f6] text-neutral-900'} flex items-center justify-center font-['Poppins'] tracking-[0.35em] text-[10px]`}>
@@ -156,13 +175,11 @@ export default function Results() {
   );
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-[#0a0a0c] text-white' : 'bg-[#f4f4f6] text-neutral-900'} font-['Open_Sans'] antialiased flex flex-col relative overflow-hidden uppercase transition-colors duration-300`}>
+    <div className={`min-h-screen ${isDarkMode ? 'bg-[#0a0a0c] text-white' : 'bg-[#f4f4f6] text-neutral-900'} font-['Open_Sans'] antialiased flex flex-col relative overflow-x-hidden uppercase transition-colors duration-300`}>
       
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div animate={{ x: [-50, 50, -50], y: [-30, 30, -30], scale: [1, 1.2, 1] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className={`absolute top-0 left-0 w-[250px] md:w-[600px] h-[250px] md:h-[600px] ${isDarkMode ? 'bg-purple-600/10' : 'bg-purple-600/5'} rounded-full blur-[100px] md:blur-[150px]`} />
-        <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className={`absolute bottom-0 right-0 w-[200px] md:w-[500px] h-[200px] md:h-[500px] ${isDarkMode ? 'bg-indigo-600/10' : 'bg-indigo-600/5'} rounded-full blur-[90px] md:blur-[130px]`} />
       </div>
 
       <nav className={`p-6 md:p-8 border-b ${isDarkMode ? 'border-white/5 bg-black/20' : 'border-black/5 bg-white/60'} flex justify-between items-center relative z-50 backdrop-blur-md`}>
@@ -177,9 +194,9 @@ export default function Results() {
           <div className="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <span className={`text-[10px] ${isDarkMode ? 'text-gray-400' : 'text-neutral-600'} tracking-[0.2em] font-bold`}>{filteredProfessionals.length} TALENTOS DISPONIBLES</span>
             
-            {(selectedRubro || selectedProvincia || selectedSpecialty || searchTermQuery) && (
+            {(selectedMacro || selectedSub || selectedProvincia || searchTermQuery) && (
               <button 
-                onClick={() => { setSelectedRubro(''); setSelectedProvincia(''); setSelectedSpecialty(''); setSearchTermQuery(''); }}
+                onClick={() => { setSelectedMacro(''); setSelectedSub(''); setSelectedProvincia(''); setSearchTermQuery(''); }}
                 className={`self-start md:self-auto flex items-center gap-2 text-[8px] font-black tracking-widest ${isDarkMode ? 'bg-white/5 border-white/10 text-purple-400 hover:bg-white/10' : 'bg-black/5 border-black/10 text-purple-600 hover:bg-black/10'} border px-4 py-2 rounded-xl transition-all cursor-pointer`}>
                 <X size={12}/> LIMPIAR FILTROS
               </button>
@@ -187,51 +204,156 @@ export default function Results() {
           </div>
         </header>
 
-        <section className={`${isDarkMode ? 'bg-white/[0.02] border-white/5 text-white' : 'bg-white/70 border-black/5 text-neutral-900'} border backdrop-blur-xl rounded-3xl p-6 mb-12 shadow-2xl space-y-4`}>
+        {/* CONTENEDOR DE FILTROS EN CASCADA (3 COLUMNAS) */}
+        <section className={`${isDarkMode ? 'bg-white/[0.02] border-white/5 text-white' : 'bg-white/70 border-black/5 text-neutral-900'} border backdrop-blur-xl rounded-3xl p-6 mb-12 shadow-2xl space-y-4 relative z-50`}>
           <div className="flex items-center gap-2 text-[9px] font-black text-purple-500 tracking-widest border-l-2 border-purple-500 pl-3">
             <Filter size={14}/> FILTROS DE BÚSQUEDA EN CASCADA
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-1">
-              <label className={`text-[7px] ${isDarkMode ? 'text-gray-500' : 'text-neutral-500'} tracking-widest font-bold`}>MACRO-CATEGORÍA (RUBRO)</label>
-              <select 
-                className={`w-full ${isDarkMode ? 'bg-[#121215] border-white/10 text-white' : 'bg-white border-black/10 text-neutral-900'} border rounded-2xl p-4 text-[9px] uppercase outline-none focus:border-purple-500 tracking-widest cursor-pointer`}
-                value={selectedRubro}
-                onChange={(e) => { setSelectedRubro(e.target.value); setSelectedSpecialty(''); }}>
-                <option value="">TODAS LAS MACRO-CATEGORÍAS</option>
-                {Object.keys(RUBROS).map(rubro => (
-                  <option key={rubro} value={rubro}>{rubro}</option>
-                ))}
-              </select>
+            
+            {/* 1. SELECTOR DE MACRO-CATEGORÍA */}
+            <div ref={macroRef} className="space-y-1 relative">
+              <label className={`text-[7px] ${isDarkMode ? 'text-gray-500' : 'text-neutral-500'} tracking-widest font-bold`}>RUBRO</label>
+              
+              <button 
+                type="button"
+                onClick={() => { setIsMacroOpen(!isMacroOpen); setIsSubOpen(false); setIsLocOpen(false); }}
+                className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl border text-[9px] uppercase tracking-widest cursor-pointer transition-all ${isDarkMode ? 'bg-[#121215] border-white/10 text-white' : 'bg-white border-black/10 text-neutral-900'}`}
+              >
+                <span className={selectedMacro ? "text-purple-400 font-bold truncate" : (isDarkMode ? "text-gray-400 truncate" : "text-neutral-500 truncate")}>
+                  {selectedMacro || "TODAS LAS MACRO-CATEGORÍAS"}
+                </span>
+                <ChevronDown className={`w-4 h-4 shrink-0 transition-transform duration-300 ${isMacroOpen ? 'rotate-180 text-purple-400' : 'text-gray-400'}`} />
+              </button>
+
+              <AnimatePresence>
+                {isMacroOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className={`absolute top-full left-0 right-0 mt-2 border rounded-2xl shadow-2xl max-h-72 overflow-y-auto z-[100] p-2 space-y-1 ${isDarkMode ? 'bg-[#121215] border-white/10 text-white' : 'bg-white border-black/10 text-neutral-900'}`}
+                  >
+                    <div 
+                      onClick={() => { setSelectedMacro(''); setSelectedSub(''); setIsMacroOpen(false); }}
+                      className={`px-3 py-3 text-[9px] uppercase tracking-widest rounded-xl cursor-pointer transition-all flex items-center justify-between ${!selectedMacro ? 'bg-purple-600/20 text-purple-400 font-bold' : 'hover:bg-white/5'}`}
+                    >
+                      TODAS LOS RUBROS
+                      {!selectedMacro && <Check size={14} className="text-purple-400" />}
+                    </div>
+
+                    {Object.keys(RUBROS).map((macro) => (
+                      <div 
+                        key={macro}
+                        onClick={() => { 
+                          setSelectedMacro(macro); 
+                          setSelectedSub(''); 
+                          setIsMacroOpen(false); 
+                        }}
+                        className={`px-3 py-3 text-[9px] font-black uppercase tracking-[0.15em] rounded-xl cursor-pointer transition-all flex items-center justify-between ${selectedMacro === macro ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30' : 'text-gray-300 hover:bg-white/5 hover:text-white'}`}
+                      >
+                        <span className="truncate">{macro}</span>
+                        {selectedMacro === macro && <Check size={14} className="text-purple-400 shrink-0" />}
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            <div className="space-y-1">
-              <label className={`text-[7px] ${isDarkMode ? 'text-gray-500' : 'text-neutral-500'} tracking-widest font-bold`}>SUBCATEGORÍA (ESPECIALIDAD)</label>
-              <select 
-                className={`w-full ${isDarkMode ? 'bg-[#121215] border-white/10 text-white' : 'bg-white border-black/10 text-neutral-900'} border rounded-2xl p-4 text-[9px] uppercase outline-none focus:border-purple-500 tracking-widest cursor-pointer`}
-                value={selectedSpecialty}
-                onChange={(e) => setSelectedSpecialty(e.target.value)}
-                disabled={!selectedRubro}>
-                <option value="">TODAS LAS ESPECIALIDADES</option>
-                {selectedRubro && RUBROS[selectedRubro]?.map(spec => (
-                  <option key={spec} value={spec}>{spec.toUpperCase()}</option>
-                ))}
-              </select>
+            {/* 2. SELECTOR DE SUBCATEGORÍA */}
+            <div ref={subRef} className="space-y-1 relative">
+              <label className={`text-[7px] ${isDarkMode ? 'text-gray-500' : 'text-neutral-500'} tracking-widest font-bold`}>ESPECIALIDAD</label>
+              
+              <button 
+                type="button"
+                disabled={!selectedMacro}
+                onClick={() => { if(selectedMacro) { setIsSubOpen(!isSubOpen); setIsMacroOpen(false); setIsLocOpen(false); }}}
+                className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl border text-[9px] uppercase tracking-widest transition-all ${!selectedMacro ? 'opacity-50 cursor-not-allowed bg-black/10 border-white/5 text-gray-600' : 'cursor-pointer'} ${isDarkMode ? 'bg-[#121215] border-white/10 text-white' : 'bg-white border-black/10 text-neutral-900'}`}
+              >
+                <span className={selectedSub ? "text-purple-400 font-bold truncate" : (isDarkMode ? "text-gray-400 truncate" : "text-neutral-500 truncate")}>
+                  {!selectedMacro ? "SELECCIONÁ UN RUBRO PRIMERO" : (selectedSub || "TODAS LAS ESPECIALIDADES")}
+                </span>
+                <ChevronDown className={`w-4 h-4 shrink-0 transition-transform duration-300 ${isSubOpen ? 'rotate-180 text-purple-400' : 'text-gray-400'}`} />
+              </button>
+
+              <AnimatePresence>
+                {isSubOpen && selectedMacro && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className={`absolute top-full left-0 right-0 mt-2 border rounded-2xl shadow-2xl max-h-56 overflow-y-auto z-[100] p-2 space-y-1 ${isDarkMode ? 'bg-[#121215] border-white/10 text-white' : 'bg-white border-black/10 text-neutral-900'}`}
+                  >
+                    <div 
+                      onClick={() => { setSelectedSub(''); setIsSubOpen(false); }}
+                      className={`px-3 py-2.5 text-[9px] uppercase tracking-widest rounded-xl cursor-pointer transition-all flex items-center justify-between ${!selectedSub ? 'bg-purple-600/20 text-purple-400 font-bold' : 'hover:bg-white/5'}`}
+                    >
+                      TODAS LAS ESPECIALIDADES
+                      {!selectedSub && <Check size={14} className="text-purple-400" />}
+                    </div>
+
+                    {currentSubcategories.map((sub) => (
+                      <div 
+                        key={sub}
+                        onClick={() => { setSelectedSub(sub); setIsSubOpen(false); }}
+                        className={`px-3 py-2.5 text-[9px] uppercase tracking-widest rounded-xl cursor-pointer transition-all flex items-center justify-between ${selectedSub === sub ? 'bg-purple-600/20 text-purple-400 font-bold border border-purple-500/30' : 'text-gray-400 hover:bg-white/5'}`}
+                      >
+                        <span className="truncate">{sub}</span>
+                        {selectedSub === sub && <Check size={14} className="text-purple-400 shrink-0" />}
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            <div className="space-y-1">
+            {/* 3. SELECTOR DE PROVINCIA */}
+            <div ref={locRef} className="space-y-1 relative">
               <label className={`text-[7px] ${isDarkMode ? 'text-gray-500' : 'text-neutral-500'} tracking-widest font-bold`}>PROVINCIA / UBICACIÓN</label>
-              <select 
-                className={`w-full ${isDarkMode ? 'bg-[#121215] border-white/10 text-white' : 'bg-white border-black/10 text-neutral-900'} border rounded-2xl p-4 text-[9px] uppercase outline-none focus:border-purple-500 tracking-widest cursor-pointer`}
-                value={selectedProvincia}
-                onChange={(e) => setSelectedProvincia(e.target.value)}>
-                <option value="">TODAS LAS PROVINCIAS</option>
-                {PROVINCIAS.map(prov => (
-                  <option key={prov} value={prov}>{prov.toUpperCase()}</option>
-                ))}
-              </select>
+              
+              <button 
+                type="button"
+                onClick={() => { setIsLocOpen(!isLocOpen); setIsMacroOpen(false); setIsSubOpen(false); }}
+                className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl border text-[9px] uppercase tracking-widest cursor-pointer transition-all ${isDarkMode ? 'bg-[#121215] border-white/10 text-white' : 'bg-white border-black/10 text-neutral-900'}`}
+              >
+                <span className={selectedProvincia ? "text-purple-400 font-bold truncate" : (isDarkMode ? "text-gray-400 truncate" : "text-neutral-500 truncate")}>
+                  {selectedProvincia || "TODAS LAS PROVINCIAS"}
+                </span>
+                <ChevronDown className={`w-4 h-4 shrink-0 transition-transform duration-300 ${isLocOpen ? 'rotate-180 text-purple-400' : 'text-gray-400'}`} />
+              </button>
+
+              <AnimatePresence>
+                {isLocOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className={`absolute top-full left-0 right-0 mt-2 border rounded-2xl shadow-2xl max-h-56 overflow-y-auto z-[100] p-2 space-y-1 ${isDarkMode ? 'bg-[#121215] border-white/10 text-white' : 'bg-white border-black/10 text-neutral-900'}`}
+                  >
+                    <div 
+                      onClick={() => { setSelectedProvincia(''); setIsLocOpen(false); }}
+                      className={`px-3 py-2.5 text-[9px] uppercase tracking-widest rounded-xl cursor-pointer transition-all flex items-center justify-between ${!selectedProvincia ? 'bg-purple-600/20 text-purple-400 font-bold' : 'hover:bg-white/5'}`}
+                    >
+                      TODAS LAS PROVINCIAS
+                      {!selectedProvincia && <Check size={14} className="text-purple-400" />}
+                    </div>
+                    {PROVINCIAS.map((prov) => (
+                      <div 
+                        key={prov}
+                        onClick={() => { setSelectedProvincia(prov); setIsLocOpen(false); }}
+                        className={`px-3 py-2 text-[9px] uppercase tracking-widest rounded-xl cursor-pointer transition-all flex items-center justify-between ${selectedProvincia === prov ? 'bg-purple-600/20 text-purple-400 font-bold border border-purple-500/30' : 'text-gray-400 hover:bg-white/5'}`}
+                      >
+                        <span className="truncate">{prov}</span>
+                        {selectedProvincia === prov && <Check size={14} className="text-purple-400 shrink-0" />}
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
+
           </div>
         </section>
 

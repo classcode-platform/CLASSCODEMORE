@@ -28,7 +28,6 @@ export default function Dashboard() {
   const [profiles, setProfiles] = useState([]);
   const [activeProfileIndex, setActiveProfileIndex] = useState(0);
 
-  // 1. Modificar el estado inicial para que specialty sea un array
   const [profile, setProfile] = useState({
     name: '', job: '', specialty: [], location: '', bio: '', videoLink: '', 
     ...Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`photo${i + 1}`, ''])),
@@ -41,42 +40,30 @@ export default function Dashboard() {
   });
 
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'warning' });
-
-  // Estados para los desplegables personalizados
-  const [openDropdown, setOpenDropdown] = useState(null); // 'job' | 'location' | 'specialty' | null
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   const CLOUD_NAME = "dsyfitywd";
   const UPLOAD_PRESET = "CLASSCODE"; 
 
+  // Estructura actualizada con la categoría Técnica y equipamiento ajustada
   const RUBROS = {
     "COBERTURA AUDIOVISUAL Y VISUAL": [
-      "Fotografía Social", "Fotografía de Moda", "Fotografía Publicitaria", "Fotografía de Producto", 
-      "Fotografía Gastronómica", "Fotografía Inmobiliaria", "Fotografía Corporativa", "Fotografía Editorial", 
-      "Fotografía Deportiva", "Fotografía de Naturaleza", "Retrato", "Filmmaker", "Dirección de Fotografía", 
-      "Edición de Video", "Color Grading", "Motion Graphics", "Animación 2D / 3D", "Streaming", "Operador de Cámara", "Drone"
+      "Fotografía", "Video", "Edición", "Cobertura Integral", "Drone"
     ],
     "ESPACIOS Y LOCACIONES": [
-      "Salones", "Quintas", "Estudios Fotográficos", "Estudios Audiovisuales", "Teatros", 
-      "Galpones", "Hoteles", "Rooftops", "Restaurantes", "Bares", "Espacios Corporativos", "Espacios al Aire Libre"
+      "Salones", "Estudios", "Quintas", "Teatros", "Hoteles", "Rooftops", "Otros espacios"
     ],
     "TÉCNICA Y EQUIPAMIENTO": [
-      "Iluminación", "Operador de Luces", "Pantallas LED", "Escenarios", "Estructuras", 
-      "Rigging", "Efectos Especiales", "Mapping", "Sonidista", "Operador de Audio", "Ingeniería de Sonido"
+      "Sonido e iluminación", "Rental", "Iluminación", "Pantallas LED", "Escenarios", "Sonidista", "DJ"
     ],
     "AMBIENTACIÓN, DECO Y PROVEEDORES": [
-      "Catering", "Barra", "Bartender", "Barista", "Coffee Break", "Pastelería", "Food Truck", "Chef Privado",
-      "Escenografía", "Escaparatismo", "Arte Digital", "Wedding Planner", "Event Planner", "Coordinación de Eventos", "Organización Integral"
+      "Ambientación", "Catering", "Pastelería", "Barra", "Planner"
     ],
     "MODA, ESTILISMO Y BELLEZA": [
-      "Moda", "Publicidad", "E-commerce", "Pasarela", "Presencia para Eventos", "Fitness", "Curvy", "Comercial", 
-      "Makeup Social", "Makeup Editorial", "Makeup FX", "Makeup Artístico", "Hairstylist", "Barbería", "Caracterización",
-      "Estilismo", "Vestuario", "Personal Shopper", "Asesoría de Imagen", "Diseño de Moda", "Sastrería"
+      "Makeup y pelo", "Atelier y alta costura", "Joyería y accesorios", "Make up", "Hairstylist"
     ],
-    "PRODUCCIÓN, TALENTO Y PLANIFICACIÓN": [
-      "Actor / Actriz", "Bailarín/a", "Cantante", "Músico", "Performer", "Comediante", "Improvisación", "Voz", "Locución", "Doblaje",
-      "Influencer", "UGC Creator", "Streamer", "Presentador/a de Contenido", "Community Creator", "Community Manager", "Social Media Manager", "Content Creator", "Podcaster",
-      "Animación", "Magia", "Circo", "Personajes", "Shows Infantiles", "Shows Temáticos", "Zanquistas", "Comparsas", "Bandas", "DJs en Vivo", "Karaoke", "Humor",
-      "Producción Audiovisual", "Producción de Moda", "Producción de Eventos", "Dirección General", "Dirección Creativa", "Dirección de Arte", "Dirección de Casting", "Asistencia de Producción"
+    "SHOWS Y TALENTOS": [
+      "Artista", "Producción", "Influencer", "Show", "UGC", "Community Manager"
     ]
   };
   
@@ -115,7 +102,6 @@ export default function Dashboard() {
     return bonus + (currentProfile.academyBaseScore || 0);
   };
 
-  // 2. Asegurar que specialty se cargue siempre como un array
   const loadProfileDataIntoState = (profilesList, index) => {
     const target = profilesList[index] || profilesList[0];
     if (!target) return;
@@ -320,7 +306,6 @@ export default function Dashboard() {
     navigate(`/profile/${userId}?index=${activeProfileIndex}`);
   };
 
-  // 3. Función para alternar (toggle) especialidades de forma múltiple
   const toggleSpecialty = (spec) => {
     setProfile(prev => {
       const currentSpecs = Array.isArray(prev.specialty) ? prev.specialty : [];
@@ -481,7 +466,6 @@ export default function Dashboard() {
                       {currentJobIcon}
                       <p className={`${isDarkMode ? 'text-white/80' : 'text-neutral-700'} text-[10px] md:text-xs tracking-[0.3em] font-bold truncate`}>{profile.job || 'ASIGNAR RUBRO'}</p>
                     </div>
-                    {/* Visualización de múltiples especialidades */}
                     {Array.isArray(profile.specialty) && profile.specialty.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 justify-center md:justify-start pt-1">
                         {profile.specialty.map(spec => (
@@ -649,8 +633,6 @@ export default function Dashboard() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  
-                  {/* Desplegable Personalizado: Rubro Principal */}
                   <div className="space-y-2 relative">
                     <label className={`text-[8px] ${isDarkMode ? 'text-white/80' : 'text-neutral-700'} tracking-widest font-black`}>Rubro Principal</label>
                     <div 
@@ -683,7 +665,6 @@ export default function Dashboard() {
                     )}
                   </div>
 
-                  {/* Desplegable Personalizado: Provincia */}
                   <div className="space-y-2 relative">
                     <label className={`text-[8px] ${isDarkMode ? 'text-white/80' : 'text-neutral-700'} tracking-widest font-black`}>Provincia</label>
                     <div 
@@ -717,7 +698,6 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Desplegable Personalizado: Múltiples Especialidades */}
                 {profile.job && RUBROS[profile.job] && (
                   <div className="space-y-2 relative">
                     <label className={`text-[8px] ${isDarkMode ? 'text-white/80' : 'text-neutral-700'} tracking-widest font-black`}>
