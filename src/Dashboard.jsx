@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from './firebase'; 
 import { doc, setDoc, collection, query, where, onSnapshot, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -8,7 +8,7 @@ import {
   Upload, X, Eye, Menu, Zap, 
   LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, Plus,
   Camera as CameraIcon, Video as VideoIcon, User as UserIcon, Theater, Smartphone, PartyPopper, 
-  Clapperboard, Sparkles, Shirt, Palette, Music, Utensils, CalendarDays, Home as HomeIcon
+  Clapperboard, Sparkles, Shirt, Palette, Music, Utensils, CalendarDays, Home as HomeIcon, Check, ChevronDown
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -41,10 +41,12 @@ export default function Dashboard() {
 
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'warning' });
 
+  // Estados para los desplegables personalizados de Tema Día/Noche
+  const [openDropdown, setOpenDropdown] = useState(null); // 'job' | 'location' | 'specialty' | null
+
   const CLOUD_NAME = "dsyfitywd";
   const UPLOAD_PRESET = "CLASSCODE"; 
 
-  // Actualizado con las 6 Macro-Categorías exactas y sus especialidades finas en cascada
   const RUBROS = {
     "COBERTURA AUDIOVISUAL Y VISUAL": [
       "Fotografía Social", "Fotografía de Moda", "Fotografía Publicitaria", "Fotografía de Producto", 
@@ -447,13 +449,14 @@ export default function Dashboard() {
               <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 w-full px-2">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left w-full md:w-auto min-w-0">
                   
-                  <div className={`relative w-28 h-28 md:w-32 md:h-32 rounded-full border-2 ${isDarkMode ? 'border-purple-500/30 bg-black/50 text-white/60' : 'border-purple-500/40 bg-black/10 text-neutral-600'} overflow-hidden flex-shrink-0 group shadow-xl`}>
+                  {/* FOTO DE PERFIL CORREGIDA: Sin estiramiento, formato perfectamente circular y centrado */}
+                  <div className={`relative w-28 h-28 md:w-32 md:h-32 rounded-full border-2 ${isDarkMode ? 'border-purple-500/30 bg-black/50 text-white/60' : 'border-purple-500/40 bg-black/10 text-neutral-600'} overflow-hidden flex-shrink-0 group shadow-xl flex items-center justify-center`}>
                     {profile.photo1 ? (
-                      <img src={profile.photo1} className="w-full h-full object-cover" alt="" />
+                      <img src={profile.photo1} className="w-full h-full object-cover rounded-full" alt="" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center"><User size={40}/></div>
                     )}
-                    <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 cursor-pointer transition-all">
+                    <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 cursor-pointer transition-all rounded-full">
                       <Camera size={20} className="text-purple-400"/>
                       <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'photo1')} className="hidden" />
                     </label>
@@ -623,43 +626,106 @@ export default function Dashboard() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                  
+                  {/* Desplegable Personalizado: Rubro Principal */}
+                  <div className="space-y-2 relative">
                     <label className={`text-[8px] ${isDarkMode ? 'text-white/80' : 'text-neutral-700'} tracking-widest font-black`}>Rubro Principal</label>
-                    <select 
-                      className={`w-full ${isDarkMode ? 'bg-[#0b0c10] border-white/15 text-white' : 'bg-white border-black/15 text-neutral-900'} border rounded-xl px-4 py-3 text-[10px] uppercase outline-none focus:border-purple-500 tracking-widest box-border cursor-pointer`} 
-                      value={profile.job || ""} 
-                      onChange={e => {
-                        const selectedJob = e.target.value;
-                        setProfile(prev => ({ ...prev, job: selectedJob, specialty: "" }));
-                      }}>
-                      <option value="" className={`${isDarkMode ? 'bg-[#0b0c10] text-white' : 'bg-white text-neutral-900'}`}>SELECCIONAR</option>
-                      {Object.keys(RUBROS).map(rubro => (
-                        <option key={rubro} value={rubro} className={`${isDarkMode ? 'bg-[#0b0c10] text-white' : 'bg-white text-neutral-900'}`}>{rubro}</option>
-                      ))}
-                    </select>
+                    <div 
+                      onClick={() => setOpenDropdown(openDropdown === 'job' ? null : 'job')}
+                      className={`w-full ${isDarkMode ? 'bg-[#0b0c10] border-white/15 text-white' : 'bg-white border-black/15 text-neutral-900'} border rounded-xl px-4 py-3 text-[10px] uppercase flex items-center justify-between cursor-pointer`}
+                    >
+                      <span className="truncate">{profile.job || "SELECCIONAR"}</span>
+                      <ChevronDown size={14} className={`transition-transform ${openDropdown === 'job' ? 'rotate-180' : ''}`} />
+                    </div>
+
+                    {openDropdown === 'job' && (
+                      <div className={`absolute top-full left-0 right-0 mt-1 z-50 ${isDarkMode ? 'bg-[#0b0c10] border-white/20 text-white' : 'bg-white border-black/20 text-neutral-900'} border rounded-xl shadow-2xl max-h-52 overflow-y-auto`}>
+                        <div 
+                          onClick={() => { setProfile(prev => ({ ...prev, job: "", specialty: "" })); setOpenDropdown(null); }}
+                          className={`px-4 py-3 text-[10px] cursor-pointer hover:bg-purple-500/20 border-b ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}
+                        >
+                          SELECCIONAR
+                        </div>
+                        {Object.keys(RUBROS).map(rubro => (
+                          <div 
+                            key={rubro}
+                            onClick={() => { setProfile(prev => ({ ...prev, job: rubro, specialty: "" })); setOpenDropdown(null); }}
+                            className={`px-4 py-3 text-[10px] cursor-pointer hover:bg-purple-500/20 flex items-center justify-between ${profile.job === rubro ? 'text-purple-400 font-black' : ''}`}
+                          >
+                            <span>{rubro}</span>
+                            {profile.job === rubro && <Check size={12} />}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <div className="space-y-2">
+
+                  {/* Desplegable Personalizado: Provincia */}
+                  <div className="space-y-2 relative">
                     <label className={`text-[8px] ${isDarkMode ? 'text-white/80' : 'text-neutral-700'} tracking-widest font-black`}>Provincia</label>
-                    <select 
-                      className={`w-full ${isDarkMode ? 'bg-[#0b0c10] border-white/15 text-white' : 'bg-white border-black/15 text-neutral-900'} border rounded-xl px-4 py-3 text-[10px] uppercase outline-none focus:border-purple-500 tracking-widest box-border cursor-pointer`} 
-                      value={profile.location || ""} 
-                      onChange={e => setProfile(prev => ({ ...prev, location: e.target.value }))}>
-                      <option value="" className={`${isDarkMode ? 'bg-[#0b0c10] text-white' : 'bg-white text-neutral-900'}`}>SELECCIONAR</option>
-                      {PROVINCIAS.map(prov => <option key={prov} value={prov} className={`${isDarkMode ? 'bg-[#0b0c10] text-white' : 'bg-white text-neutral-900'}`}>{prov.toUpperCase()}</option>)}
-                    </select>
+                    <div 
+                      onClick={() => setOpenDropdown(openDropdown === 'location' ? null : 'location')}
+                      className={`w-full ${isDarkMode ? 'bg-[#0b0c10] border-white/15 text-white' : 'bg-white border-black/15 text-neutral-900'} border rounded-xl px-4 py-3 text-[10px] uppercase flex items-center justify-between cursor-pointer`}
+                    >
+                      <span className="truncate">{profile.location || "SELECCIONAR"}</span>
+                      <ChevronDown size={14} className={`transition-transform ${openDropdown === 'location' ? 'rotate-180' : ''}`} />
+                    </div>
+
+                    {openDropdown === 'location' && (
+                      <div className={`absolute top-full left-0 right-0 mt-1 z-50 ${isDarkMode ? 'bg-[#0b0c10] border-white/20 text-white' : 'bg-white border-black/20 text-neutral-900'} border rounded-xl shadow-2xl max-h-52 overflow-y-auto`}>
+                        <div 
+                          onClick={() => { setProfile(prev => ({ ...prev, location: "" })); setOpenDropdown(null); }}
+                          className={`px-4 py-3 text-[10px] cursor-pointer hover:bg-purple-500/20 border-b ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}
+                        >
+                          SELECCIONAR
+                        </div>
+                        {PROVINCIAS.map(prov => (
+                          <div 
+                            key={prov}
+                            onClick={() => { setProfile(prev => ({ ...prev, location: prov })); setOpenDropdown(null); }}
+                            className={`px-4 py-3 text-[10px] cursor-pointer hover:bg-purple-500/20 flex items-center justify-between ${profile.location === prov ? 'text-purple-400 font-black' : ''}`}
+                          >
+                            <span>{prov.toUpperCase()}</span>
+                            {profile.location === prov && <Check size={12} />}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
+                {/* Desplegable Personalizado: Especialidad */}
                 {profile.job && RUBROS[profile.job] && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 relative">
                     <label className={`text-[8px] ${isDarkMode ? 'text-white/80' : 'text-neutral-700'} tracking-widest font-black`}>Especialidad</label>
-                    <select 
-                      className={`w-full ${isDarkMode ? 'bg-[#0b0c10] border-white/15 text-white' : 'bg-white border-black/15 text-neutral-900'} border rounded-xl px-4 py-3 text-[10px] uppercase outline-none focus:border-purple-500 tracking-widest box-border cursor-pointer`} 
-                      value={profile.specialty || ""} 
-                      onChange={e => setProfile(prev => ({ ...prev, specialty: e.target.value }))}>
-                      <option value="" className={`${isDarkMode ? 'bg-[#0b0c10] text-white' : 'bg-white text-neutral-900'}`}>SELECCIONAR ESPECIALIDAD</option>
-                      {RUBROS[profile.job].map(spec => <option key={spec} value={spec} className={`${isDarkMode ? 'bg-[#0b0c10] text-white' : 'bg-white text-neutral-900'}`}>{spec.toUpperCase()}</option>)}
-                    </select>
+                    <div 
+                      onClick={() => setOpenDropdown(openDropdown === 'specialty' ? null : 'specialty')}
+                      className={`w-full ${isDarkMode ? 'bg-[#0b0c10] border-white/15 text-white' : 'bg-white border-black/15 text-neutral-900'} border rounded-xl px-4 py-3 text-[10px] uppercase flex items-center justify-between cursor-pointer`}
+                    >
+                      <span className="truncate">{profile.specialty || "SELECCIONAR ESPECIALIDAD"}</span>
+                      <ChevronDown size={14} className={`transition-transform ${openDropdown === 'specialty' ? 'rotate-180' : ''}`} />
+                    </div>
+
+                    {openDropdown === 'specialty' && (
+                      <div className={`absolute top-full left-0 right-0 mt-1 z-50 ${isDarkMode ? 'bg-[#0b0c10] border-white/20 text-white' : 'bg-white border-black/20 text-neutral-900'} border rounded-xl shadow-2xl max-h-52 overflow-y-auto`}>
+                        <div 
+                          onClick={() => { setProfile(prev => ({ ...prev, specialty: "" })); setOpenDropdown(null); }}
+                          className={`px-4 py-3 text-[10px] cursor-pointer hover:bg-purple-500/20 border-b ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}
+                        >
+                          SELECCIONAR ESPECIALIDAD
+                        </div>
+                        {RUBROS[profile.job].map(spec => (
+                          <div 
+                            key={spec}
+                            onClick={() => { setProfile(prev => ({ ...prev, specialty: spec })); setOpenDropdown(null); }}
+                            className={`px-4 py-3 text-[10px] cursor-pointer hover:bg-purple-500/20 flex items-center justify-between ${profile.specialty === spec ? 'text-purple-400 font-black' : ''}`}
+                          >
+                            <span>{spec.toUpperCase()}</span>
+                            {profile.specialty === spec && <Check size={12} />}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
