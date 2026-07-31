@@ -33,11 +33,11 @@ export default function AcademyTest() {
     const user = auth.currentUser;
     if (user && approved) {
       try {
-        // CORRECCIÓN DE ID: Aseguramos que el ID coincida con los de la videoLibrary de Academy.jsx
-        // Si es el test técnico, el ID es 'cert_fotografia_triangulo', si es el de entrada es 'cert_fotografia'
+        // Normalización unificada para que coincida exactamente con el Dashboard
+        const cleanCat = decodedCategory.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\s/]/g, '_');
         const courseId = decodedCategory === "Generico" 
           ? "cert_generico" 
-          : `cert_${decodedCategory.toLowerCase().replace(/\s/g, '_')}`;
+          : `cert_${cleanCat}`;
         
         await setDoc(doc(db, "professionals", user.uid), {
           score: increment(puntosAOtorgar),
@@ -134,7 +134,7 @@ export default function AcademyTest() {
                     <h2 className="text-[18px] font-['Poppins'] tracking-[0.2em]">REPASO NECESARIO</h2>
                     <p className="text-[9px] text-gray-500 font-black tracking-widest leading-relaxed uppercase">
                       Debes acertar todas las preguntas para certificar este módulo.
-                      </p>
+                    </p>
                   </div>
                   <div className="space-y-4 pt-4">
                     <button onClick={() => window.location.reload()} className="w-full py-5 bg-purple-600 text-white rounded-2xl text-[10px] font-black tracking-[0.4em] shadow-xl shadow-purple-900/20 flex items-center justify-center gap-3 active:scale-95 transition-all">

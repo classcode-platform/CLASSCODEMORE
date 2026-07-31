@@ -33,12 +33,12 @@ export default function Academy() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  // BIBLIOTECA COMPLETA DE CLASES CON CLOUDINARY
+  // BIBLIOTECA COMPLETA DE CLASES ACTUALIZADA A LAS NUEVAS MACRO-CATEGORÍAS
   const videoLibrary = [
-    // FOTOGRAFÍA
+    // FOTO Y VIDEO
     { 
       id: 'cert_fotografia_intro', 
-      category: 'FOTOGRAFÍA', 
+      category: 'FOTO Y VIDEO', 
       title: 'FOTOGRAFÍA I: INTRODUCCIÓN', 
       videoUrl: 'https://res.cloudinary.com/dsyfitywd/video/upload/v1785139540/INTROFOTOFINAL_vyoxwi.mp4', 
       description: 'CONCEPTOS INICIALES Y FILOSOFÍA DE TRABAJO EN SET.',
@@ -47,47 +47,65 @@ export default function Academy() {
     },
     { 
       id: 'cert_fotografia_triangulo', 
-      category: 'FOTOGRAFÍA', 
+      category: 'FOTO Y VIDEO', 
       title: 'FOTOGRAFÍA II: TRIÁNGULO EXPOSICIÓN', 
       videoUrl: 'https://res.cloudinary.com/dsyfitywd/video/upload/v1785139462/0112_1_zyb4mb.mp4', 
       description: 'DOMINIO TÉCNICO: APERTURA, VELOCIDAD E ISO.',
       testPath: '/academy-test/fotografia_triangulo',
       available: true
     },
-    // ESCÉNICO
-    { 
-      id: 'cert_escenico_intro', 
-      category: 'ESCÉNICO', 
-      title: 'ACTUACIÓN Y PRESENCIA ESCÉNICA I', 
-      videoUrl: 'https://res.cloudinary.com/dsyfitywd/video/upload/v1785139614/Presenta_1_vilqib.mp4', 
-      description: 'EXPRESIÓN CORPORAL, MANEJO DE CÁMARA Y TÉCNICA ACTORAL.',
-      testPath: '/academy-test/Escénico',
-      available: true
-    },
-    // MAKEUP / PELO
+    { id: 'c_audiovisual', category: 'FOTO Y VIDEO', title: 'FILMMAKER & DIRECCIÓN DE FOTOGRAFÍA', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_edicion', category: 'FOTO Y VIDEO', title: 'EDICIÓN Y POSTPRODUCCIÓN DIGITAL', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_drone', category: 'FOTO Y VIDEO', title: 'PILOTO DE DRONE & TOMAS AÉREAS', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+
+    // ESPACIOS Y LOCACIONES
+    { id: 'c_salones', category: 'ESPACIOS Y LOCACIONES', title: 'GESTIÓN DE SALONES Y CENTROS DE EVENTOS', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_estudios', category: 'ESPACIOS Y LOCACIONES', title: 'ESTUDIOS FOTOGRÁFICOS Y PLATOS DE RODAJE', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_quintas', category: 'ESPACIOS Y LOCACIONES', title: 'QUINTAS Y ESPACIOS AL AIRE LIBRE', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_teatros', category: 'ESPACIOS Y LOCACIONES', title: 'TEATROS Y AUDITORIOS', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+
+    // TÉCNICA Y EQUIPAMIENTO
+    { id: 'c_sonido_iluminacion', category: 'TÉCNICA Y EQUIPAMIENTO', title: 'SONIDO E ILUMINACIÓN PROFESIONAL', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_rental', category: 'TÉCNICA Y EQUIPAMIENTO', title: 'RENTAL Y LOGÍSTICA DE EQUIPOS', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_pantallas', category: 'TÉCNICA Y EQUIPAMIENTO', title: 'PANTALLAS LED Y CIRCUITOS CERRADOS', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_dj', category: 'TÉCNICA Y EQUIPAMIENTO', title: 'TÉCNICA DE SONIDO Y DJ SET', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+
+    // AMBIENTACIÓN Y PROVEEDORES
+    { id: 'c_ambientacion', category: 'AMBIENTACIÓN Y PROVEEDORES', title: 'DECORACIÓN Y DISEÑO DE ESPACIOS', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_catering', category: 'AMBIENTACIÓN Y PROVEEDORES', title: 'GASTRONOMÍA Y LOGÍSTICA DE SET', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_pasteleria', category: 'AMBIENTACIÓN Y PROVEEDORES', title: 'PASTELERÍA Y MESA DULCE', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_barra', category: 'AMBIENTACIÓN Y PROVEEDORES', title: 'COCTELERÍA Y BARRAS MÓVILES', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_planner', category: 'AMBIENTACIÓN Y PROVEEDORES', title: 'CRONOGRAMAS Y GESTIÓN DE EVENTOS', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+
+    // ESTILISMO Y BELLEZA
     { 
       id: 'cert_makeup_intro', 
-      category: 'MAKEUP / PELO', 
+      category: 'ESTILISMO Y BELLEZA', 
       title: 'MAKEUP & PELO PARA SET I', 
       videoUrl: 'https://res.cloudinary.com/dsyfitywd/video/upload/v1785140159/Intro_Make_up_pelo_1_1_1_tqe1t0.mp4', 
       description: 'ESTÉTICA PROFESIONAL, PREPARACIÓN DE PIEL Y ESTILISMO TÉCNICO.',
       testPath: '/academy-test/Makeup_Pelo',
       available: true
     },
-    // RESTO DE CATEGORÍAS (PRÓXIMAMENTE)
-    { id: 'c_audiovisual', category: 'AUDIOVISUAL', title: 'FILMMAKER & DIRECCIÓN DE FOTOGRAFÍA', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
-    { id: 'c_modelo', category: 'MODELO', title: 'MODELAJE Y TÉCNICA DE PASARELA', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
-    { id: 'c_digital', category: 'DIGITAL', title: 'CREACIÓN DE CONTENIDO & UGC', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
-    { id: 'c_show', category: 'SHOW', title: 'ANIMACIÓN Y ESPECTÁCULO EN VIVO', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
-    { id: 'c_produccion', category: 'PRODUCCIÓN / DIRECCIÓN', title: 'PRODUCCIÓN EJECUTIVA Y RODAJE', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
-    { id: 'c_estilismo', category: 'ESTILISMO / MODA', title: 'FITTING Y VESTUARIO PROFESIONAL', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
-    { id: 'c_diseno', category: 'DISEÑO / ARTE', title: 'IDENTIDAD VISUAL Y VECTORES', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
-    { id: 'c_dj', category: 'DJ / SONIDO', title: 'TÉCNICA DE SONIDO Y DJ SET', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
-    { id: 'c_catering', category: 'CATERING / BARRA', title: 'GASTRONOMÍA Y LOGÍSTICA DE SET', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
-    { id: 'c_planner', category: 'PLANNER / EVENTOS', title: 'CRONOGRAMAS Y GESTIÓN DE EVENTOS', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
-    { id: 'c_tecnica', category: 'TÉCNICA / ILUMINACIÓN', title: 'LUCES, ENERGÍA Y RIGGING', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
-    { id: 'c_agencia', category: 'AGENCIA', title: 'REPRESENTACIÓN Y GESTIÓN DE TALENTOS', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
-    { id: 'c_locaciones', category: 'LOCACIONES', title: 'SCOUTING Y GESTIÓN DE ESPACIOS', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false }
+    { id: 'c_hairstylist', category: 'ESTILISMO Y BELLEZA', title: 'HAIRSTYLIST AVANZADO PARA SET', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_moda', category: 'ESTILISMO Y BELLEZA', title: 'FITTING Y VESTUARIO PROFESIONAL', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_asesoria', category: 'ESTILISMO Y BELLEZA', title: 'ASESORÍA DE IMAGEN INTEGRAL', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+
+    // SHOWS Y TALENTOS
+    { 
+      id: 'cert_escenico_intro', 
+      category: 'SHOWS Y TALENTOS', 
+      title: 'ACTUACIÓN Y PRESENCIA ESCÉNICA I', 
+      videoUrl: 'https://res.cloudinary.com/dsyfitywd/video/upload/v1785139614/Presenta_1_vilqib.mp4', 
+      description: 'EXPRESIÓN CORPORAL, MANEJO DE CÁMARA Y TÉCNICA ACTORAL.',
+      testPath: '/academy-test/Escénico',
+      available: true
+    },
+    { id: 'c_modelo', category: 'SHOWS Y TALENTOS', title: 'MODELAJE Y TÉCNICA DE PASARELA', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_digital', category: 'SHOWS Y TALENTOS', title: 'CREACIÓN DE CONTENIDO & UGC', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_show', category: 'SHOWS Y TALENTOS', title: 'ANIMACIÓN Y ESPECTÁCULO EN VIVO', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_produccion', category: 'SHOWS Y TALENTOS', title: 'PRODUCCIÓN EJECUTIVA Y RODAJE', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false },
+    { id: 'c_agencia', category: 'SHOWS Y TALENTOS', title: 'REPRESENTACIÓN Y GESTIÓN DE TALENTOS', videoUrl: '', description: 'MÓDULO EN DESARROLLO.', testPath: '', available: false }
   ];
 
   useEffect(() => {
@@ -196,7 +214,7 @@ export default function Academy() {
           </div>
         </section>
 
-        {/* TODAS LAS ESPECIALIDADES ORGANIZADAS */}
+        {/* TODAS LAS MACRO-CATEGORÍAS ORGANIZADAS */}
         {categoriesList.map((cat) => {
           const catVideos = videoLibrary.filter(v => v.category === cat);
           if (catVideos.length === 0) return null;

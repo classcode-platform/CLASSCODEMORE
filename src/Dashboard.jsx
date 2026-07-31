@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from './firebase'; 
-import { doc, setDoc, collection, query, where, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, query, where, onSnapshot, updateDoc, deleteField, deleteDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -8,7 +8,7 @@ import {
   Upload, X, Eye, Menu, Zap, 
   LayoutDashboard, LogOut, RefreshCcw, User, MessageSquare, Edit3, Camera, Award, MapPin, Plus,
   Camera as CameraIcon, Video as VideoIcon, User as UserIcon, Theater, Smartphone, PartyPopper, 
-  Clapperboard, Sparkles, Shirt, Palette, Music, Utensils, CalendarDays, Home as HomeIcon, Check, ChevronDown
+  Clapperboard, Sparkles, Shirt, Palette, Music, Utensils, CalendarDays, Home as HomeIcon, Check, ChevronDown, Settings, Trash2, EyeOff
 } from 'lucide-react'; 
 import CustomModal from './components/CustomModal'; 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +17,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isAdvancedSettingsOpen, setIsAdvancedSettingsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState([]);
   
@@ -29,7 +30,7 @@ export default function Dashboard() {
   const [activeProfileIndex, setActiveProfileIndex] = useState(0);
 
   const [profile, setProfile] = useState({
-    name: '', job: '', specialty: [], location: '', bio: '', videoLink: '', 
+    name: '', job: '', specialty: [], location: '', bio: '', videoLink: '', isPublic: true,
     ...Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`photo${i + 1}`, ''])),
     academyPoints: 0, verified: false, score: 0,
     completedCourses: [] 
@@ -41,11 +42,11 @@ export default function Dashboard() {
 
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'warning' });
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const CLOUD_NAME = "dsyfitywd";
   const UPLOAD_PRESET = "CLASSCODE"; 
 
-  // Estructura actualizada con las categorías oficiales correctas
   const RUBROS = {
     "FOTO Y VIDEO": [
       "Fotografía", "Video", "Edición", "Cobertura Integral", "Drone"
@@ -118,6 +119,7 @@ export default function Dashboard() {
       location: target.location || '',
       bio: target.bio || '',
       videoLink: target.videoLink || '',
+      isPublic: target.isPublic !== undefined ? target.isPublic : true,
       completedCourses: target.completedCourses || [],
       academyBaseScore: target.academyBaseScore || 0,
       ...photosData
@@ -139,7 +141,7 @@ export default function Dashboard() {
           } else {
             const initialProf = {
               name: user.displayName || 'NUEVO TALENTO',
-              job: '', specialty: [], location: '', bio: '', videoLink: '', completedCourses: [], academyBaseScore: 0
+              job: '', specialty: [], location: '', bio: '', videoLink: '', isPublic: true, completedCourses: [], academyBaseScore: 0
             };
             setProfiles([initialProf]);
             setProfile(initialProf);
@@ -209,7 +211,7 @@ export default function Dashboard() {
 
     const newBlankProfile = {
       name: profile.name || 'NUEVO TALENTO',
-      job: '', specialty: [], location: profile.location || '', bio: '', videoLink: '',
+      job: '', specialty: [], location: profile.location || '', bio: '', videoLink: '', isPublic: true,
       photos: [],
       completedCourses: [],
       academyBaseScore: 0
@@ -235,6 +237,38 @@ export default function Dashboard() {
       setModal({ isOpen: true, type: 'success', title: "NUEVO PERFIL", message: "SE CREÓ UN NUEVO PERFIL PROFESIONAL." });
     } catch (e) {
       console.error("Error al crear perfil:", e);
+    }
+  };
+
+  const handleDeleteCurrentProfile = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    if (profiles.length <= 1) {
+      setModal({ isOpen: true, type: 'warning', title: 'ACCIÓN NO PERMITIDA', message: 'Debes tener al menos un perfil activo en tu cuenta.' });
+      setShowDeleteConfirm(false);
+      return;
+    }
+
+    const updatedProfiles = profiles.filter((_, idx) => idx !== activeProfileIndex);
+    setProfiles(updatedProfiles);
+    const nextIndex = 0;
+    setActiveProfileIndex(nextIndex);
+    loadProfileDataIntoState(updatedProfiles, nextIndex);
+
+    const userDocRef = doc(db, "professionals", user.uid);
+    try {
+      const dataToSave = {
+        ...updatedProfiles[nextIndex],
+        profiles: updatedProfiles,
+        uid: user.uid
+      };
+      await setDoc(userDocRef, dataToSave);
+      setShowDeleteConfirm(false);
+      setIsAdvancedSettingsOpen(false);
+      setModal({ isOpen: true, type: 'success', title: 'PERFIL ELIMINADO', message: 'El perfil seleccionado ha sido borrado correctamente.' });
+    } catch (e) {
+      console.error("Error al eliminar perfil:", e);
     }
   };
 
@@ -357,6 +391,7 @@ export default function Dashboard() {
                 <button onClick={() => { navigate('/dashboard'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-4 text-[11px] font-black tracking-widest ${isDarkMode ? 'text-purple-300' : 'text-purple-600'} uppercase cursor-pointer w-full py-2`}><LayoutDashboard size={18}/> DASHBOARD</button>
                 <button onClick={() => { navigate('/academy'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-4 text-[11px] font-black tracking-widest ${isDarkMode ? 'text-white/70 hover:text-white' : 'text-neutral-600 hover:text-neutral-900'} uppercase cursor-pointer w-full py-2`}><GraduationCap size={18}/> ACADEMY</button>
                 <button onClick={() => { handleAddNewProfile(); setIsMobileMenuOpen(false); }} className={`flex items-center gap-4 text-[11px] font-black tracking-widest ${isDarkMode ? 'text-white/70 hover:text-white' : 'text-neutral-600 hover:text-neutral-900'} uppercase cursor-pointer w-full py-2`}><Plus size={18}/> NUEVO RUBRO</button>
+                <button onClick={() => { setIsAdvancedSettingsOpen(true); setIsMobileMenuOpen(false); }} className={`flex items-center gap-4 text-[11px] font-black tracking-widest ${isDarkMode ? 'text-white/70 hover:text-white' : 'text-neutral-600 hover:text-neutral-900'} uppercase cursor-pointer w-full py-2`}><Settings size={18}/> CONFIGURACIÓN</button>
               </nav>
 
               <button onClick={() => { auth.signOut(); setIsMobileMenuOpen(false); }} className={`flex items-center gap-5 ${isDarkMode ? 'text-white/50 hover:text-red-300' : 'text-neutral-500 hover:text-red-600'} text-[10px] font-black tracking-widest uppercase mt-8 cursor-pointer`}><LogOut size={18}/> SALIR</button>
@@ -389,6 +424,7 @@ export default function Dashboard() {
           <button onClick={() => navigate('/dashboard')} className={`flex items-center gap-3 ${isDarkMode ? 'text-purple-300' : 'text-purple-600'} py-3 px-3 text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer w-full`}><LayoutDashboard size={16}/> DASHBOARD</button>
           <button onClick={() => navigate('/academy')} className={`flex items-center gap-3 ${isDarkMode ? 'text-white/70 hover:text-white' : 'text-neutral-600 hover:text-neutral-900'} py-3 px-3 text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer w-full`}><GraduationCap size={16}/> ACADEMY</button>
           <button onClick={handleAddNewProfile} className={`flex items-center gap-3 ${isDarkMode ? 'text-white/70 hover:text-white' : 'text-neutral-600 hover:text-neutral-900'} py-3 px-3 text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer w-full`}><Plus size={16}/> NUEVO RUBRO</button>
+          <button onClick={() => setIsAdvancedSettingsOpen(true)} className={`flex items-center gap-3 ${isDarkMode ? 'text-white/70 hover:text-white' : 'text-neutral-600 hover:text-neutral-900'} py-3 px-3 text-[10px] font-black tracking-widest leading-none transition-all cursor-pointer w-full`}><Settings size={16}/> CONFIGURACIÓN</button>
         </nav>
 
         <button onClick={() => auth.signOut()} className={`flex items-center gap-4 ${isDarkMode ? 'text-white/50 hover:text-red-300 border-white/10' : 'text-neutral-500 hover:text-red-600 border-black/10'} text-[10px] font-black tracking-widest transition-all mt-auto pt-6 border-t leading-none cursor-pointer`}><LogOut size={16}/> CERRAR SESIÓN</button>
@@ -399,20 +435,28 @@ export default function Dashboard() {
         <div className="flex-1 p-6 md:p-12 mt-16 md:mt-0 w-full max-w-[1400px] mx-auto box-border overflow-x-hidden space-y-8">
           
           {profiles.length > 0 && (
-            <div className="flex items-center gap-3 overflow-x-auto pb-2">
-              <span className={`text-[8px] font-black tracking-widest ${isDarkMode ? 'text-white/70' : 'text-neutral-600'}`}>PERFILES ACTIVOS:</span>
-              {profiles.map((p, idx) => (
-                <button 
-                  key={idx} 
-                  onClick={() => setActiveProfileIndex(idx)}
-                  className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-widest border transition-all uppercase cursor-pointer shadow-lg ${
-                    activeProfileIndex === idx 
-                      ? (isDarkMode ? 'bg-white/[0.08] border-purple-400 text-purple-300' : 'bg-black/[0.05] border-purple-600 text-purple-600') 
-                      : (isDarkMode ? 'bg-white/[0.03] border-white/10 text-white/70 hover:text-white' : 'bg-black/[0.02] border-black/10 text-neutral-600 hover:text-neutral-900')
-                  }`}>
-                  {p.job || `PERFIL ${idx + 1}`}
-                </button>
-              ))}
+            <div className="flex items-center justify-between gap-3 overflow-x-auto pb-2">
+              <div className="flex items-center gap-3 overflow-x-auto">
+                <span className={`text-[8px] font-black tracking-widest ${isDarkMode ? 'text-white/70' : 'text-neutral-600'}`}>PERFILES ACTIVOS:</span>
+                {profiles.map((p, idx) => (
+                  <button 
+                    key={idx} 
+                    onClick={() => setActiveProfileIndex(idx)}
+                    className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-widest border transition-all uppercase cursor-pointer shadow-lg ${
+                      activeProfileIndex === idx 
+                        ? (isDarkMode ? 'bg-white/[0.08] border-purple-400 text-purple-300' : 'bg-black/[0.05] border-purple-600 text-purple-600') 
+                        : (isDarkMode ? 'bg-white/[0.03] border-white/10 text-white/70 hover:text-white' : 'bg-black/[0.02] border-black/10 text-neutral-600 hover:text-neutral-900')
+                    }`}>
+                    {p.job || `PERFIL ${idx + 1}`}
+                  </button>
+                ))}
+              </div>
+              <button 
+                onClick={() => setIsAdvancedSettingsOpen(true)}
+                className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-widest border transition-all uppercase cursor-pointer flex items-center gap-2 ${isDarkMode ? 'bg-white/[0.03] border-white/10 text-white/70 hover:text-white' : 'bg-black/[0.02] border-black/10 text-neutral-600 hover:text-neutral-900'}`}
+              >
+                <Settings size={12} /> <span className="hidden md:inline">AVANZADO</span>
+              </button>
             </div>
           )}
 
@@ -461,7 +505,14 @@ export default function Dashboard() {
                   </div>
 
                   <div className="space-y-2 min-w-0 flex-1 w-full pt-2">
-                    <h1 className={`text-lg md:text-2xl font-['Poppins'] font-normal tracking-wide ${isDarkMode ? 'text-white' : 'text-neutral-900'} truncate max-w-full`}>{profile.name || 'NUEVO TALENTO'}</h1>
+                    <div className="flex items-center gap-3 justify-center md:justify-start">
+                      <h1 className={`text-lg md:text-2xl font-['Poppins'] font-normal tracking-wide ${isDarkMode ? 'text-white' : 'text-neutral-900'} truncate max-w-full`}>{profile.name || 'NUEVO TALENTO'}</h1>
+                      {!profile.isPublic && (
+                        <span className="text-[7px] px-2 py-0.5 bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-md font-black tracking-wider flex items-center gap-1">
+                          <EyeOff size={10} /> PRIVADO
+                        </span>
+                      )}
+                    </div>
                     <div className="flex items-center justify-center md:justify-start gap-2">
                       {currentJobIcon}
                       <p className={`${isDarkMode ? 'text-white/80' : 'text-neutral-700'} text-[10px] md:text-xs tracking-[0.3em] font-bold truncate`}>{profile.job || 'ASIGNAR RUBRO'}</p>
@@ -612,6 +663,123 @@ export default function Dashboard() {
         </footer>
       </div>
 
+      {/* MODAL DE CONFIGURACIÓN AVANZADA */}
+      <AnimatePresence>
+        {isAdvancedSettingsOpen && (
+          <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/75 p-4 box-border overflow-x-hidden uppercase">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className={`${isDarkMode ? 'bg-[#070709] border-white/15 text-white' : 'bg-white border-black/15 text-neutral-900'} w-full max-w-lg p-6 md:p-8 rounded-2xl border relative space-y-6 max-h-[90vh] flex flex-col box-border shadow-2xl`}
+            >
+              <button onClick={() => { setIsAdvancedSettingsOpen(false); setShowDeleteConfirm(false); }} className={`absolute top-6 right-6 ${isDarkMode ? 'text-white/60 hover:text-white' : 'text-neutral-500 hover:text-neutral-900'} transition-colors cursor-pointer p-2 z-10`}><X size={22} /></button>
+              
+              <div className="flex items-center gap-3 border-b pb-4 border-white/10">
+                <Settings size={18} className="text-purple-500" />
+                <h3 className="text-[11px] font-['Poppins'] tracking-[0.3em] font-black">Configuración Avanzada</h3>
+              </div>
+              
+              <div className="space-y-6 font-bold overflow-y-auto pr-2 flex-1 scrollbar-hide text-left box-border">
+                
+                {/* 1. GESTIÓN DE ESPECIALIDADES / ETIQUETAS */}
+                <div className={`space-y-3 p-4 rounded-xl border ${isDarkMode ? 'bg-white/[0.02] border-white/10' : 'bg-black/[0.02] border-black/10'}`}>
+                  <label className={`text-[9px] ${isDarkMode ? 'text-white' : 'text-neutral-900'} tracking-widest font-black block`}>Gestionar Etiquetas / Especialidades</label>
+                  <p className={`text-[7px] ${isDarkMode ? 'text-white/60' : 'text-neutral-500'} tracking-wider`}>Haz clic en la cruz de cada etiqueta para quitarla de tu perfil actual.</p>
+                  
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {Array.isArray(profile.specialty) && profile.specialty.length > 0 ? (
+                      profile.specialty.map(spec => (
+                        <span key={spec} className={`text-[8px] px-3 py-1 rounded-lg font-black tracking-wider flex items-center gap-2 ${isDarkMode ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-purple-500/10 text-purple-700 border border-purple-500/20'}`}>
+                          {spec}
+                          <button 
+                            onClick={async () => {
+                              const updatedSpecs = profile.specialty.filter(s => s !== spec);
+                              setProfile(prev => ({ ...prev, specialty: updatedSpecs }));
+                              await persistProfile({ specialty: updatedSpecs });
+                            }}
+                            className="hover:text-red-400 transition-colors cursor-pointer"
+                          >
+                            <X size={10} />
+                          </button>
+                        </span>
+                      ))
+                    ) : (
+                      <span className={`text-[8px] ${isDarkMode ? 'text-white/40' : 'text-neutral-400'} tracking-wider`}>No hay especialidades seleccionadas.</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. VISIBILIDAD DEL PERFIL */}
+                <div className={`space-y-3 p-4 rounded-xl border ${isDarkMode ? 'bg-white/[0.02] border-white/10' : 'bg-black/[0.02] border-black/10'}`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className={`text-[9px] ${isDarkMode ? 'text-white' : 'text-neutral-900'} tracking-widest font-black block`}>Visibilidad Pública</label>
+                      <p className={`text-[7px] ${isDarkMode ? 'text-white/60' : 'text-neutral-500'} tracking-wider mt-0.5`}>Oculta tu perfil de las búsquedas de clientes sin borrar tus datos.</p>
+                    </div>
+                    <button 
+                      onClick={async () => {
+                        const newStatus = !profile.isPublic;
+                        setProfile(prev => ({ ...prev, isPublic: newStatus }));
+                        await persistProfile({ isPublic: newStatus });
+                      }}
+                      className={`px-4 py-2 rounded-lg text-[8px] font-black tracking-widest border transition-all cursor-pointer ${
+                        profile.isPublic 
+                          ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' 
+                          : 'bg-amber-500/20 border-amber-500/30 text-amber-400'
+                      }`}
+                    >
+                      {profile.isPublic ? 'PÚBLICO (VISIBLE)' : 'PRIVADO (OCULTO)'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* 3. ZONA DE PELIGRO: BORRAR PERFIL */}
+                <div className="space-y-3 p-4 rounded-xl border border-red-500/30 bg-red-500/5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-[9px] text-red-400 tracking-widest font-black block">Eliminar Perfil Actual</label>
+                      <p className="text-[7px] text-red-400/70 tracking-wider mt-0.5">Borra permanentemente este rubro/perfil de tu cuenta.</p>
+                    </div>
+                    <button 
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="px-4 py-2 rounded-lg text-[8px] font-black tracking-widest bg-red-500 text-white hover:bg-red-600 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Trash2 size={12} /> BORRAR
+                    </button>
+                  </div>
+
+                  {showDeleteConfirm && (
+                    <div className="mt-4 p-4 rounded-lg bg-black/40 border border-red-500/50 space-y-3">
+                      <p className="text-[8px] text-red-300 tracking-wider">¿Estás completamente segura de eliminar este perfil? Esta acción no se puede deshacer.</p>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={handleDeleteCurrentProfile}
+                          className="px-4 py-2 rounded-lg text-[8px] font-black tracking-widest bg-red-600 text-white hover:bg-red-700 cursor-pointer"
+                        >
+                          SÍ, ELIMINAR
+                        </button>
+                        <button 
+                          onClick={() => setShowDeleteConfirm(false)}
+                          className={`px-4 py-2 rounded-lg text-[8px] font-black tracking-widest border ${isDarkMode ? 'border-white/20 text-white' : 'border-black/20 text-neutral-900'} cursor-pointer`}
+                        >
+                          CANCELAR
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+
+              <div className={`pt-4 flex justify-end border-t ${isDarkMode ? 'border-white/10' : 'border-black/10'}`}>
+                <button type="button" onClick={() => { setIsAdvancedSettingsOpen(false); setShowDeleteConfirm(false); }} className={`px-6 py-3 ${isDarkMode ? 'bg-white/[0.04] border-white/15 hover:bg-white/[0.08] text-white' : 'bg-black/[0.04] border-black/15 hover:bg-black/[0.08] text-neutral-900'} border rounded-xl text-[9px] font-black tracking-widest transition-all cursor-pointer`}>
+                  Cerrar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL DE EDICIÓN DE PERFIL EXISTENTE */}
       <AnimatePresence>
         {isEditingProfile && (
           <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/75 p-4 box-border overflow-x-hidden uppercase">
