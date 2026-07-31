@@ -7,10 +7,10 @@ import {
   Home as HomeIcon, Shirt, Palette, PartyPopper, Zap, 
   Users, Theater, Smartphone, Clapperboard, CalendarDays,
   Instagram, Linkedin, MessageCircle, Globe, ShieldCheck, Check, X,
-  GraduationCap, PlayCircle, Briefcase, ArrowLeft
+  GraduationCap, PlayCircle, Briefcase, ArrowLeft, Layers, Gem, Scissors
 } from 'lucide-react';
 import { auth, db } from './firebase'; 
-import { signOut } from 'firebase/auth';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore'; 
 import ThemeSwitcher from './components/ThemeSwitcher';
 
@@ -19,6 +19,9 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+
+  // Estado para verificar si hay un usuario logueado activamente
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Estados desplegables custom
   const [isCatOpen, setIsCatOpen] = useState(false);
@@ -61,7 +64,7 @@ export default function Home() {
       title: 'EDITORIAL DE MODA', 
       category: 'ESTILISMO', 
       aspect: 'aspect-[4/5]', 
-      url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80' 
+      url: "https://res.cloudinary.com/dsyfitywd/image/upload/v1785476490/Dise%C3%B1o_sin_t%C3%ADtulo_18_llsvie.jpg"
     },
     { 
       id: 5, 
@@ -79,24 +82,62 @@ export default function Home() {
     }
   ];
 
-  const categories = [
-    { name: 'Fotografía', count: '+ profesionales', icon: Camera, gradient: 'from-cyan-400 to-blue-500' },
-    { name: 'Audiovisual', count: '+ profesionales', icon: Video, gradient: 'from-blue-400 to-indigo-600' },
-    { name: 'Modelo', count: '+ profesionales', icon: User, gradient: 'from-fuchsia-400 to-purple-600' },
-    { name: 'Escénico', count: '+ profesionales', icon: Theater, gradient: 'from-violet-400 to-indigo-500' },
-    { name: 'Digital', count: '+ profesionales', icon: Smartphone, gradient: 'from-blue-500 to-teal-400' },
-    { name: 'Show', count: '+ profesionales', icon: PartyPopper, gradient: 'from-amber-200 to-yellow-500' },
-    { name: 'Producción / Dirección', count: '+ profesionales', icon: Clapperboard, gradient: 'from-red-500 to-orange-600' },
-    { name: 'Makeup / Pelo', count: '+ profesionales', icon: Sparkles, gradient: 'from-orange-300 to-yellow-500' },
-    { name: 'Estilismo / Moda', count: '+ profesionales', icon: Shirt, gradient: 'from-pink-400 to-rose-500' },
-    { name: 'Diseño / Arte', count: '+ profesionales', icon: Palette, gradient: 'from-red-400 to-orange-500' },
-    { name: 'DJ / Sonido', count: '+ profesionales', icon: Music, gradient: 'from-green-400 to-emerald-500' },
-    { name: 'Catering / Barra', count: '+ profesionales', icon: Utensils, gradient: 'from-lime-400 to-green-600' },
-    { name: 'Planner / Eventos', count: '+ profesionales', icon: CalendarDays, gradient: 'from-teal-400 to-emerald-600' },
-    { name: 'Técnica / Iluminación', count: '+ profesionales', icon: Zap, gradient: 'from-sky-400 to-blue-600' },
-    { name: 'Agencia', count: '+ profesionales', icon: Users, gradient: 'from-indigo-400 to-purple-500' },
-    { name: 'Locaciones', count: '+ profesionales', icon: HomeIcon, gradient: 'from-slate-400 to-slate-700' }
+  // Las 6 Macro-Categorías Actualizadas con sus subcategorías completas
+  const macroCategories = [
+    {
+      id: 1,
+      title: "COBERTURA AUDIOVISUAL Y VISUAL",
+      subtitle: "Fotografía, Video, Filmmaking & Postproducción",
+      image: "https://res.cloudinary.com/dsyfitywd/image/upload/v1785476514/Dise%C3%B1o_sin_t%C3%ADtulo_21_pepaqt.jpg",
+      subcategories: ["Fotografía Social", "Fotografía de Moda", "Fotografía Publicitaria", "Fotografía de Producto", "Video y filmmaking", "Postproducción y edición", "Edición de Video", "Color Grading", "Streaming"]
+    },
+    {
+      id: 2,
+      title: "ESPACIOS Y LOCACIONES",
+      subtitle: "Salones, Quintas, Estudios & Sets",
+      image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1000&q=80",
+      subcategories: ["Salones y espacios", "Estudios y locaciones", "Salones", "Quintas", "Estudios Fotográficos", "Estudios Audiovisuales", "Teatros", "Hoteles", "Rooftops"]
+    },
+    {
+      id: 3,
+      title: "TÉCNICA Y EQUIPAMIENTO",
+      subtitle: "Sonido, Iluminación, Rental & Escenarios",
+      image: "https://res.cloudinary.com/dsyfitywd/image/upload/v1785476500/Dise%C3%B1o_sin_t%C3%ADtulo_19_lbiadp.jpg",
+      subcategories: ["Sonido e iluminación", "Alquiler de equipo / Rental", "Iluminación", "Pantallas LED", "Escenarios", "Sonidista", "Operador de Audio", "Mezcla y Mastering"]
+    },
+    {
+      id: 4,
+      title: "AMBIENTACIÓN, DECO Y PROVEEDORES",
+      subtitle: "Materiales, Deco, Catering & Barras",
+      image: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1000&q=80",
+      subcategories: ["Materiales, ambientación y deco", "Catering y barras", "Catering", "Barra", "Bartender", "Barista", "Pastelería", "Food Truck"]
+    },
+    {
+      id: 5,
+      title: "MODA, ESTILISMO Y BELLEZA",
+      subtitle: "Makeup, Pelo, Atelier, Alta Costura & Modelos",
+      image: "https://res.cloudinary.com/dsyfitywd/image/upload/v1785476490/Dise%C3%B1o_sin_t%C3%ADtulo_18_llsvie.jpg",
+      subcategories: ["Makeup y pelo", "Atelier y alta costura", "Joyería y accesorios", "Indumentaria y estilismo", "Moda", "Publicidad", "E-commerce", "Pasarela", "Makeup Social", "Hairstylist"]
+    },
+    {
+      id: 6,
+      title: "PRODUCCIÓN, TALENTO Y PLANIFICACIÓN",
+      subtitle: "Planners, Artistas, Entretenimiento & Logística",
+      image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80",
+      subcategories: ["Event & Wedding Planners", "Artistas y entretenimiento", "Logística y producción", "Wedding Planner", "Event Planner", "Actor / Actriz", "Bailarín/a", "Músico", "Influencer", "UGC Creator", "Community Manager"]
+    }
   ];
+
+  // Lista simplificada y limpia para el desplegable principal del buscador en Home
+// Las 6 Macro-Categorías exactas para el desplegable limpio de la Home
+const categories = [
+  { name: 'COBERTURA AUDIOVISUAL Y VISUAL', count: '+ profesionales', icon: Camera, gradient: 'from-cyan-400 to-blue-500' },
+  { name: 'ESPACIOS Y LOCACIONES', count: '+ profesionales', icon: HomeIcon, gradient: 'from-slate-400 to-slate-700' },
+  { name: 'TÉCNICA Y EQUIPAMIENTO', count: '+ profesionales', icon: Zap, gradient: 'from-sky-400 to-blue-600' },
+  { name: 'AMBIENTACIÓN, DECO Y PROVEEDORES', count: '+ profesionales', icon: Palette, gradient: 'from-red-400 to-orange-500' },
+  { name: 'MODA, ESTILISMO Y BELLEZA', count: '+ profesionales', icon: Sparkles, gradient: 'from-pink-400 to-rose-500' },
+  { name: 'PRODUCCIÓN, TALENTO Y PLANIFICACIÓN', count: '+ profesionales', icon: Users, gradient: 'from-indigo-400 to-purple-500' }
+];
 
   const locationsList = [
     "CABA", "Buenos Aires", "Córdoba", "Santa Fe", "Mendoza", "Tucumán", 
@@ -104,6 +145,13 @@ export default function Home() {
     "Neuquén", "Chubut", "Formosa", "Jujuy", "San Luis", "San Juan", 
     "La Rioja", "La Pampa", "Santiago del Estero", "Catamarca", "Santa Cruz", "Tierra del Fuego"
   ];
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -157,7 +205,6 @@ export default function Home() {
             exit={{ opacity: 0, y: 30 }}
             className="fixed inset-0 z-[150] bg-[var(--bg-primary)] overflow-y-auto flex flex-col justify-between"
           >
-            {/* HEADER DE LA GALERÍA */}
             <header className="px-6 py-6 md:px-12 max-w-7xl mx-auto w-full flex items-center justify-between border-b border-[var(--border-glass)]">
               <button 
                 onClick={() => setShowLiveGallery(false)}
@@ -173,7 +220,6 @@ export default function Home() {
               </div>
             </header>
 
-            {/* CONTENIDO PRINCIPAL SHOWCASE */}
             <main className="max-w-7xl mx-auto px-6 md:px-12 py-10 w-full flex-grow">
               <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
                 {showcaseItems.map((item) => (
@@ -210,7 +256,6 @@ export default function Home() {
               CLASSCODE • ARGENTINA © 2026
             </footer>
 
-            {/* MODAL LIGHTBOX INTERNO */}
             <AnimatePresence>
               {selectedGalleryItem && (
                 <motion.div 
@@ -267,16 +312,25 @@ export default function Home() {
         <motion.div animate={{ x: [50, -50, 50], y: [30, -30, 30], scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-0 w-[200px] md:w-[500px] h-[200px] md:h-[500px] bg-indigo-600/10 rounded-full blur-[90px] md:blur-[130px]" />
       </div>
 
-      <header className="px-4 py-3 md:px-6 md:py-4 flex justify-end items-center max-w-4xl mx-auto w-full relative z-[60]">
-        <div className="flex items-center gap-4">
+      {/* HEADER: ThemeSwitcher a la izquierda y controles de cuenta/salir condicionales a la derecha */}
+      <header className="px-4 py-3 md:px-6 md:py-4 flex justify-between items-center max-w-5xl mx-auto w-full relative z-[60]">
+        <div>
           <ThemeSwitcher />
-          <button onClick={handleAccount} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-[var(--text-primary)] transition-all flex items-center gap-2 font-bold cursor-pointer"><User size={12}/> MI CUENTA</button>
-          <button onClick={handleLogout} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-red-400 transition-all flex items-center gap-2 font-bold cursor-pointer"><LogOut size={12}/> SALIR</button>
+        </div>
+        <div className="flex items-center gap-4">
+          <button onClick={handleAccount} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-[var(--text-primary)] transition-all flex items-center gap-2 font-bold cursor-pointer">
+            <User size={12}/> MI CUENTA
+          </button>
+          {currentUser && (
+            <button onClick={handleLogout} className="text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-red-400 transition-all flex items-center gap-2 font-bold cursor-pointer">
+              <LogOut size={12}/> SALIR
+            </button>
+          )}
         </div>
       </header>
 
       <main className="flex-grow flex flex-col justify-center relative z-10 py-6 md:py-12">
-        <div className="max-w-4xl mx-auto px-6 md:px-10 flex flex-col items-center w-full gap-8 md:gap-10">
+        <div className="max-w-5xl mx-auto px-6 md:px-10 flex flex-col items-center w-full gap-8 md:gap-10">
           
           {/* HEADER PRINCIPAL */}
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
@@ -416,7 +470,7 @@ export default function Home() {
 
               <button 
                 onClick={() => navigate('/client-profile?mode=experience')}
-                title="El maletín organizador"
+                title="Organizador"
                 className="w-10 h-10 md:w-12 md:h-12 rounded-xl glass-panel hover:border-indigo-500/50 flex items-center justify-center text-indigo-400 transition-all shadow-lg group cursor-pointer"
               >
                 <Briefcase size={18} className="group-hover:scale-110 transition-transform" />
@@ -436,17 +490,96 @@ export default function Home() {
 
           </div>
 
-          {/* GRILLA DE CATEGORÍAS */}
-          <div className="w-full hidden md:grid grid-cols-2 md:grid-cols-4 gap-3">
-            {categories.map((cat) => (
-              <motion.div key={cat.name} onClick={() => handleCategoryClick(cat.name)} whileHover={{ scale: 1.02 }} className="glass-panel p-3 rounded-2xl flex items-center gap-3 hover:border-white/20 transition-all cursor-pointer group shadow-lg">
-                <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center shadow-[0_0_10px_rgba(0,0,0,0.4)] shrink-0`}><cat.icon className="text-white w-3.5 h-3.5" /></div>
-                <div className="min-w-0">
-                  <h3 className="text-[var(--text-primary)] font-bold text-[9px] uppercase tracking-[0.08em] leading-tight truncate">{cat.name}</h3>
-                  <p className="text-[6.5px] text-gray-500 uppercase tracking-widest mt-0.5 font-bold">{cat.count}</p>
-                </div>
-              </motion.div>
-            ))}
+          {/* BANNER DE INVITACIÓN A PROVEEDORES Y TALENTOS */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="w-full relative rounded-3xl overflow-hidden glass-panel p-8 md:p-12 border border-purple-500/30 shadow-2xl my-2"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 via-indigo-900/10 to-transparent pointer-events-none" />
+            
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+              <div className="max-w-xl">
+                <span className="text-[9px] font-black uppercase tracking-[0.4em] text-purple-400 mb-2 block">
+                  SUMATE AL DIRECTORIO
+                </span>
+                <h3 className="text-xl md:text-2xl font-['Poppins'] tracking-[0.05em] uppercase text-[var(--text-primary)] font-normal leading-tight mb-3">
+                  ¿SOS PROVEEDOR, TÉCNICO O TALENTO?
+                </h3>
+                <p className="text-[10px] uppercase tracking-widest text-gray-400 leading-relaxed font-normal">
+                  Mostrá tu trabajo en la red donde se arman las mejores producciones y eventos. Formá parte de la movida.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+                <button 
+                  onClick={() => navigate('/auth')}
+                  className="px-8 py-3.5 rounded-xl bg-purple-600 text-white font-black uppercase tracking-[0.2em] text-[9px] hover:bg-purple-500 transition-all shadow-lg cursor-pointer"
+                >
+                  REGISTRARME GRATIS
+                </button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* MACRO-CATEGORÍAS VISUALES */}
+          <div className="w-full flex flex-col gap-6 mt-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-glass)] pb-3">
+              <div className="flex items-center gap-2">
+                <Layers className="text-purple-400 w-4 h-4" />
+                <h2 className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] font-['Poppins'] text-[var(--text-primary)]">
+                  ¿QUÉ ESTÁS BUSCANDO?
+                </h2>
+              </div>
+              <span className="text-[8px] uppercase tracking-[0.2em] text-gray-500 font-bold">SECTORES PRINCIPALES</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {macroCategories.map((macro) => (
+                <motion.div 
+                  key={macro.id}
+                  whileHover={{ y: -4 }}
+                  className="group relative rounded-3xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-glass)] shadow-xl cursor-pointer min-h-[320px] flex flex-col justify-end p-7 transition-all duration-300"
+                >
+                  {/* IMAGEN DE FONDO CON OVERLAY ADAPTATIVO */}
+                  <div className="absolute inset-0 overflow-hidden">
+                    <img 
+                      src={macro.image} 
+                      alt={macro.title}
+                      className="w-full h-full object-cover opacity-50 dark:opacity-40 group-hover:scale-105 transition-all duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-[var(--bg-card)]/80 to-transparent" />
+                  </div>
+
+                  {/* CONTENIDO DE LA TARJETA */}
+                  <div className="relative z-10 flex flex-col justify-end h-full">
+                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-purple-500 dark:text-purple-400 mb-1.5">
+                      {macro.subtitle}
+                    </span>
+                    <h3 className="text-sm md:text-base font-['Poppins'] tracking-[0.05em] uppercase text-[var(--text-primary)] font-semibold mb-3 leading-snug">
+                      {macro.title}
+                    </h3>
+
+                    {/* SUBCATEGORÍAS COMO TAGS */}
+                    <div className="flex flex-wrap gap-1.5 pt-3 border-t border-[var(--border-glass)]">
+                      {macro.subcategories.map((sub) => (
+                        <button
+                          key={sub}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCategoryClick(sub);
+                          }}
+                          className="text-[8px] uppercase tracking-wider font-bold bg-[var(--bg-primary)]/80 hover:bg-purple-600 hover:text-white text-[var(--text-primary)] px-2.5 py-1.5 rounded-lg backdrop-blur-md transition-all cursor-pointer shadow-sm border border-[var(--border-glass)]"
+                        >
+                          {sub}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
 
         </div>
@@ -455,7 +588,7 @@ export default function Home() {
 
       {/* FOOTER */}
       <footer className="relative bg-[var(--bg-primary)] border-t border-[var(--border-glass)] py-6 px-6 overflow-hidden uppercase font-normal transition-colors duration-300">
-        <div className="max-w-4xl mx-auto relative z-10">
+        <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4 text-center md:text-left">
             <div className="hidden md:block space-y-1">
               <h2 className="text-[18px] font-['Poppins'] tracking-[0.05em] text-[var(--text-primary)] leading-none font-normal">CLASSCODE<sup className="text-[8px] ml-1 font-bold">®</sup></h2>

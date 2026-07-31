@@ -22,22 +22,37 @@ export default function Results() {
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [searchTermQuery, setSearchTermQuery] = useState('');
 
+  // Las 6 Macro-Categorías exactas conectadas con sus subespecialidades finas para el filtro en cascada
   const RUBROS = {
-    "FOTOGRAFÍA": ["Fotografía Social", "Fotografía de Moda", "Fotografía Publicitaria", "Fotografía de Producto", "Fotografía Gastronómica", "Fotografía Inmobiliaria", "Fotografía Corporativa", "Fotografía Editorial", "Fotografía Deportiva", "Fotografía de Naturaleza", "Retrato", "Drone"],
-    "AUDIOVISUAL": ["Filmmaker", "Dirección de Fotografía", "Edición de Video", "Color Grading", "Motion Graphics", "Animación 2D / 3D", "Streaming", "Operador de Cámara", "Drone", "Producción de Contenido"],
-    "MODELO": ["Moda", "Publicidad", "E-commerce", "Pasarela", "Presencia para Eventos", "Fitness", "Curvy", "Comercial", "Editorial", "Partes del cuerpo (Hands / Feet / Hair)"],
-    "ESCÉNICO": ["Actor / Actriz", "Bailarín/a", "Cantante", "Músico", "Performer", "Comediante", "Improvisación", "Voz", "Locución", "Doblaje"],
-    "DIGITAL": ["Influencer", "UGC Creator", "Streamer", "Presentador/a de Contenido", "Community Creator", "Community Manager", "Social Media Manager", "Content Creator", "Podcaster"],
-    "SHOW": ["Animación", "Magia", "Circo", "Personajes", "Shows Infantiles", "Shows Temáticos", "Zanquistas", "Comparsas", "Bandas", "DJs en Vivo", "Karaoke", "Humor"],
-    "PRODUCCIÓN / DIRECCIÓN": ["Producción Audiovisual", "Producción de Moda", "Producción de Eventos", "Dirección General", "Dirección Creativa", "Dirección de Arte", "Dirección de Casting", "Asistencia de Producción"],
-    "MAKEUP / PELO": ["Makeup Social", "Makeup Editorial", "Makeup FX", "Makeup Artístico", "Hairstylist", "Barbería", "Caracterización"],
-    "ESTILISMO / MODA": ["Estilismo", "Vestuario", "Personal Shopper", "Asesoría de Imagen", "Diseño de Moda", "Sastrería"],
-    "DISEÑO / ARTE": ["Diseño Gráfico", "Ilustración", "Branding", "Identidad Visual", "UX/UI", "Escenografía", "Escaparatismo", "Arte Digital"],
-    "DJ / SONIDO": ["DJ", "Sonidista", "Operador de Audio", "Ingeniería de Sonido", "Musicalización", "Producción Musical", "Grabación", "Mezcla y Mastering"],
-    "CATERING / BARRA": ["Catering", "Barra", "Bartender", "Barista", "Coffee Break", "Pastelería", "Food Truck", "Chef Privado"],
-    "PLANNER / EVENTOS": ["Wedding Planner", "Event Planner", "Coordinación de Eventos", "Organización Integral", "Maestro/a de Ceremonias", "Protocolo", "Logística"],
-    "TÉCNICA / ILUMINACIÓN": ["Iluminación", "Operador de Luces", "Pantallas LED", "Escenarios", "Estructuras", "Rigging", "Efectos Especiales", "Mapping"],
-    "LOCACIONES": ["Salones", "Quintas", "Estudios Fotográficos", "Estudios Audiovisuales", "Teatros", "Galpones", "Hoteles", "Rooftops", "Restaurantes", "Bares", "Espacios Corporativos", "Espacios al Aire Libre"]
+    "COBERTURA AUDIOVISUAL Y VISUAL": [
+      "Fotografía Social", "Fotografía de Moda", "Fotografía Publicitaria", "Fotografía de Producto", 
+      "Fotografía Gastronómica", "Fotografía Inmobiliaria", "Fotografía Corporativa", "Fotografía Editorial", 
+      "Fotografía Deportiva", "Fotografía de Naturaleza", "Retrato", "Filmmaker", "Dirección de Fotografía", 
+      "Edición de Video", "Color Grading", "Motion Graphics", "Animación 2D / 3D", "Streaming", "Operador de Cámara", "Drone"
+    ],
+    "ESPACIOS Y LOCACIONES": [
+      "Salones", "Quintas", "Estudios Fotográficos", "Estudios Audiovisuales", "Teatros", 
+      "Galpones", "Hoteles", "Rooftops", "Restaurantes", "Bares", "Espacios Corporativos", "Espacios al Aire Libre"
+    ],
+    "TÉCNICA Y EQUIPAMIENTO": [
+      "Iluminación", "Operador de Luces", "Pantallas LED", "Escenarios", "Estructuras", 
+      "Rigging", "Efectos Especiales", "Mapping", "Sonidista", "Operador de Audio", "Ingeniería de Sonido"
+    ],
+    "AMBIENTACIÓN, DECO Y PROVEEDORES": [
+      "Catering", "Barra", "Bartender", "Barista", "Coffee Break", "Pastelería", "Food Truck", "Chef Privado",
+      "Escenografía", "Escaparatismo", "Arte Digital", "Wedding Planner", "Event Planner", "Coordinación de Eventos", "Organización Integral"
+    ],
+    "MODA, ESTILISMO Y BELLEZA": [
+      "Moda", "Publicidad", "E-commerce", "Pasarela", "Presencia para Eventos", "Fitness", "Curvy", "Comercial", 
+      "Makeup Social", "Makeup Editorial", "Makeup FX", "Makeup Artístico", "Hairstylist", "Barbería", "Caracterización",
+      "Estilismo", "Vestuario", "Personal Shopper", "Asesoría de Imagen", "Diseño de Moda", "Sastrería"
+    ],
+    "PRODUCCIÓN, TALENTO Y PLANIFICACIÓN": [
+      "Actor / Actriz", "Bailarín/a", "Cantante", "Músico", "Performer", "Comediante", "Improvisación", "Voz", "Locución", "Doblaje",
+      "Influencer", "UGC Creator", "Streamer", "Presentador/a de Contenido", "Community Creator", "Community Manager", "Social Media Manager", "Content Creator", "Podcaster",
+      "Animación", "Magia", "Circo", "Personajes", "Shows Infantiles", "Shows Temáticos", "Zanquistas", "Comparsas", "Bandas", "DJs en Vivo", "Karaoke", "Humor",
+      "Producción Audiovisual", "Producción de Moda", "Producción de Eventos", "Dirección General", "Dirección Creativa", "Dirección de Arte", "Dirección de Casting", "Asistencia de Producción"
+    ]
   };
 
   const PROVINCIAS = ["CABA", "Buenos Aires", "Capital Federal", "Córdoba", "Santa Fe", "Mendoza", "Tucumán", "Entre Ríos", "Salta", "Misiones", "Chaco", "Corrientes", "Río Negro", "Neuquén", "Chubut", "Formosa", "Jujuy", "San Luis", "San Juan", "La Rioja", "La Pampa", "Santiago del Estero", "Catamarca", "Santa Cruz", "Tierra del Fuego"];
@@ -174,17 +189,17 @@ export default function Results() {
 
         <section className={`${isDarkMode ? 'bg-white/[0.02] border-white/5 text-white' : 'bg-white/70 border-black/5 text-neutral-900'} border backdrop-blur-xl rounded-3xl p-6 mb-12 shadow-2xl space-y-4`}>
           <div className="flex items-center gap-2 text-[9px] font-black text-purple-500 tracking-widest border-l-2 border-purple-500 pl-3">
-            <Filter size={14}/> FILTROS DE BÚSQUEDA
+            <Filter size={14}/> FILTROS DE BÚSQUEDA EN CASCADA
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1">
-              <label className={`text-[7px] ${isDarkMode ? 'text-gray-500' : 'text-neutral-500'} tracking-widest font-bold`}>RUBRO</label>
+              <label className={`text-[7px] ${isDarkMode ? 'text-gray-500' : 'text-neutral-500'} tracking-widest font-bold`}>MACRO-CATEGORÍA (RUBRO)</label>
               <select 
                 className={`w-full ${isDarkMode ? 'bg-[#121215] border-white/10 text-white' : 'bg-white border-black/10 text-neutral-900'} border rounded-2xl p-4 text-[9px] uppercase outline-none focus:border-purple-500 tracking-widest cursor-pointer`}
                 value={selectedRubro}
                 onChange={(e) => { setSelectedRubro(e.target.value); setSelectedSpecialty(''); }}>
-                <option value="">TODOS LOS RUBROS</option>
+                <option value="">TODAS LAS MACRO-CATEGORÍAS</option>
                 {Object.keys(RUBROS).map(rubro => (
                   <option key={rubro} value={rubro}>{rubro}</option>
                 ))}
@@ -192,7 +207,7 @@ export default function Results() {
             </div>
 
             <div className="space-y-1">
-              <label className={`text-[7px] ${isDarkMode ? 'text-gray-500' : 'text-neutral-500'} tracking-widest font-bold`}>ESPECIALIDAD</label>
+              <label className={`text-[7px] ${isDarkMode ? 'text-gray-500' : 'text-neutral-500'} tracking-widest font-bold`}>SUBCATEGORÍA (ESPECIALIDAD)</label>
               <select 
                 className={`w-full ${isDarkMode ? 'bg-[#121215] border-white/10 text-white' : 'bg-white border-black/10 text-neutral-900'} border rounded-2xl p-4 text-[9px] uppercase outline-none focus:border-purple-500 tracking-widest cursor-pointer`}
                 value={selectedSpecialty}
