@@ -28,8 +28,9 @@ export default function Dashboard() {
   const [profiles, setProfiles] = useState([]);
   const [activeProfileIndex, setActiveProfileIndex] = useState(0);
 
+  // 1. Modificar el estado inicial para que specialty sea un array
   const [profile, setProfile] = useState({
-    name: '', job: '', specialty: '', location: '', bio: '', videoLink: '', 
+    name: '', job: '', specialty: [], location: '', bio: '', videoLink: '', 
     ...Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`photo${i + 1}`, ''])),
     academyPoints: 0, verified: false, score: 0,
     completedCourses: [] 
@@ -41,7 +42,7 @@ export default function Dashboard() {
 
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'warning' });
 
-  // Estados para los desplegables personalizados de Tema Día/Noche
+  // Estados para los desplegables personalizados
   const [openDropdown, setOpenDropdown] = useState(null); // 'job' | 'location' | 'specialty' | null
 
   const CLOUD_NAME = "dsyfitywd";
@@ -114,6 +115,7 @@ export default function Dashboard() {
     return bonus + (currentProfile.academyBaseScore || 0);
   };
 
+  // 2. Asegurar que specialty se cargue siempre como un array
   const loadProfileDataIntoState = (profilesList, index) => {
     const target = profilesList[index] || profilesList[0];
     if (!target) return;
@@ -126,7 +128,7 @@ export default function Dashboard() {
     setProfile({
       name: target.name || '',
       job: target.job || '',
-      specialty: target.specialty || '',
+      specialty: Array.isArray(target.specialty) ? target.specialty : (target.specialty ? [target.specialty] : []),
       location: target.location || '',
       bio: target.bio || '',
       videoLink: target.videoLink || '',
@@ -151,7 +153,7 @@ export default function Dashboard() {
           } else {
             const initialProf = {
               name: user.displayName || 'NUEVO TALENTO',
-              job: '', specialty: '', location: '', bio: '', videoLink: '', completedCourses: [], academyBaseScore: 0
+              job: '', specialty: [], location: '', bio: '', videoLink: '', completedCourses: [], academyBaseScore: 0
             };
             setProfiles([initialProf]);
             setProfile(initialProf);
@@ -221,7 +223,7 @@ export default function Dashboard() {
 
     const newBlankProfile = {
       name: profile.name || 'NUEVO TALENTO',
-      job: '', specialty: '', location: profile.location || '', bio: '', videoLink: '',
+      job: '', specialty: [], location: profile.location || '', bio: '', videoLink: '',
       photos: [],
       completedCourses: [],
       academyBaseScore: 0
@@ -316,6 +318,18 @@ export default function Dashboard() {
     const userId = auth.currentUser?.uid;
     if (!userId) return;
     navigate(`/profile/${userId}?index=${activeProfileIndex}`);
+  };
+
+  // 3. Función para alternar (toggle) especialidades de forma múltiple
+  const toggleSpecialty = (spec) => {
+    setProfile(prev => {
+      const currentSpecs = Array.isArray(prev.specialty) ? prev.specialty : [];
+      if (currentSpecs.includes(spec)) {
+        return { ...prev, specialty: currentSpecs.filter(s => s !== spec) };
+      } else {
+        return { ...prev, specialty: [...currentSpecs, spec] };
+      }
+    });
   };
 
   if (loading) return <div className={`min-h-screen w-full ${isDarkMode ? 'bg-[#0a0a0c] text-white' : 'bg-[#f4f4f6] text-neutral-900'} flex items-center justify-center tracking-[0.4em] text-[10px] uppercase font-['Poppins'] overflow-x-hidden box-border`}>CARGANDO DASHBOARD...</div>;
@@ -449,7 +463,6 @@ export default function Dashboard() {
               <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 w-full px-2">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left w-full md:w-auto min-w-0">
                   
-                  {/* FOTO DE PERFIL CORREGIDA: Sin estiramiento, formato perfectamente circular y centrado */}
                   <div className={`relative w-28 h-28 md:w-32 md:h-32 rounded-full border-2 ${isDarkMode ? 'border-purple-500/30 bg-black/50 text-white/60' : 'border-purple-500/40 bg-black/10 text-neutral-600'} overflow-hidden flex-shrink-0 group shadow-xl flex items-center justify-center`}>
                     {profile.photo1 ? (
                       <img src={profile.photo1} className="w-full h-full object-cover rounded-full" alt="" />
@@ -468,6 +481,16 @@ export default function Dashboard() {
                       {currentJobIcon}
                       <p className={`${isDarkMode ? 'text-white/80' : 'text-neutral-700'} text-[10px] md:text-xs tracking-[0.3em] font-bold truncate`}>{profile.job || 'ASIGNAR RUBRO'}</p>
                     </div>
+                    {/* Visualización de múltiples especialidades */}
+                    {Array.isArray(profile.specialty) && profile.specialty.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 justify-center md:justify-start pt-1">
+                        {profile.specialty.map(spec => (
+                          <span key={spec} className={`text-[8px] px-2 py-0.5 rounded-md font-black tracking-wider ${isDarkMode ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-purple-500/10 text-purple-700 border border-purple-500/20'}`}>
+                            {spec}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <div className={`flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] ${isDarkMode ? 'text-white/80' : 'text-neutral-700'} font-bold tracking-widest pt-1`}>
                       {profile.location && <span className="flex items-center gap-1.5"><MapPin size={14} className="text-purple-500"/> {profile.location}</span>}
                       <span className="flex items-center gap-2">
@@ -641,7 +664,7 @@ export default function Dashboard() {
                     {openDropdown === 'job' && (
                       <div className={`absolute top-full left-0 right-0 mt-1 z-50 ${isDarkMode ? 'bg-[#0b0c10] border-white/20 text-white' : 'bg-white border-black/20 text-neutral-900'} border rounded-xl shadow-2xl max-h-52 overflow-y-auto`}>
                         <div 
-                          onClick={() => { setProfile(prev => ({ ...prev, job: "", specialty: "" })); setOpenDropdown(null); }}
+                          onClick={() => { setProfile(prev => ({ ...prev, job: "", specialty: [] })); setOpenDropdown(null); }}
                           className={`px-4 py-3 text-[10px] cursor-pointer hover:bg-purple-500/20 border-b ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}
                         >
                           SELECCIONAR
@@ -649,7 +672,7 @@ export default function Dashboard() {
                         {Object.keys(RUBROS).map(rubro => (
                           <div 
                             key={rubro}
-                            onClick={() => { setProfile(prev => ({ ...prev, job: rubro, specialty: "" })); setOpenDropdown(null); }}
+                            onClick={() => { setProfile(prev => ({ ...prev, job: rubro, specialty: [] })); setOpenDropdown(null); }}
                             className={`px-4 py-3 text-[10px] cursor-pointer hover:bg-purple-500/20 flex items-center justify-between ${profile.job === rubro ? 'text-purple-400 font-black' : ''}`}
                           >
                             <span>{rubro}</span>
@@ -694,36 +717,40 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Desplegable Personalizado: Especialidad */}
+                {/* Desplegable Personalizado: Múltiples Especialidades */}
                 {profile.job && RUBROS[profile.job] && (
                   <div className="space-y-2 relative">
-                    <label className={`text-[8px] ${isDarkMode ? 'text-white/80' : 'text-neutral-700'} tracking-widest font-black`}>Especialidad</label>
+                    <label className={`text-[8px] ${isDarkMode ? 'text-white/80' : 'text-neutral-700'} tracking-widest font-black`}>
+                      Especialidades (Podés seleccionar varias)
+                    </label>
+                    
                     <div 
                       onClick={() => setOpenDropdown(openDropdown === 'specialty' ? null : 'specialty')}
                       className={`w-full ${isDarkMode ? 'bg-[#0b0c10] border-white/15 text-white' : 'bg-white border-black/15 text-neutral-900'} border rounded-xl px-4 py-3 text-[10px] uppercase flex items-center justify-between cursor-pointer`}
                     >
-                      <span className="truncate">{profile.specialty || "SELECCIONAR ESPECIALIDAD"}</span>
+                      <span className="truncate">
+                        {Array.isArray(profile.specialty) && profile.specialty.length > 0 
+                          ? profile.specialty.join(', ') 
+                          : "SELECCIONAR ESPECIALIDADES"}
+                      </span>
                       <ChevronDown size={14} className={`transition-transform ${openDropdown === 'specialty' ? 'rotate-180' : ''}`} />
                     </div>
 
                     {openDropdown === 'specialty' && (
                       <div className={`absolute top-full left-0 right-0 mt-1 z-50 ${isDarkMode ? 'bg-[#0b0c10] border-white/20 text-white' : 'bg-white border-black/20 text-neutral-900'} border rounded-xl shadow-2xl max-h-52 overflow-y-auto`}>
-                        <div 
-                          onClick={() => { setProfile(prev => ({ ...prev, specialty: "" })); setOpenDropdown(null); }}
-                          className={`px-4 py-3 text-[10px] cursor-pointer hover:bg-purple-500/20 border-b ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}
-                        >
-                          SELECCIONAR ESPECIALIDAD
-                        </div>
-                        {RUBROS[profile.job].map(spec => (
-                          <div 
-                            key={spec}
-                            onClick={() => { setProfile(prev => ({ ...prev, specialty: spec })); setOpenDropdown(null); }}
-                            className={`px-4 py-3 text-[10px] cursor-pointer hover:bg-purple-500/20 flex items-center justify-between ${profile.specialty === spec ? 'text-purple-400 font-black' : ''}`}
-                          >
-                            <span>{spec.toUpperCase()}</span>
-                            {profile.specialty === spec && <Check size={12} />}
-                          </div>
-                        ))}
+                        {RUBROS[profile.job].map(spec => {
+                          const isSelected = Array.isArray(profile.specialty) && profile.specialty.includes(spec);
+                          return (
+                            <div 
+                              key={spec}
+                              onClick={() => toggleSpecialty(spec)}
+                              className={`px-4 py-3 text-[10px] cursor-pointer hover:bg-purple-500/20 flex items-center justify-between ${isSelected ? 'text-purple-400 font-black' : ''}`}
+                            >
+                              <span>{spec.toUpperCase()}</span>
+                              {isSelected && <Check size={12} />}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
